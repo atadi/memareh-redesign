@@ -8,19 +8,11 @@ import { ServiceSelection } from '@/components/booking/ServiceSelection'
 import { LocationForm } from '@/components/booking/LocationForm'
 import { TimeSlotPicker } from '@/components/booking/TimeSlotPicker'
 import { BookingSummary } from '@/components/booking/BookingSummary'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-
-// Define the Service interface to match ServiceSelection
-interface Service {
-  id: string
-  name: string
-  description: string
-  price: number
-  duration: number
-  icon: any
-  category: string
-  isEmergency: boolean
-}
+import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
+import type { Service, ServiceRequest } from '@/types/database'
+import toast from 'react-hot-toast'
 
 const bookingSchema = z.object({
   service: z.string().min(1, 'لطفا نوع خدمات را انتخاب کنید'),
@@ -29,6 +21,7 @@ const bookingSchema = z.object({
   address: z.string().min(10, 'آدرس کامل را وارد کنید'),
   city: z.string().min(1, 'شهر را انتخاب کنید'),
   postalCode: z.string().optional(),
+  locationDetails: z.string().optional(),
   date: z.date(),
   timeSlot: z.string().min(1, 'زمان مراجعه را انتخاب کنید'),
   isEmergency: z.boolean(),
@@ -39,7 +32,10 @@ type BookingFormData = z.infer<typeof bookingSchema>
 
 export default function BookingPage() {
   const [step, setStep] = useState(1)
-  const [selectedService, setSelectedService] = useState<Service | null>(null)  // Fixed: proper type
+  const [selectedService, setSelectedService] = useState<Service | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter()
+  const supabase = createClient()
   
   const {
     register,
@@ -57,25 +53,76 @@ export default function BookingPage() {
       address: '',
       city: '',
       postalCode: '',
+      locationDetails: '',
       timeSlot: '',
     }
   })
 
   const onSubmit = async (data: BookingFormData) => {
-    // Submit booking to Supabase
-    console.log('Booking data:', data)
-    console.log('Selected service:', selectedService)
+    setIsSubmitting(true)
     
-    // Here you would typically:
-    // 1. Create the booking in Supabase
-    // 2. Send confirmation email/SMS
-    // 3. Redirect to confirmation page
+    try {
+      // Get current user
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      
+      if (authError || !user) {
+        toast.error('لطفا ابتدا وارد حساب کاربری خود شوید')
+        router.push('/login')
+        return
+      }
+
+      // Generate unique request number
+      const requestNumber = `REQ-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+
+      // Prepare service request data
+      const serviceRequest: ServiceRequest = {
+        customer_id: user.id,
+        service_id: data.service,
+        title: selectedService?.name_fa || 'درخواست خدمات',
+        description: data.description,
+        property_type: data.propertyType as any,
+        address: data.address,
+        city: data.city,
+        postal_code: data.postalCode || null,
+        location_details: data.locationDetails || null,
+        requested_date: data.date.toISOString().split('T')[0],
+        requested_time_slot: data.timeSlot,
+        is_emergency: data.isEmergency,
+        status: 'pending',
+        priority: data.isEmergency ? 'emergency' : 'normal',
+        images: data.images || null,
+      }
+
+      // Insert service request
+      const { data: insertedRequest, error: insertError } = await supabase
+        .from('service_requests')
+        .insert(serviceRequest)
+        .select()
+        .single()
+
+      if (insertError) {
+        console.error('Error creating service request:', insertError)
+        throw new Error('خطا در ثبت درخواست. لطفا دوباره تلاش کنید.')
+      }
+
+      toast.success('درخواست شما با موفقیت ثبت شد!')
+      
+      // Redirect to success page or dashboard
+      router.push(`/booking/success?id=${insertedRequest.id}`)
+      
+    } catch (error) {
+      console.error('Booking submission error:', error)
+      toast.error(error instanceof Error ? error.message : 'خطا در ثبت درخواست')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // Handler for service selection
   const handleServiceSelect = (service: Service) => {
     setSelectedService(service)
-    setValue('service', service.id)  // Also update the form value
+    setValue('service', service.id)
+    setValue('isEmergency', service.is_emergency || false)
   }
 
   const steps = [
@@ -88,12 +135,11 @@ export default function BookingPage() {
   const canProceedToNextStep = () => {
     switch(step) {
       case 1:
-        return selectedService !== null
+        return selectedService !== null && watch('description')?.length >= 10
       case 2:
-        // You can add more validation here
-        return true
+        return watch('address')?.length >= 10 && watch('city')?.length > 0
       case 3:
-        return true
+        return watch('date') && watch('timeSlot')?.length > 0
       default:
         return true
     }
@@ -132,7 +178,7 @@ export default function BookingPage() {
             {step === 1 && (
               <ServiceSelection
                 selectedService={selectedService}
-                onSelectService={handleServiceSelect}  // Fixed: using the handler function
+                onSelectService={handleServiceSelect}
                 register={register}
                 errors={errors}
               />
@@ -172,7 +218,7 @@ export default function BookingPage() {
                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
-                disabled={step === 1}
+                disabled={step === 1 || isSubmitting}
               >
                 <ChevronRight className="inline w-5 h-5 ml-2" />
                 مرحله قبل
@@ -185,11 +231,11 @@ export default function BookingPage() {
                     if (canProceedToNextStep()) {
                       setStep(Math.min(4, step + 1))
                     } else {
-                      // Show validation message
-                      alert('لطفا ابتدا این مرحله را تکمیل کنید')
+                      toast.error('لطفا ابتدا این مرحله را تکمیل کنید')
                     }
                   }}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+                  disabled={isSubmitting}
                 >
                   مرحله بعد
                   <ChevronLeft className="inline w-5 h-5 mr-2" />
@@ -197,9 +243,17 @@ export default function BookingPage() {
               ) : (
                 <button
                   type="submit"
-                  className="px-8 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+                  className="px-8 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors disabled:bg-gray-400 flex items-center"
+                  disabled={isSubmitting}
                 >
-                  تایید و پرداخت
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 ml-2 animate-spin" />
+                      در حال ثبت...
+                    </>
+                  ) : (
+                    'تایید و ثبت درخواست'
+                  )}
                 </button>
               )}
             </div>
