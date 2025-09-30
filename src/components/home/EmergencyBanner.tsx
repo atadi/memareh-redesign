@@ -9,7 +9,7 @@ export function EmergencyBanner() {
   if (!isVisible) return null
 
   return (
-    <div className="bg-red-600 text-white relative">
+    <div className="sticky top-0 z-50 bg-red-600 text-white shadow-lg animate-in slide-in-from-top duration-300">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -20,11 +20,11 @@ export function EmergencyBanner() {
           
           <div className="flex items-center gap-4">
             <a 
-              href="tel:02112345678" 
-              className="flex items-center gap-2 bg-white text-red-600 px-4 py-1.5 rounded-full hover:bg-red-50 transition-colors"
+              href="tel:09129636605" 
+              className="flex items-center gap-2 bg-white text-red-600 px-4 py-1.5 rounded-full hover:bg-red-50 transition-colors font-medium"
             >
               <Phone className="w-4 h-4" />
-              <span className="font-bold">0912-9636605</span>
+              <span className="font-bold">۰۹۱۲-۹۶۳۶۶۰۵</span>
             </a>
             
             <button
