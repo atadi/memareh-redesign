@@ -11,8 +11,8 @@ import {
   DollarSign,
   Loader2
 } from 'lucide-react'
-import { useServices } from '@/hooks/useServices'
 import type { Service, ServiceWithIcon } from '@/types/database'
+import { useServices } from '../../hooks/useServices'
 
 interface ServiceSelectionProps {
   selectedService: Service | null
