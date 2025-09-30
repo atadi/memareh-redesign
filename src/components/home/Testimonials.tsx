@@ -13,8 +13,8 @@ export function Testimonials() {
       role: 'مدیر ساختمان مسکونی',
       content: 'خدمات بسیار عالی و حرفه‌ای. تکنسین‌ها به موقع رسیدند و کار را با کیفیت بالا انجام دادند. قیمت‌ها هم منصفانه بود.',
       rating: 5,
-      image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmad',
-      initials: 'ا.ر',
+      image: '/assets/avatars/1.jpg',
+      initials: '',
       bgColor: 'bg-blue-500'
     },
     {
@@ -22,8 +22,8 @@ export function Testimonials() {
       role: 'صاحب کسب و کار',
       content: 'برای برق‌کشی مغازه جدیدم از خدمات این شرکت استفاده کردم. کار بسیار تمیز و اصولی انجام شد. واقعا راضی هستم.',
       rating: 5,
-      image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Maryam',
-      initials: 'م.م',
+      image: '/assets/avatars/2.jpg',
+      initials: '',
       bgColor: 'bg-purple-500'
     },
     {
@@ -31,8 +31,8 @@ export function Testimonials() {
       role: 'مالک آپارتمان',
       content: 'سرعت عمل در رفع اتصالی برق واحدم عالی بود. کمتر از یک ساعت تکنسین اومد و مشکل رو حل کرد. ممنون از خدمات اضطراری‌تون.',
       rating: 5,
-      image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ali',
-      initials: 'ع.ح',
+      image: '/assets/avatars/3.jpg',
+      initials: '',
       bgColor: 'bg-green-500'
     }
   ]
