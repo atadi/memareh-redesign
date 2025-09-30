@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { 
   Zap, 
   Wrench, 
@@ -9,25 +8,27 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  DollarSign
+  DollarSign,
+  Loader2
 } from 'lucide-react'
-
-interface Service {
-  id: string
-  name: string
-  description: string
-  price: number
-  duration: number
-  icon: any
-  category: string
-  isEmergency: boolean
-}
+import { useServices } from '@/hooks/useServices'
+import type { Service, ServiceWithIcon } from '@/types/database'
 
 interface ServiceSelectionProps {
   selectedService: Service | null
   onSelectService: (service: Service) => void
   register: any
   errors: any
+}
+
+// Map icon names from database to components
+const iconMap: Record<string, any> = {
+  'alert-triangle': AlertTriangle,
+  'zap': Zap,
+  'wrench': Wrench,
+  'home': Home,
+  'building': Building,
+  'check-circle': CheckCircle,
 }
 
 export function ServiceSelection({ 
@@ -37,72 +38,47 @@ export function ServiceSelection({
   errors 
 }: ServiceSelectionProps) {
   
-  const services: Service[] = [
-    {
-      id: '1',
-      name: 'رفع قطعی برق',
-      description: 'رفع مشکلات قطعی برق و اتصالی',
-      price: 250000,
-      duration: 60,
-      icon: AlertTriangle,
-      category: 'emergency',
-      isEmergency: true
-    },
-    {
-      id: '2',
-      name: 'نصب کولر گازی',
-      description: 'نصب و راه‌اندازی انواع کولر گازی اسپلیت',
-      price: 500000,
-      duration: 120,
-      icon: Home,
-      category: 'installation',
-      isEmergency: false
-    },
-    {
-      id: '3',
-      name: 'سیم‌کشی ساختمان',
-      description: 'سیم‌کشی کامل واحد مسکونی یا تجاری',
-      price: 0,
-      duration: 480,
-      icon: Building,
-      category: 'wiring',
-      isEmergency: false
-    },
-    {
-      id: '4',
-      name: 'تعمیر کلید و پریز',
-      description: 'تعمیر یا تعویض کلید و پریز معیوب',
-      price: 150000,
-      duration: 30,
-      icon: Wrench,
-      category: 'repair',
-      isEmergency: false
-    },
-    {
-      id: '5',
-      name: 'نصب چراغ و لوستر',
-      description: 'نصب انواع چراغ، لوستر و روشنایی',
-      price: 100000,
-      duration: 45,
-      icon: Zap,
-      category: 'installation',
-      isEmergency: false
-    },
-    {
-      id: '6',
-      name: 'بازرسی سیستم برق',
-      description: 'بازرسی کامل و ارائه گزارش فنی',
-      price: 300000,
-      duration: 90,
-      icon: CheckCircle,
-      category: 'inspection',
-      isEmergency: false
-    }
-  ]
+  const { services, loading, error } = useServices()
 
-  const formatPrice = (price: number) => {
-    if (price === 0) return 'توافقی'
-    return `${(price / 1000).toLocaleString()} هزار تومان`
+  const formatPrice = (price: number | null) => {
+    if (!price || price === 0) return 'توافقی'
+    return `${(price / 1000).toLocaleString('fa-IR')} هزار تومان`
+  }
+
+  const getIcon = (iconName: string | null) => {
+    if (!iconName) return Zap
+    return iconMap[iconName] || Zap
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <span className="mr-3 text-gray-600">در حال بارگذاری خدمات...</span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+        <p className="text-red-600">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-2 text-blue-600 hover:underline"
+        >
+          تلاش مجدد
+        </button>
+      </div>
+    )
+  }
+
+  if (services.length === 0) {
+    return (
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+        <p className="text-gray-600">در حال حاضر خدمتی ثبت نشده است.</p>
+      </div>
+    )
   }
 
   return (
@@ -116,7 +92,7 @@ export function ServiceSelection({
 
       <div className="grid md:grid-cols-2 gap-4">
         {services.map(service => {
-          const Icon = service.icon
+          const Icon = getIcon(service.icon)
           const isSelected = selectedService?.id === service.id
           
           return (
@@ -129,12 +105,18 @@ export function ServiceSelection({
                   ? 'border-blue-500 bg-blue-50' 
                   : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
                 }
-                ${service.isEmergency ? 'relative' : ''}
+                ${service.is_emergency ? 'relative' : ''}
               `}
             >
-              {service.isEmergency && (
+              {service.is_emergency && (
                 <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
                   اضطراری
+                </div>
+              )}
+              
+              {service.popular && !service.is_emergency && (
+                <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                  محبوب
                 </div>
               )}
               
@@ -151,20 +133,24 @@ export function ServiceSelection({
                 
                 <div className="flex-1">
                   <h3 className="font-bold text-lg mb-1">
-                    {service.name}
+                    {service.name_fa}
                   </h3>
-                  <p className="text-gray-600 text-sm mb-2">
-                    {service.description}
-                  </p>
+                  {service.description && (
+                    <p className="text-gray-600 text-sm mb-2">
+                      {service.description}
+                    </p>
+                  )}
                   
                   <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-1 text-gray-500">
-                      <Clock className="w-4 h-4" />
-                      <span>{service.duration} دقیقه</span>
-                    </div>
+                    {service.estimated_duration && (
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <Clock className="w-4 h-4" />
+                        <span>{service.estimated_duration} دقیقه</span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-1 text-gray-500">
                       <DollarSign className="w-4 h-4" />
-                      <span>{formatPrice(service.price)}</span>
+                      <span>{formatPrice(service.base_price)}</span>
                     </div>
                   </div>
                 </div>
