@@ -60,13 +60,7 @@ export function HowItWorks() {
                 
                 <h3 className="text-lg font-bold mb-2">{step.title}</h3>
                 <p className="text-gray-600 text-sm">{step.description}</p>
-                
-                {/* Connecting line between steps - only show on large screens and not for last step */}
-                {index < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-10 left-1/2 w-full h-0.5">
-                    <div className="border-t-2 border-dashed border-gray-300"></div>
-                  </div>
-                )}
+               
               </div>
             )
           })}
