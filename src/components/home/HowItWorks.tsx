@@ -44,11 +44,11 @@ export function HowItWorks() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {steps.map((step, index) => {
             const Icon = step.icon
             return (
-              <div key={index} className="text-center group">
+              <div key={index} className="relative text-center group">
                 <div className="relative mb-6">
                   <div className={`${step.color} w-20 h-20 rounded-full flex items-center justify-center mx-auto text-white shadow-lg group-hover:scale-110 transition-transform`}>
                     <Icon className="w-10 h-10" />
@@ -61,8 +61,9 @@ export function HowItWorks() {
                 <h3 className="text-lg font-bold mb-2">{step.title}</h3>
                 <p className="text-gray-600 text-sm">{step.description}</p>
                 
+                {/* Connecting line between steps - only show on large screens and not for last step */}
                 {index < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-10 left-0 transform translate-x-1/2 w-full">
+                  <div className="hidden lg:block absolute top-10 left-1/2 w-full h-0.5">
                     <div className="border-t-2 border-dashed border-gray-300"></div>
                   </div>
                 )}
