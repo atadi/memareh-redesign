@@ -43,23 +43,19 @@ export function Hero() {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="inline-flex items-center gap-3"
+              className="inline-flex items-center gap-4"
             >
-              <div className="relative w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl p-2 border border-white/20 shadow-xl">
+              <div className="relative bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/20 shadow-xl">
                 <Image
-                  src="/assets/logo/fav-logo.png"
-                  alt="معماره Logo"
-                  width={80}
-                  height={80}
-                  className="w-full h-full object-contain"
+                  src="/assets/logo/logo.png"
+                  alt="معماره - خدمات برق‌کاری حرفه‌ای"
+                  width={180}
+                  height={60}
+                  className="h-12 w-auto object-contain"
                   priority
                 />
                 {/* Glow effect */}
-                <div className="absolute inset-0 bg-blue-500 rounded-2xl blur-xl opacity-30" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-2xl font-bold">معماره</span>
-                <span className="text-sm text-gray-300">خدمات برق‌کاری حرفه‌ای</span>
+                <div className="absolute inset-0 bg-blue-500 rounded-2xl blur-xl opacity-30 -z-10" />
               </div>
             </motion.div>
 
