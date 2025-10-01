@@ -1,18 +1,14 @@
 'use client'
 
+import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
-import { 
-  Zap, 
-  Home, 
-  Building2, 
-  Wrench,
-  ShieldCheck,
-  Gauge,
-  Lightbulb,
-  Cable
-} from 'lucide-react'
+import { ChevronLeft, ChevronRight, Zap } from 'lucide-react'
 
 export function ServiceCategories() {
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isHovering, setIsHovering] = useState<number | null>(null)
+
   const categories = [
     {
       title: 'رفع اتصالی و عیب یابی برق ساختمان',
@@ -76,37 +72,142 @@ export function ServiceCategories() {
     }
   ]
 
+  const itemsPerPage = 3
+  const totalPages = Math.ceil(categories.length / itemsPerPage)
+
+  const nextSlide = () => {
+    setCurrentIndex((prev) => (prev + 1) % totalPages)
+  }
+
+  const prevSlide = () => {
+    setCurrentIndex((prev) => (prev - 1 + totalPages) % totalPages)
+  }
+
+  const visibleCategories = categories.slice(
+    currentIndex * itemsPerPage,
+    (currentIndex + 1) * itemsPerPage
+  )
+
   return (
-    <section className="py-16 bg-gray-50">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">خدمات ما</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            ارائه دهنده انواع خدمات برق‌کاری با بیش از ۱۵ سال تجربه و تیم متخصص
+    <section className="py-20 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+      {/* Background Decorations */}
+      <div className="absolute top-20 left-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
+      <div className="absolute bottom-20 right-10 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
+      
+      <div className="container mx-auto px-4 relative z-10">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-600 px-4 py-2 rounded-full mb-4">
+            <Zap className="w-4 h-4" />
+            <span className="text-sm font-medium">خدمات تخصصی</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
+            خدمات برق‌کاری معماره
+          </h2>
+          <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+            ارائه کامل‌ترین خدمات برق‌کاری با تیم متخصص و با تجربه
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {categories.map((category, index) => {
-            const Icon = category.icon
-            return (
-              <Link
+        {/* Services Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          {visibleCategories.map((category, index) => (
+            <div
+              key={currentIndex * itemsPerPage + index}
+              className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden"
+              onMouseEnter={() => setIsHovering(currentIndex * itemsPerPage + index)}
+              onMouseLeave={() => setIsHovering(null)}
+            >
+              {/* Image Container */}
+              <div className="relative h-64 overflow-hidden">
+                <Image
+                  src={category.image}
+                  alt={category.title}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                
+                {/* Title on Image */}
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <h3 className="text-xl font-bold text-white mb-2 line-clamp-2">
+                    {category.title}
+                  </h3>
+                </div>
+
+                {/* Hover Icon */}
+                <div className="absolute top-4 right-4 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-6">
+                <p className={`text-gray-600 text-sm leading-relaxed transition-all duration-300 ${
+                  isHovering === currentIndex * itemsPerPage + index ? 'line-clamp-none' : 'line-clamp-3'
+                }`}>
+                  {category.description}
+                </p>
+
+                {/* CTA Button */}
+                <Link
+                  href="/booking"
+                  className="mt-4 inline-flex items-center gap-2 text-blue-600 font-medium hover:gap-3 transition-all group"
+                >
+                  <span>درخواست خدمات</span>
+                  <ChevronLeft className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+
+              {/* Decorative Corner */}
+              <div className="absolute top-0 left-0 w-20 h-20 bg-gradient-to-br from-blue-500/10 to-transparent rounded-br-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            </div>
+          ))}
+        </div>
+
+        {/* Navigation */}
+        <div className="flex items-center justify-center gap-4">
+          <button
+            onClick={prevSlide}
+            className="p-3 bg-white rounded-full shadow-lg hover:shadow-xl hover:bg-blue-600 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={currentIndex === 0}
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+
+          {/* Dots */}
+          <div className="flex gap-2">
+            {Array.from({ length: totalPages }).map((_, index) => (
+              <button
                 key={index}
-                href={category.href}
-                className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 group"
-              >
-                <div className={`${category.color} w-14 h-14 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                  <Icon className="w-7 h-7 text-white" />
-                </div>
-                <h3 className="text-lg font-bold mb-2">{category.title}</h3>
-                <p className="text-gray-600 text-sm">{category.description}</p>
-                <div className="mt-4 text-blue-600 text-sm font-medium group-hover:gap-2 flex items-center transition-all">
-                  مشاهده جزئیات
-                  <span className="mr-1 group-hover:mr-2 transition-all">←</span>
-                </div>
-              </Link>
-            )
-          })}
+                onClick={() => setCurrentIndex(index)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  index === currentIndex ? 'w-8 bg-blue-600' : 'w-2 bg-gray-300'
+                }`}
+                aria-label={`صفحه ${index + 1}`}
+              />
+            ))}
+          </div>
+
+          <button
+            onClick={nextSlide}
+            className="p-3 bg-white rounded-full shadow-lg hover:shadow-xl hover:bg-blue-600 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={currentIndex === totalPages - 1}
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* View All Link */}
+        <div className="text-center mt-12">
+          <Link
+            href="/services"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold px-8 py-4 rounded-xl hover:from-blue-700 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+          >
+            <span>مشاهده تمام خدمات</span>
+            <ChevronLeft className="w-5 h-5" />
+          </Link>
         </div>
       </div>
     </section>
