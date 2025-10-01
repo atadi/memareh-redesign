@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { ChevronLeft, Zap, ArrowUpRight } from 'lucide-react'
 
 export function ServiceCategories() {
-  const [expandedCard, setExpandedCard] = useState<number | null>(null)
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null)
 
   const categories = [
     {
@@ -97,16 +97,17 @@ export function ServiceCategories() {
           {categories.map((category, index) => (
             <div
               key={index}
-              className="group relative bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden cursor-pointer"
-              onMouseEnter={() => setExpandedCard(index)}
-              onMouseLeave={() => setExpandedCard(null)}
+              className="group relative bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden"
+              onMouseEnter={() => setHoveredCard(index)}
+              onMouseLeave={() => setHoveredCard(null)}
             >
-              {/* Image Container */}
-              <div className="relative h-48 overflow-hidden">
+              {/* Image Container - Fixed aspect ratio and proper sizing */}
+              <div className="relative w-full h-48 overflow-hidden bg-gray-100">
                 <Image
                   src={category.image}
                   alt={category.title}
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 {/* Gradient Overlay */}
@@ -117,22 +118,26 @@ export function ServiceCategories() {
                   {index + 1}
                 </div>
 
-                {/* Hover Icon */}
-                <div className="absolute top-3 left-3 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110">
-                  <ArrowUpRight className="w-5 h-5 text-white" />
-                </div>
+                {/* Hover Icon - Only show on the hovered card */}
+                {hoveredCard === index && (
+                  <div className="absolute top-3 left-3 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center animate-in fade-in zoom-in duration-300">
+                    <ArrowUpRight className="w-5 h-5 text-white" />
+                  </div>
+                )}
               </div>
 
               {/* Content */}
               <div className="p-5">
                 {/* Title */}
-                <h3 className="text-base font-bold text-gray-900 mb-3 leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors">
+                <h3 className={`text-base font-bold mb-3 leading-tight line-clamp-2 transition-colors duration-300 ${
+                  hoveredCard === index ? 'text-blue-600' : 'text-gray-900'
+                }`}>
                   {category.title}
                 </h3>
 
-                {/* Description */}
+                {/* Description - Only expand the hovered card */}
                 <p className={`text-gray-600 text-sm leading-relaxed mb-4 transition-all duration-300 ${
-                  expandedCard === index ? 'line-clamp-none' : 'line-clamp-3'
+                  hoveredCard === index ? 'line-clamp-none' : 'line-clamp-3'
                 }`}>
                   {category.description}
                 </p>
@@ -140,15 +145,17 @@ export function ServiceCategories() {
                 {/* CTA Link */}
                 <Link
                   href="/booking"
-                  className="inline-flex items-center gap-2 text-blue-600 font-medium text-sm hover:gap-3 transition-all group/link"
+                  className="inline-flex items-center gap-2 text-blue-600 font-medium text-sm hover:gap-3 transition-all"
                 >
                   <span>درخواست خدمات</span>
-                  <ChevronLeft className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
+                  <ChevronLeft className="w-4 h-4 transition-transform hover:translate-x-1" />
                 </Link>
               </div>
 
-              {/* Decorative Border on Hover */}
-              <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-600 to-purple-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+              {/* Decorative Border on Hover - Only on hovered card */}
+              {hoveredCard === index && (
+                <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-600 to-purple-600 animate-in slide-in-from-left duration-500" />
+              )}
             </div>
           ))}
         </div>
