@@ -13,8 +13,8 @@ export function WhyChooseUs() {
   const features = [
     {
       icon: Award,
-      title: 'تکنسین‌های مجاز',
-      description: 'تمام تکنسین‌های ما دارای پروانه کار از نظام مهندسی هستند'
+      title: 'تکنسین‌های متخصص',
+      description: 'تمام تکنسین‌های ما دارای مدارک معتبر هستند'
     },
     {
       icon: Clock,
@@ -23,13 +23,8 @@ export function WhyChooseUs() {
     },
     {
       icon: Shield,
-      title: 'ضمانت کتبی',
-      description: 'ارائه ضمانت‌نامه کتبی برای تمام خدمات انجام شده'
-    },
-    {
-      icon: Users,
-      title: '۵۰۰+ تکنسین',
-      description: 'تیم بزرگ و حرفه‌ای در سراسر شهر برای خدمات سریع'
+      title: 'ضمانت کیفیت',
+      description: 'ضمانت‌ خدمات برای تمام سرویس‌های انجام شده'
     },
     {
       icon: ThumbsUp,
@@ -52,8 +47,8 @@ export function WhyChooseUs() {
               چرا ما را انتخاب کنید؟
             </h2>
             <p className="text-gray-600 mb-8">
-              با بیش از ۱۵ سال تجربه در ارائه خدمات برق‌کاری، ما به عنوان یکی از معتبرترین 
-              شرکت‌های خدمات فنی در تهران شناخته می‌شویم. تعهد ما به کیفیت، ایمنی و رضایت 
+              با بیش از ۱۵ سال تجربه در ارائه خدمات برقکاری، ما به عنوان یکی از معتبرترین 
+              مراجع خدمات فنی در تهران شناخته می‌شویم. تعهد ما به کیفیت، ایمنی و رضایت 
               مشتری، ما را به انتخاب اول شما برای تمام نیازهای برقی تبدیل کرده است.
             </p>
             
@@ -83,27 +78,19 @@ export function WhyChooseUs() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span>پروژه‌های تکمیل شده</span>
-                  <span className="text-2xl font-bold">۱۲,۵۰۰+</span>
+                  <span className="text-2xl font-bold">۳,۰۰۰+</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>مشتریان راضی</span>
-                  <span className="text-2xl font-bold">۸,۳۰۰+</span>
+                  <span className="text-2xl font-bold">۴,۰۰۰+</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>سال‌های فعالیت</span>
                   <span className="text-2xl font-bold">۱۵+</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span>تکنسین‌های فعال</span>
-                  <span className="text-2xl font-bold">۵۰۰+</span>
-                </div>
               </div>
             </div>
-            
-            {/* Decorative elements */}
-            <div className="absolute -top-4 -right-4 w-20 h-20 bg-yellow-400 rounded-full opacity-20"></div>
-            <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-green-400 rounded-full opacity-20"></div>
-          </div>
+         </div>
         </div>
       </div>
     </section>

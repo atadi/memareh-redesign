@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "معماره - خدمات برق‌کاری حرفه‌ای و مطمئن",
-  description: "دسترسی سریع به بیش از ۵۰۰ تکنسین برق‌کار مجاز در سراسر کشور. خدمات اضطراری ۲۴ ساعته، نصب، تعمیر و نگهداری تاسیسات برقی با ضمانت کتبی.",
-  keywords: ["برق‌کار", "خدمات برق‌کاری", "تکنسین برق", "نصب برق", "تعمیر برق", "سیم‌کشی", "معماره"],
+  title: "معماره - خدمات برقکاری حرفه‌ای و مطمئن",
+  description: "دسترسی سریع به تکنسین برقکار در تهران. خدمات اضطراری ۲۴ ساعته، نصب، تعمیر و نگهداری تاسیسات برقی با کیفیت و سرعت.",
+  keywords: ["برقکار", "خدمات برقکاری", "تکنسین برق", "نصب برق", "تعمیر برق", "سیم‌کشی", "معماره"],
   authors: [{ name: "معماره" }],
   creator: "معماره",
   publisher: "معماره",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "معماره - خدمات برق‌کاری حرفه‌ای",
-    description: "دسترسی سریع به بیش از ۵۰۰ تکنسین برق‌کار مجاز در سراسر کشور",
+    description: "دسترسی سریع به تکنسین برقکار در سراسر تهران",
     url: "https://memareh.com",
     siteName: "معماره",
     images: [
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
         url: "/assets/logo/cover-image.jpg",
         width: 1200,
         height: 630,
-        alt: "معماره - خدمات برق‌کاری",
+        alt: "معماره - خدمات برقکاری",
       },
     ],
     locale: "fa_IR",
@@ -48,8 +48,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "معماره - خدمات برق‌کاری حرفه‌ای",
-    description: "دسترسی سریع به بیش از ۵۰۰ تکنسین برق‌کار مجاز",
+    title: "معماره - خدمات برقکاری حرفه‌ای",
+    description: "دسترسی سریع به تکنسین برقکار",
     images: ["/assets/logo/cover-image.jpg"],
   },
   robots: {

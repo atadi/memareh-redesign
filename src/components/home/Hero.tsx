@@ -16,7 +16,7 @@ export function Hero() {
   }
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-[90vh]">
+    <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-[100vh]">
       {/* Animated Background Effects */}
       <div className="absolute inset-0">
         {/* Grid Pattern */}
@@ -28,7 +28,7 @@ export function Hero() {
         <div className="absolute -bottom-8 left-20 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
       </div>
 
-      <div className="relative container mx-auto px-4 py-16 md:py-16">
+      <div className="relative container mx-auto px-4 py-16 md:py-30">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           
           {/* Left Side - Content */}
@@ -39,28 +39,31 @@ export function Hero() {
             className="text-white space-y-8"
           >
             {/* Logo Badge */}
-            <div className="absolute top-1/8 right-1/7 opacity-10">
+            <div className="absolute top-0 right-1/7 opacity-4">
               <Image
                 src="/assets/images/walking-man.png"
-                alt="معماره - خدمات برق‌کاری حرفه‌ای"
-                width={400}
-                height={700}
+                alt="معماره - خدمات برقکاری حرفه‌ای"
+                width={1000}
+                height={3024}
                 className="object-contain"
                 priority
               />
             </div>
-
+            
             {/* Main Heading */}
             <div className="space-y-4">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                برق‌کار
+                برقکار
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500">
                   حرفه‌ای و مجرب
                 </span>
                 در خدمت شماست
               </h1>
               <p className="text-lg md:text-xl text-gray-300 max-w-xl">
-                دسترسی آسان به بیش از ۵۰۰ تکنسین مجاز و با تجربه در سراسر کشور. خدمات اضطراری ۲۴ ساعته با پاسخگویی بسیار سریع.
+                دسترسی آسان به تکنسین‌های مجاز و با تجربه در تمامی مناطق تهران
+              </p>
+              <p className="text-lg md:text-xl text-gray-300 max-w-xl">
+                خدمات اضطراری ۲۴ ساعته با پاسخگویی بسیار سریع
               </p>
             </div>
 
@@ -98,10 +101,10 @@ export function Hero() {
             {/* Features List */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {[
-                'ضمانت کتبی خدمات',
-                'تکنسین‌های مجاز',
+                'ضمانت خدمات',
+                'تکنسین‌های مجرب',
                 'قیمت شفاف و رقابتی',
-                'پشتیبانی اختصاصی'
+                'پشتیبانی سریع'
               ].map((feature, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-400" />
@@ -113,11 +116,11 @@ export function Hero() {
             {/* Emergency CTA */}
             <div className="flex flex-col sm:flex-row gap-4">
               <a
-                href="tel:09129636605"
+                href="tel:09126769048"
                 className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-bold px-8 py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-red-500/50 hover:scale-105"
               >
                 <Phone className="w-5 h-5 animate-pulse" />
-                <span>تماس اضطراری: ۰۹۱۲-۹۶۳۶۶۰۵</span>
+                <span>تماس اضطراری: ۰۹۱۲۶۷۶۹۰۴۸</span>
               </a>
             </div>
           </motion.div>
@@ -137,36 +140,15 @@ export function Hero() {
               <div className="relative space-y-6">
                 <div className="text-center">
                   <h2 className="text-3xl font-bold text-white mb-2">
-                    رزرو آنلاین برق‌کار
+                    رزرو آنلاین برقکار
                   </h2>
                   <p className="text-gray-300">
-                    در چند ثانیه تکنسین خود را پیدا کنید
+                    در چند دقیقه تکنسین خود را پیدا کنید
                   </p>
                 </div>
 
                 {/* Form Fields */}
                 <div className="space-y-4">
-                  {/* City Selection */}
-                  <div>
-                    <label className="block text-white font-medium mb-2 text-right">
-                      <MapPin className="inline w-4 h-4 ml-1" />
-                      شهر
-                    </label>
-                    <select
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      className="w-full px-4 py-3.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition appearance-none"
-                    >
-                      <option value="" className="bg-slate-800">انتخاب شهر...</option>
-                      <option value="tehran" className="bg-slate-800">تهران</option>
-                      <option value="karaj" className="bg-slate-800">کرج</option>
-                      <option value="isfahan" className="bg-slate-800">اصفهان</option>
-                      <option value="mashhad" className="bg-slate-800">مشهد</option>
-                      <option value="shiraz" className="bg-slate-800">شیراز</option>
-                      <option value="tabriz" className="bg-slate-800">تبریز</option>
-                    </select>
-                  </div>
-
                   {/* Service Type */}
                   <div>
                     <label className="block text-white font-medium mb-2 text-right">
@@ -192,7 +174,7 @@ export function Hero() {
                     onClick={handleQuickBooking}
                     className="w-full group bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-blue-500/50 flex items-center justify-center gap-2"
                   >
-                    <span>مشاهده برق‌کاران موجود</span>
+                    <span>مشاهده برقکاران موجود</span>
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
@@ -200,17 +182,13 @@ export function Hero() {
                 {/* Trust Badge */}
                 <div className="flex items-center justify-center gap-2 text-sm text-gray-300">
                   <Shield className="w-4 h-4 text-green-400" />
-                  <span>تضمین بازگشت وجه در صورت عدم رضایت</span>
+                  <span>تضمین کیفیت خدمات در اسرع وقت</span>
                 </div>
 
                 {/* Stats Row */}
-                <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
+                <div className="grid grid-cols-2 gap-4 pt-6 border-t border-white/10">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-white">۵۰۰+</div>
-                    <div className="text-xs text-gray-400">تکنسین</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-white">۱۰K+</div>
+                    <div className="text-2xl font-bold text-white">3000+</div>
                     <div className="text-xs text-gray-400">پروژه</div>
                   </div>
                   <div className="text-center">

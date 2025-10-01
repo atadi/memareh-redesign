@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft, Zap, ArrowUpRight } from 'lucide-react'
+import { Phone } from 'lucide-react'
 
 export function ServiceCategories() {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null)
@@ -120,7 +121,7 @@ export function ServiceCategories() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                   
                   {/* Number Badge - Always visible */}
-                  <div className="absolute top-3 right-3 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg z-10">
+                  <div className="absolute top-3 right-3 w-10 h-10 bg-yellow-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg z-10">
                     {index + 1}
                   </div>
 
@@ -136,34 +137,30 @@ export function ServiceCategories() {
                 <div className="p-5 flex flex-col flex-grow">
                   {/* Title - Fixed 2 lines */}
                   <h3 className={`text-base font-bold leading-tight h-12 overflow-hidden transition-colors duration-300 mb-3 ${
-                    isHovered ? 'text-blue-600' : 'text-gray-900'
+                    isHovered ? 'text-yellow-600' : 'text-gray-900'
                   }`}>
                     {category.title}
                   </h3>
 
                   {/* Description - Fixed 3 lines, no expansion */}
-                  <p className="text-gray-600 text-sm leading-relaxed h-16 overflow-hidden mb-4 flex-grow">
+                  <p className="text-gray-600 text-sm leading-relaxed h-34 overflow-hidden mb-4 flex-grow">
                     {category.description}
                   </p>
 
                   {/* CTA Link */}
                   <div className="mt-auto">
-                    <Link
-                      href="/booking"
-                      className={`inline-flex items-center text-blue-600 font-medium text-sm transition-all duration-300 ${
-                        isHovered ? 'gap-3' : 'gap-2'
-                      }`}
+                    <a 
+                      href="tel:09126769048" 
+                      className="flex items-center w-40 gap-2 bg-yellow-100 text-yellow-600 px-4 py-1.5 rounded-full hover:bg-yellow-200 transition-colors font-medium"
                     >
-                      <span>درخواست خدمات</span>
-                      <ChevronLeft className={`w-4 h-4 transition-transform duration-300 ${
-                        isHovered ? 'translate-x-1' : 'translate-x-0'
-                      }`} />
-                    </Link>
+                      <Phone className="w-4 h-4" />
+                      <span className="font-bold">۰۹۱۲-۶۷۶۹۰۴۸</span>
+                    </a>
                   </div>
                 </div>
 
                 {/* Decorative Border */}
-                <div className={`absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-600 to-purple-600 transition-transform duration-500 origin-left ${
+                <div className={`absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-yellow-600 to-yellow-100 transition-transform duration-500 origin-left ${
                   isHovered ? 'scale-x-100' : 'scale-x-0'
                 }`} />
               </div>
@@ -174,20 +171,16 @@ export function ServiceCategories() {
         {/* Bottom CTA */}
         <div className="text-center">
           <div className="inline-flex flex-col sm:flex-row items-center gap-4">
-            <Link
-              href="/booking"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold px-8 py-4 rounded-xl hover:from-blue-700 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
-            >
-              <Zap className="w-5 h-5" />
-              <span>درخواست خدمات برق‌کاری</span>
-            </Link>
-            <Link
-              href="/services"
-              className="inline-flex items-center gap-2 bg-white border-2 border-gray-200 text-gray-700 font-bold px-8 py-4 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all duration-300 shadow-md hover:shadow-lg"
-            >
-              <span>اطلاعات بیشتر</span>
-              <ChevronLeft className="w-5 h-5" />
-            </Link>
+            {/* Emergency CTA */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <a
+                href="tel:09126769048"
+                className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-bold px-8 py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-red-500/50 hover:scale-105"
+              >
+                <Phone className="w-5 h-5 animate-pulse" />
+                <span>تماس اضطراری: ۰۹۱۲۶۷۶۹۰۴۸</span>
+              </a>
+            </div>
           </div>
           
           {/* Trust Badge */}
@@ -199,7 +192,7 @@ export function ServiceCategories() {
                 </div>
               ))}
             </div>
-            <span>بیش از ۱۰،۰۰۰ مشتری راضی</span>
+            <span>بیش از 3،۰۰۰ مشتری راضی</span>
           </div>
         </div>
       </div>

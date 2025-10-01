@@ -20,11 +20,11 @@ export function EmergencyBanner() {
           
           <div className="flex items-center gap-4">
             <a 
-              href="tel:09129636605" 
+              href="tel:09126769048" 
               className="flex items-center gap-2 bg-white text-red-600 px-4 py-1.5 rounded-full hover:bg-red-50 transition-colors font-medium"
             >
               <Phone className="w-4 h-4" />
-              <span className="font-bold">۰۹۱۲-۹۶۳۶۶۰۵</span>
+              <span className="font-bold">۰۹۱۲-۶۷۶۹۰۴۸</span>
             </a>
             
             <button
