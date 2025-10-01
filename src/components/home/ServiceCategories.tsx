@@ -100,12 +100,12 @@ export function ServiceCategories() {
             return (
               <div
                 key={index}
-                className="relative bg-white rounded-xl shadow-md hover:shadow-2xl transition-shadow duration-500 overflow-hidden"
+                className="relative bg-white rounded-xl shadow-md hover:shadow-2xl transition-shadow duration-500 overflow-hidden flex flex-col h-full"
                 onMouseEnter={() => setHoveredCard(index)}
                 onMouseLeave={() => setHoveredCard(null)}
               >
                 {/* Image Container - Exact aspect ratio for 370x300 */}
-                <div className="relative w-full aspect-[370/300] overflow-hidden bg-gray-100">
+                <div className="relative w-full aspect-[370/300] overflow-hidden bg-gray-100 flex-shrink-0">
                   <Image
                     src={category.image}
                     alt={category.title}
@@ -124,7 +124,7 @@ export function ServiceCategories() {
                     {index + 1}
                   </div>
 
-                  {/* Hover Icon - Conditional rendering */}
+                  {/* Hover Icon */}
                   <div className={`absolute top-3 left-3 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center z-10 transition-all duration-300 ${
                     isHovered ? 'opacity-100 scale-110' : 'opacity-0 scale-90'
                   }`}>
@@ -132,37 +132,37 @@ export function ServiceCategories() {
                   </div>
                 </div>
 
-                {/* Content */}
-                <div className="p-5">
-                  {/* Title */}
-                  <h3 className={`text-base font-bold mb-3 leading-tight min-h-[3rem] transition-colors duration-300 ${
+                {/* Content - Fixed height container */}
+                <div className="p-5 flex flex-col flex-grow">
+                  {/* Title - Fixed 2 lines */}
+                  <h3 className={`text-base font-bold leading-tight h-12 overflow-hidden transition-colors duration-300 mb-3 ${
                     isHovered ? 'text-blue-600' : 'text-gray-900'
                   }`}>
-                    <span className="line-clamp-2">{category.title}</span>
+                    {category.title}
                   </h3>
 
-                  {/* Description */}
-                  <p className="text-gray-600 text-sm leading-relaxed mb-4 min-h-[4.5rem]">
-                    <span className={isHovered ? 'line-clamp-none' : 'line-clamp-3'}>
-                      {category.description}
-                    </span>
+                  {/* Description - Fixed 3 lines, no expansion */}
+                  <p className="text-gray-600 text-sm leading-relaxed h-16 overflow-hidden mb-4 flex-grow">
+                    {category.description}
                   </p>
 
                   {/* CTA Link */}
-                  <Link
-                    href="/booking"
-                    className={`inline-flex items-center text-blue-600 font-medium text-sm transition-all duration-300 ${
-                      isHovered ? 'gap-3' : 'gap-2'
-                    }`}
-                  >
-                    <span>درخواست خدمات</span>
-                    <ChevronLeft className={`w-4 h-4 transition-transform duration-300 ${
-                      isHovered ? 'translate-x-1' : 'translate-x-0'
-                    }`} />
-                  </Link>
+                  <div className="mt-auto">
+                    <Link
+                      href="/booking"
+                      className={`inline-flex items-center text-blue-600 font-medium text-sm transition-all duration-300 ${
+                        isHovered ? 'gap-3' : 'gap-2'
+                      }`}
+                    >
+                      <span>درخواست خدمات</span>
+                      <ChevronLeft className={`w-4 h-4 transition-transform duration-300 ${
+                        isHovered ? 'translate-x-1' : 'translate-x-0'
+                      }`} />
+                    </Link>
+                  </div>
                 </div>
 
-                {/* Decorative Border - Conditional rendering */}
+                {/* Decorative Border */}
                 <div className={`absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-600 to-purple-600 transition-transform duration-500 origin-left ${
                   isHovered ? 'scale-x-100' : 'scale-x-0'
                 }`} />
