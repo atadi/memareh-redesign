@@ -39,31 +39,14 @@ export function Hero() {
             className="text-white space-y-8"
           >
             {/* Logo Badge */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="inline-flex items-center gap-4"
-            >
-              <div className="relative bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/20 shadow-xl">
-                <Image
-                  src="/assets/logo/logo.png"
-                  alt="معماره - خدمات برق‌کاری حرفه‌ای"
-                  width={180}
-                  height={60}
-                  className="h-12 w-auto object-contain"
-                  priority
-                />
-                {/* Glow effect */}
-                <div className="absolute inset-0 bg-blue-500 rounded-2xl blur-xl opacity-30 -z-10" />
-              </div>
-            </motion.div>
-
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-blue-500/20 backdrop-blur-sm border border-blue-400/30 rounded-full px-4 py-2">
-              <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-              <span className="text-sm">رتبه ۱ در ارائه خدمات برق‌کاری</span>
-            </div>
+            <Image
+              src="/assets/logo/logo-reverse.png"
+              alt="معماره - خدمات برق‌کاری حرفه‌ای"
+              width={250}
+              height={168}
+              className="h-12 w-auto object-contain"
+              priority
+            />
 
             {/* Main Heading */}
             <div className="space-y-4">
