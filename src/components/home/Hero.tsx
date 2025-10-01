@@ -28,7 +28,7 @@ export function Hero() {
         <div className="absolute -bottom-8 left-20 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
       </div>
 
-      <div className="relative container mx-auto px-4 py-16 md:py-24">
+      <div className="relative container mx-auto px-4 py-16 md:py-16">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           
           {/* Left Side - Content */}
@@ -39,14 +39,16 @@ export function Hero() {
             className="text-white space-y-8"
           >
             {/* Logo Badge */}
-            <Image
-              src="/assets/logo/logo-reverse.png"
-              alt="معماره - خدمات برق‌کاری حرفه‌ای"
-              width={250}
-              height={168}
-              className="h-12 w-auto object-contain"
-              priority
-            />
+            <div className="absolute top-1/8 right-1/7 opacity-10">
+              <Image
+                src="/assets/images/walking-man.png"
+                alt="معماره - خدمات برق‌کاری حرفه‌ای"
+                width={400}
+                height={700}
+                className="object-contain"
+                priority
+              />
+            </div>
 
             {/* Main Heading */}
             <div className="space-y-4">
@@ -58,7 +60,7 @@ export function Hero() {
                 در خدمت شماست
               </h1>
               <p className="text-lg md:text-xl text-gray-300 max-w-xl">
-                دسترسی آسان به بیش از ۵۰۰ تکنسین مجاز و با تجربه در سراسر کشور. خدمات اضطراری ۲۴ ساعته با پاسخگویی زیر ۱ ساعت.
+                دسترسی آسان به بیش از ۵۰۰ تکنسین مجاز و با تجربه در سراسر کشور. خدمات اضطراری ۲۴ ساعته با پاسخگویی بسیار سریع.
               </p>
             </div>
 
