@@ -38,15 +38,21 @@ export function Hero() {
             transition={{ duration: 0.8 }}
             className="text-white space-y-8"
           >
-            {/* Logo Badge */}
-            <Image
-              src="/assets/logo/logo-reverse.png"
-              alt="معماره - خدمات برق‌کاری حرفه‌ای"
-              width={250}
-              height={168}
-              className="h-12 w-auto object-contain"
-              priority
-            />
+            {/* Logo Badge - Now it will scale based on width/height you set! */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <Image
+                src="/assets/logo/logo-reverse.png"
+                alt="معماره - خدمات برق‌کاری حرفه‌ای"
+                width={350}
+                height={118}
+                className="w-auto h-auto max-w-sm"
+                priority
+              />
+            </motion.div>
 
             {/* Main Heading */}
             <div className="space-y-4">
