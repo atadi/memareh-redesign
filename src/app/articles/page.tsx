@@ -45,53 +45,71 @@ interface Article {
   _count?: {
     comments: number
   }
-  // Additional computed properties
   averageRating?: number
   ratingCount?: number
 }
 
 export default function ArticlesPage() {
-  // Properly type the state
-  const [articles, setArticles] = useState<Article[]>([])  // ✅ Fixed: explicitly typed
+  const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'rating'>('newest')
-  const supabase = createClient()
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     loadArticles()
   }, [selectedCategory, sortBy])
 
   const loadArticles = async () => {
-    let query = supabase
-      .from('articles')
-      .select('*')
-      .eq('status', 'published')
+    try {
+      // ✅ Create client inside the function
+      const supabase = createClient()
+      
+      // Debug logging
+      console.log('🔍 Fetching articles with:', {
+        category: selectedCategory,
+        sortBy,
+        url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+        hasKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      })
 
-    if (selectedCategory !== 'all') {
-      query = query.eq('category', selectedCategory)
-    }
+      let query = supabase
+        .from('articles')
+        .select('*')
+        .eq('status', 'published')
 
-    if (sortBy === 'newest') {
-      query = query.order('published_at', { ascending: false })
-    } else if (sortBy === 'popular') {
-      query = query.order('view_count', { ascending: false })
-    } else if (sortBy === 'rating') {
-      query = query.order('published_at', { ascending: false })
-    }
+      if (selectedCategory !== 'all') {
+        query = query.eq('category', selectedCategory)
+      }
 
-    const { data, error } = await query
+      if (sortBy === 'newest') {
+        query = query.order('published_at', { ascending: false })
+      } else if (sortBy === 'popular') {
+        query = query.order('view_count', { ascending: false })
+      } else if (sortBy === 'rating') {
+        query = query.order('published_at', { ascending: false })
+      }
 
-    if (error) {
-      console.error('Error loading articles:', error)
+      const { data, error } = await query
+
+      if (error) {
+        console.error('❌ Error loading articles:', error)
+        setError(error.message)
+        setLoading(false)
+        return
+      }
+
+      console.log('✅ Articles loaded:', data?.length)
+      if (data) {
+        setArticles(data as Article[])
+      }
+      setError(null)
+    } catch (err) {
+      console.error('❌ Unexpected error:', err)
+      setError('Failed to load articles')
+    } finally {
       setLoading(false)
-      return
     }
-
-    if (data) {
-      setArticles(data as Article[])
-    }
-    setLoading(false)
   }
 
   const categories = [
@@ -109,7 +127,6 @@ export default function ArticlesPage() {
       {/* Hero Section */}
       <div className="bg-gradient-to-l from-blue-600 to-blue-800 text-white py-16">
         <div className="container mx-auto px-4">
-          {/* Back to Home Link */}
           <a
             href="/"
             className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-6 transition-colors"
@@ -126,6 +143,13 @@ export default function ArticlesPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Show error if any */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <strong>خطا:</strong> {error}
+          </div>
+        )}
+
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar - Categories */}
           <aside className="lg:w-1/4">
@@ -155,7 +179,6 @@ export default function ArticlesPage() {
                 })}
               </div>
 
-              {/* Sort Options */}
               <div className="mt-8 pt-6 border-t">
                 <h3 className="font-bold mb-3">مرتب‌سازی</h3>
                 <select
@@ -171,7 +194,7 @@ export default function ArticlesPage() {
             </div>
           </aside>
 
-          {/* Main Content - Articles Grid */}
+          {/* Main Content */}
           <main className="lg:w-3/4">
             {loading ? (
               <div className="text-center py-12">
