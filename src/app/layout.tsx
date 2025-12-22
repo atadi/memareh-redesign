@@ -2,6 +2,7 @@ import type { Metadata } from "next/types";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from 'react-hot-toast';
 import "./globals.css";
+import { Analytics } from '@vercel/analytics/next';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -72,7 +73,10 @@ export default function RootLayout({
     <html lang="fa" dir="rtl">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} >
         <Toaster position="top-center" />
-        <main>{children}</main>
+        <main>
+          {children}
+          <Analytics />
+        </main>
       </body>
     </html>
   );
