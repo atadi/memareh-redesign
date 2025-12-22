@@ -7,14 +7,15 @@ import { ArticleContent } from '@/components/articles/ArticleContent'
 import { ArticleRating } from '@/components/articles/ArticleRating'
 import { CommentSection } from '@/components/articles/CommentSection'
 import { RelatedArticles } from '@/components/articles/RelatedArticles'
-import { 
-  Clock, 
-  Eye, 
-  Calendar, 
+import {
+  Clock,
+  Eye,
+  Calendar,
   User,
   Share2,
   Bookmark,
-  Printer
+  Printer,
+  ArrowRight
 } from 'lucide-react'
 import { format } from 'date-fns-jalali'
 
@@ -77,38 +78,42 @@ export default function ArticlePage() {
   }, [article])
 
   const loadArticle = async () => {
-    if (!params.slug) return
+    const slug = typeof params.slug === 'string' ? params.slug : params.slug?.[0]
+
+    console.log('Loading article with slug:', slug, 'params:', params)
+
+    if (!slug) {
+      console.error('No slug provided')
+      setLoading(false)
+      return
+    }
 
     const { data, error } = await supabase
       .from('articles')
-      .select(`
-        *,
-        author:profiles!articles_author_id_fkey(full_name, avatar_url, role),
-        ratings:article_ratings(rating, user_id),
-        comments:article_comments(
-          id,
-          content,
-          status,
-          created_at,
-          user:profiles!article_comments_user_id_fkey(full_name, avatar_url),
-          parent_id,
-          like_count,
-          is_pinned
-        )
-      `)
-      .eq('slug', params.slug)
+      .select('*')
+      .eq('slug', slug)
       .eq('status', 'published')
       .single()
 
-    if (data && !error) {
-      setArticle(data as Article)
-      
-      // Check current user's rating
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user && data.ratings) {
-        const userRatingData = data.ratings.find((r: any) => r.user_id === user.id)
-        setUserRating(userRatingData?.rating || 0)
+    if (error) {
+      console.error('Error loading article:', error)
+      setLoading(false)
+      return
+    }
+
+    if (data) {
+      // Create a minimal article object with defaults for missing fields
+      const articleData = {
+        ...data,
+        author: {
+          full_name: 'نویسنده',
+          avatar_url: undefined,
+          role: undefined
+        },
+        ratings: [],
+        comments: []
       }
+      setArticle(articleData as Article)
     }
     setLoading(false)
   }
@@ -181,6 +186,15 @@ export default function ArticlePage() {
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
+            {/* Back to Home Link */}
+            <a
+              href="/"
+              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-4 transition-colors"
+            >
+              <ArrowRight className="w-4 h-4" />
+              <span>بازگشت به صفحه اصلی</span>
+            </a>
+
             {/* Breadcrumb */}
             <nav className="text-sm text-gray-600 mb-4">
               <a href="/" className="hover:text-blue-600">خانه</a>

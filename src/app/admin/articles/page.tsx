@@ -35,16 +35,18 @@ export default function ArticleAdminPage() {
   }, [])
 
   const loadArticles = async () => {
-    const { data } = await supabase
+    console.log('Loading articles...')
+    const { data, error } = await supabase
       .from('articles')
-      .select(`
-        *,
-        author:profiles(full_name),
-        _count:article_comments(count),
-        ratings:article_ratings(rating)
-      `)
+      .select('*')
       .order('created_at', { ascending: false })
 
+    if (error) {
+      console.error('Error loading articles:', error)
+      return
+    }
+
+    console.log('Articles loaded:', data)
     if (data) {
       setArticles(data)
     }
@@ -203,7 +205,7 @@ export default function ArticleAdminPage() {
                           {article.category}
                         </span>
                       </td>
-                      <td className="text-center py-3">{article.author.full_name}</td>
+                      <td className="text-center py-3">{article.author_id || '-'}</td>
                       <td className="text-center py-3">
                         <span className={`px-2 py-1 rounded text-sm ${
                           article.status === 'published'
@@ -213,14 +215,12 @@ export default function ArticleAdminPage() {
                           {article.status === 'published' ? 'منتشر شده' : 'پیش‌نویس'}
                         </span>
                       </td>
-                      <td className="text-center py-3">{article.view_count}</td>
-                      <td className="text-center py-3">{article._count || 0}</td>
+                      <td className="text-center py-3">{article.view_count || 0}</td>
+                      <td className="text-center py-3">-</td>
                       <td className="text-center py-3">
                         <div className="flex items-center justify-center gap-1">
                           <Star className="w-4 h-4 text-yellow-500" />
-                          {article.ratings?.length > 0
-                            ? (article.ratings.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0) / article.ratings.length).toFixed(1)
-                            : '0'}
+                          -
                         </div>
                       </td>
                       <td className="text-center py-3">

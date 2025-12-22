@@ -1,19 +1,38 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Zap, Phone, Clock, Shield, MapPin, Star, ArrowRight, CheckCircle } from 'lucide-react'
+import { Phone, Clock, Shield, Star, CheckCircle } from 'lucide-react'
 import Image from 'next/image'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
 
 export function Hero() {
-  const [city, setCity] = useState('')
-  const [serviceType, setServiceType] = useState('')
-  const router = useRouter()
+  const handlePhoneClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // Check if device is desktop (not mobile)
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
-  const handleQuickBooking = () => {
-    router.push(`/booking?city=${city}&service=${serviceType}`)
+    if (!isMobile) {
+      e.preventDefault()
+      toast('شماره تماس اضطراری: ۰۹۱۲۶۷۶۹۰۴۸\nلطفا از موبایل تماس بگیرید', {
+        icon: '🚨',
+        duration: 4000,
+        style: {
+          direction: 'rtl',
+          textAlign: 'center'
+        }
+      })
+    }
   }
+  // Hotspot config: specify region labels and fallback percentage positions.
+  // Because we now use a PNG image, anchoring is done via these percentage coordinates.
+  const hotspotsConfig = [
+    { id: 1, region: 'منطقه ۱', fallback: { top: '30%', left: '73%' } },
+    { id: 2, region: 'منطقه ۵', fallback: { top: '40%', left: '40%' } },
+    { id: 3, region: 'منطقه ۲', fallback: { top: '35%', left: '53%' } },
+    { id: 4, region: 'منطقه ۳', fallback: { top: '37%', left: '62%' } },
+  ]
+
+  const [hotspots] = useState(() => hotspotsConfig.map(h => ({ id: h.id, top: h.fallback.top, left: h.fallback.left })))
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-[100vh]">
@@ -21,16 +40,29 @@ export function Hero() {
       <div className="absolute inset-0">
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f46e520_1px,transparent_1px),linear-gradient(to_bottom,#4f46e520_1px,transparent_1px)] bg-[size:4rem_4rem]" />
-        
+
         {/* Gradient Orbs */}
         <div className="absolute top-0 -left-4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
         <div className="absolute top-0 -right-4 w-96 h-96 bg-yellow-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
         <div className="absolute -bottom-8 left-20 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
       </div>
 
+      {/* Logo Badge - positioned with zero distance from section top and bottom */}
+      <div className="absolute top-0 bottom-0 -right-12 md:right-[14.28%] opacity-4 pointer-events-none">
+        <Image
+          src="/assets/images/walking-man.png"
+          alt="معماره - خدمات برقکاری حرفه‌ای"
+          width={1000}
+          height={3024}
+          className="object-cover object-bottom h-full w-auto"
+          priority
+        />
+      </div>
+
       <div className="relative container mx-auto px-4 py-16 md:py-30">
+
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          
+
           {/* Left Side - Content */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -38,17 +70,6 @@ export function Hero() {
             transition={{ duration: 0.8 }}
             className="text-white space-y-8"
           >
-            {/* Logo Badge */}
-            <div className="absolute top-0 right-1/7 opacity-4">
-              <Image
-                src="/assets/images/walking-man.png"
-                alt="معماره - خدمات برقکاری حرفه‌ای"
-                width={1000}
-                height={3024}
-                className="object-contain"
-                priority
-              />
-            </div>
             
             {/* Main Heading */}
             <div className="space-y-4">
@@ -117,6 +138,7 @@ export function Hero() {
             <div className="flex flex-col sm:flex-row gap-4">
               <a
                 href="tel:09126769048"
+                onClick={handlePhoneClick}
                 className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-bold px-8 py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-red-500/50 hover:scale-105"
               >
                 <Phone className="w-5 h-5 animate-pulse" />
@@ -125,91 +147,34 @@ export function Hero() {
             </div>
           </motion.div>
 
-          {/* Right Side - Booking Card */}
+          {/* Right Side - Map */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative"
+            className="relative flex items-center justify-center"
           >
-            {/* Floating Card */}
-            <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl">
-              {/* Glow Effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-3xl blur-2xl opacity-20 group-hover:opacity-30 transition" />
-              
-              <div className="relative space-y-6">
-                <div className="text-center">
-                  <h2 className="text-3xl font-bold text-white mb-2">
-                    رزرو آنلاین برقکار
-                  </h2>
-                  <p className="text-gray-300">
-                    در چند دقیقه تکنسین خود را پیدا کنید
-                  </p>
-                </div>
+            <div className="hidden lg:block w-full max-w-3xl h-[520px] md:h-[640px] rounded-xl overflow-hidden relative isolate">
+              {/* Local transparent PNG map (converted) */}
+              <img
+                src="/assets/areas/tehran_regions_transparent.png"
+                alt="نقشه تهران"
+                className="w-full h-full object-contain"
+              />
 
-                {/* Form Fields */}
-                <div className="space-y-4">
-                  {/* Service Type */}
-                  <div>
-                    <label className="block text-white font-medium mb-2 text-right">
-                      <Zap className="inline w-4 h-4 ml-1" />
-                      نوع خدمات
-                    </label>
-                    <select
-                      value={serviceType}
-                      onChange={(e) => setServiceType(e.target.value)}
-                      className="w-full px-4 py-3.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition appearance-none"
-                    >
-                      <option value="" className="bg-slate-800">انتخاب خدمات...</option>
-                      <option value="emergency" className="bg-slate-800">⚡ اضطراری - رفع قطعی برق</option>
-                      <option value="installation" className="bg-slate-800">🔧 نصب و راه‌اندازی</option>
-                      <option value="repair" className="bg-slate-800">🛠️ تعمیرات</option>
-                      <option value="wiring" className="bg-slate-800">🏗️ سیم‌کشی ساختمان</option>
-                      <option value="inspection" className="bg-slate-800">✅ بازرسی فنی</option>
-                    </select>
-                  </div>
-
-                  {/* Submit Button */}
-                  <button
-                    onClick={handleQuickBooking}
-                    className="w-full group bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-blue-500/50 flex items-center justify-center gap-2"
-                  >
-                    <span>مشاهده برقکاران موجود</span>
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </button>
+              {hotspots.map(h => (
+                <div key={h.id} className="absolute" style={{ top: h.top, left: h.left, transform: 'translate(-50%, -50%)' }}>
+                  <span className="absolute inline-block w-2 h-2 rounded-full bg-yellow-400/90 ring-2 ring-amber-900" />
+                  <span
+                    className="absolute inline-block w-20 h-20 rounded-full bg-amber-400/30 -z-10 animate-ping"
+                    style={{ left: '-42px', top: '-40px' }}
+                  />
                 </div>
-
-                {/* Trust Badge */}
-                <div className="flex items-center justify-center gap-2 text-sm text-gray-300">
-                  <Shield className="w-4 h-4 text-green-400" />
-                  <span>تضمین کیفیت خدمات در اسرع وقت</span>
-                </div>
-
-                {/* Stats Row */}
-                <div className="grid grid-cols-2 gap-4 pt-6 border-t border-white/10">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-white">3000+</div>
-                    <div className="text-xs text-gray-400">پروژه</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-white">۹۸٪</div>
-                    <div className="text-xs text-gray-400">رضایت</div>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
-
-            {/* Floating Elements */}
-            <div className="absolute -top-6 -right-6 w-20 h-20 bg-yellow-400/20 rounded-full blur-2xl animate-pulse" />
-            <div className="absolute -bottom-6 -left-6 w-20 h-20 bg-blue-400/20 rounded-full blur-2xl animate-pulse animation-delay-2000" />
           </motion.div>
 
         </div>
-      </div>
-
-      {/* Animated Lightning Bolt */}
-      <div className="absolute top-1/4 left-1/4 opacity-10">
-        <Zap className="w-32 h-32 text-yellow-400 animate-pulse" />
       </div>
     </section>
   )

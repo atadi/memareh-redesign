@@ -1,15 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { 
-  Users, 
-  FileText, 
-  TrendingUp, 
+import { useRouter } from 'next/navigation'
+import {
+  Users,
+  FileText,
+  TrendingUp,
   Settings,
   AlertCircle,
   Calendar,
   DollarSign,
-  UserCheck
+  UserCheck,
+  Newspaper
 } from 'lucide-react'
 import { DashboardStats } from '@/components/admin/DashboardStats'
 import { RequestsManager } from '@/components/admin/RequestsManager'
@@ -19,11 +21,13 @@ import { EmergencyMonitor } from '@/components/admin/EmergencyMonitor'
 
 export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState('overview')
+  const router = useRouter()
 
   const menuItems = [
     { id: 'overview', label: 'نمای کلی', icon: TrendingUp },
     { id: 'requests', label: 'مدیریت درخواست‌ها', icon: FileText },
     { id: 'technicians', label: 'مدیریت تکنسین‌ها', icon: UserCheck },
+    { id: 'articles', label: 'مقالات', icon: Newspaper, isLink: true, href: '/admin/articles' },
     { id: 'emergency', label: 'مانیتور اضطراری', icon: AlertCircle },
     { id: 'revenue', label: 'گزارش مالی', icon: DollarSign },
     { id: 'schedule', label: 'برنامه‌ریزی', icon: Calendar },
@@ -44,7 +48,13 @@ export default function AdminDashboard() {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveSection(item.id)}
+                onClick={() => {
+                  if (item.isLink && item.href) {
+                    router.push(item.href)
+                  } else {
+                    setActiveSection(item.id)
+                  }
+                }}
                 className={`w-full flex items-center gap-3 px-6 py-3 hover:bg-gray-800 transition-colors ${
                   activeSection === item.id ? 'bg-blue-600' : ''
                 }`}

@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { ArticleCard } from '@/components/articles/ArticleCard'
 import { ArticleFilters } from '@/components/articles/ArticleFilters'
-import { 
-  BookOpen, 
-  TrendingUp, 
-  Clock, 
+import {
+  BookOpen,
+  TrendingUp,
+  Clock,
   Eye,
   Star,
   Filter,
@@ -16,7 +16,8 @@ import {
   Lightbulb,
   Cpu,
   Settings,
-  Search
+  Search,
+  ArrowRight
 } from 'lucide-react'
 
 // Define the Article type
@@ -64,12 +65,7 @@ export default function ArticlesPage() {
   const loadArticles = async () => {
     let query = supabase
       .from('articles')
-      .select(`
-        *,
-        author:profiles(full_name, avatar_url),
-        ratings:article_ratings(rating),
-        comments:article_comments(count)
-      `)
+      .select('*')
       .eq('status', 'published')
 
     if (selectedCategory !== 'all') {
@@ -81,33 +77,19 @@ export default function ArticlesPage() {
     } else if (sortBy === 'popular') {
       query = query.order('view_count', { ascending: false })
     } else if (sortBy === 'rating') {
-      // Sort by rating would need to be done client-side after fetching
       query = query.order('published_at', { ascending: false })
     }
 
     const { data, error } = await query
 
-    if (data && !error) {
-      // Transform the data with proper typing
-      const articlesWithRating: Article[] = data.map((article: any) => {
-        const ratings = article.ratings || []
-        const averageRating = ratings.length > 0
-          ? ratings.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / ratings.length
-          : 0
-        
-        return {
-          ...article,
-          averageRating,
-          ratingCount: ratings.length
-        } as Article  // Cast to Article type
-      })
+    if (error) {
+      console.error('Error loading articles:', error)
+      setLoading(false)
+      return
+    }
 
-      // If sorting by rating, sort the array
-      if (sortBy === 'rating') {
-        articlesWithRating.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0))
-      }
-
-      setArticles(articlesWithRating)  // ✅ Now this works!
+    if (data) {
+      setArticles(data as Article[])
     }
     setLoading(false)
   }
@@ -127,6 +109,15 @@ export default function ArticlesPage() {
       {/* Hero Section */}
       <div className="bg-gradient-to-l from-blue-600 to-blue-800 text-white py-16">
         <div className="container mx-auto px-4">
+          {/* Back to Home Link */}
+          <a
+            href="/"
+            className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-6 transition-colors"
+          >
+            <ArrowRight className="w-4 h-4" />
+            <span>بازگشت به صفحه اصلی</span>
+          </a>
+
           <h1 className="text-4xl font-bold mb-4">مقالات و آموزش‌های برق</h1>
           <p className="text-xl opacity-90">
             آموزش‌های کاربردی، نکات ایمنی و راهنمای عیب‌یابی
