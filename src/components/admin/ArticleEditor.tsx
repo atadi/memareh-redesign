@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { createClient } from '@/lib/supabase/client'
 import { uploadFeaturedImage, deleteFeaturedImage } from '@/lib/uploadImage'
@@ -25,6 +25,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
   const [content, setContent] = useState(article?.content || '')
   const [preview, setPreview] = useState(false)
   const [showHtmlCode, setShowHtmlCode] = useState(false)
+  const [editorKey, setEditorKey] = useState(0) // Add this to force remount
   const supabase = useMemo(() => createClient(), [])
   
   // Image upload states
@@ -49,7 +50,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
   })
 
   const slugify = (text: string) => {
-    // Persian to English transliteration map
     const persianToEnglish: { [key: string]: string } = {
       'آ': 'a', 'ا': 'a', 'ب': 'b', 'پ': 'p', 'ت': 't', 'ث': 's', 'ج': 'j',
       'چ': 'ch', 'ح': 'h', 'خ': 'kh', 'د': 'd', 'ذ': 'z', 'ر': 'r', 'ز': 'z',
@@ -58,7 +58,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
       'م': 'm', 'ن': 'n', 'و': 'v', 'ه': 'h', 'ی': 'i', 'ئ': 'i', 'ء': ''
     }
 
-    // Transliterate Persian to English
     let transliterated = text
       .split('')
       .map(char => persianToEnglish[char] || char)
@@ -75,16 +74,65 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
   const titleValue = watch('title')
   const slugValue = watch('slug')
 
+  // Auto-generate slug from title
   useEffect(() => {
     if (!article?.id && titleValue && !slugValue) {
       setValue('slug', slugify(titleValue))
     }
   }, [titleValue, article?.id, slugValue, setValue])
 
+  // Reset form when switching between articles
+  useEffect(() => {
+    console.log('🔄 Article changed, resetting form. Article ID:', article?.id)
+    
+    if (article?.id) {
+      // Editing existing article
+      setValue('title', article.title || '')
+      setValue('slug', article.slug || '')
+      setValue('excerpt', article.excerpt || '')
+      setValue('category', article.category || 'safety_tips')
+      setValue('tags', article.tags?.join(', ') || '')
+      setValue('featured_image', article.featured_image || '')
+      setValue('allow_comments', article.allow_comments ?? true)
+      setValue('status', article.status || 'draft')
+      setValue('meta_title', article.meta_title || '')
+      setValue('meta_description', article.meta_description || '')
+      setValue('meta_keywords', article.meta_keywords?.join(', ') || '')
+      setContent(article.content || '')
+      setFeaturedImagePreview(article.featured_image || '')
+      setFeaturedImage(null)
+    } else {
+      // Creating new article - reset everything
+      console.log('✨ Creating new article, clearing all fields')
+      setValue('title', '')
+      setValue('slug', '')
+      setValue('excerpt', '')
+      setValue('category', 'safety_tips')
+      setValue('tags', '')
+      setValue('featured_image', '')
+      setValue('allow_comments', true)
+      setValue('status', 'draft')
+      setValue('meta_title', '')
+      setValue('meta_description', '')
+      setValue('meta_keywords', '')
+      setContent('')
+      setFeaturedImagePreview('')
+      setFeaturedImage(null)
+    }
+    
+    // Force editor remount by changing key
+    setEditorKey(prev => prev + 1)
+    
+    // Reset other states
+    setPreview(false)
+    setShowHtmlCode(false)
+    setSaving(false)
+    setIsUploading(false)
+  }, [article?.id, article, setValue])
+
   const [saving, setSaving] = useState(false)
   const isPublished = article?.status === 'published'
 
-  // Handle image file selection
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log('🔍 File input triggered!', e.target.files)
     
@@ -101,14 +149,12 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
       sizeInMB: (file.size / 1024 / 1024).toFixed(2) + 'MB'
     })
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       console.log('❌ Not an image file:', file.type)
       toast.error('لطفا یک فایل تصویری انتخاب کنید')
       return
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       console.log('❌ File too large:', (file.size / 1024 / 1024).toFixed(2) + 'MB')
       toast.error('حجم تصویر نباید بیشتر از 5 مگابایت باشد')
@@ -118,7 +164,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     console.log('✅ File validation passed, creating preview...')
     setFeaturedImage(file)
     
-    // Create preview
     const reader = new FileReader()
     reader.onloadstart = () => {
       console.log('📖 Starting to read file...')
@@ -134,7 +179,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     reader.readAsDataURL(file)
   }
 
-  // Handle removing selected image
   const handleRemoveImage = () => {
     console.log('🗑️ Removing image')
     setFeaturedImage(null)
@@ -142,21 +186,17 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     setValue('featured_image', '')
   }
 
-  // Handle save with specific status
   const handleSaveWithStatus = async (status: 'draft' | 'published') => {
     setValue('status', status)
-    // Wait a tick for the value to be set, then submit
     setTimeout(() => {
       handleSubmit(onSubmitForm)()
     }, 0)
   }
 
-  // ذخیره مقاله
   const onSubmitForm = async (data: any) => {
     try {
       console.debug('ArticleEditor.onSubmitForm invoked', { data })
 
-      // Prevent multiple submissions
       if (saving) {
         console.debug('Already saving, ignoring duplicate submission')
         return
@@ -169,7 +209,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
       const { data: { user } } = await supabase.auth.getUser()
       console.debug('User:', user)
 
-      // If trying to publish, require an authenticated user
       if (data.status === 'published' && !user?.id) {
         toast.error('برای انتشار مقاله باید وارد شوید')
         setSaving(false)
@@ -177,7 +216,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
         return
       }
 
-      // Upload featured image if a new one was selected
       let imageUrl = data.featured_image || featuredImagePreview
 
       if (featuredImage) {
@@ -207,7 +245,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
           toast.dismiss()
           toast.success('تصویر با موفقیت آپلود شد')
           
-          // Delete old image if updating and URL has changed
           if (article?.featured_image && article.featured_image !== imageUrl) {
             console.log('🗑️ Deleting old image:', article.featured_image)
             await deleteFeaturedImage(article.featured_image)
@@ -275,7 +312,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
 
   return (
     <form onSubmit={handleSubmit(onSubmitForm)} className="max-w-7xl mx-auto p-6">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6 pb-4 border-b">
         <h2 className="text-2xl font-bold">
           {article?.id ? 'ویرایش مقاله' : 'مقاله جدید'}
@@ -317,11 +353,8 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="grid grid-cols-3 gap-6">
-        {/* Editor Column */}
         <div className="col-span-2 space-y-4">
-          {/* Title */}
           <div>
             <label className="block text-sm font-medium mb-2">عنوان مقاله *</label>
             <input
@@ -332,7 +365,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
             />
           </div>
           
-          {/* Slug */}
           <div>
             <label className="block text-sm font-medium mb-2">
               Slug (URL)
@@ -349,7 +381,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
             </p>
           </div>
 
-          {/* Excerpt */}
           <div>
             <label className="block text-sm font-medium mb-2">خلاصه *</label>
             <textarea
@@ -360,7 +391,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
             />
           </div>
 
-          {/* Content Editor */}
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className="block text-sm font-medium">محتوای مقاله *</label>
@@ -375,7 +405,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
               )}
             </div>
 
-            {/* Rich Text Editor */}
             {preview ? (
               <div className="prose prose-lg max-w-none p-4 border rounded-lg min-h-[400px]">
                 <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }} />
@@ -398,6 +427,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
               </div>
             ) : (
               <RichTextEditor
+                key={editorKey} // ⭐ Use the incrementing key
                 content={content}
                 onChange={setContent}
               />
@@ -405,13 +435,10 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
           </div>
         </div>
 
-        {/* Settings Column */}
         <div className="space-y-4">
-          {/* Featured Image Upload */}
           <div className="border rounded-lg p-4 bg-gray-50">
             <label className="block text-sm font-medium mb-3">تصویر شاخص</label>
             
-            {/* File Input */}
             <div className="mb-3">
               <label 
                 htmlFor="featured-image-input"
@@ -433,7 +460,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
               </label>
             </div>
 
-            {/* Image Preview */}
             {featuredImagePreview && (
               <div className="relative mb-3">
                 <img
@@ -452,7 +478,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
               </div>
             )}
 
-            {/* Or URL Input */}
             <div className="mt-3">
               <input
                 type="url"
@@ -466,7 +491,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
             </div>
           </div>
 
-          {/* Category */}
           <div>
             <label className="block text-sm font-medium mb-2">دسته‌بندی *</label>
             <select
@@ -484,7 +508,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
             </select>
           </div>
 
-          {/* Tags */}
           <div>
             <label className="block text-sm font-medium mb-2">برچسب‌ها</label>
             <input
@@ -495,7 +518,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
             />
           </div>
 
-          {/* Comments */}
           <div>
             <label className="flex items-center gap-2">
               <input
@@ -507,7 +529,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
             </label>
           </div>
 
-          {/* SEO Section */}
           <div className="pt-4 border-t">
             <h3 className="font-bold mb-3">تنظیمات SEO</h3>
             
