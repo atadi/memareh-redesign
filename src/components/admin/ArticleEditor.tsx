@@ -205,9 +205,8 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
       setSaving(true)
       setIsUploading(true)
 
-      console.debug('Getting user...')
       const { data: { user } } = await supabase.auth.getUser()
-      console.debug('User:', user)
+      const authorName = user?.user_metadata?.display_name?.trim() || 'کاربر'
 
       if (data.status === 'published' && !user?.id) {
         toast.error('برای انتشار مقاله باید وارد شوید')
@@ -265,11 +264,11 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
         meta_keywords: data.meta_keywords.split(',').map((k: string) => k.trim()).filter(Boolean),
         allow_comments: data.allow_comments,
         status: data.status,
-        author_id: user?.id, // ⭐ Always use current user's ID
+        author_id: user?.id,
+        author_name: authorName,
         reading_time: Math.ceil(content.split(' ').length / 200),
-        // ⭐ Fix published_at logic:
         published_at: data.status === 'published' 
-          ? (article?.published_at || new Date().toISOString()) // Keep existing or set new
+          ? (article?.published_at || new Date().toISOString())
           : null
       }
 
