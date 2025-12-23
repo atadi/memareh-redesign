@@ -265,9 +265,12 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
         meta_keywords: data.meta_keywords.split(',').map((k: string) => k.trim()).filter(Boolean),
         allow_comments: data.allow_comments,
         status: data.status,
-        author_id: article?.author_id || user?.id,
+        author_id: user?.id, // ⭐ Always use current user's ID
         reading_time: Math.ceil(content.split(' ').length / 200),
-        published_at: data.status === 'published' ? new Date().toISOString() : null
+        // ⭐ Fix published_at logic:
+        published_at: data.status === 'published' 
+          ? (article?.published_at || new Date().toISOString()) // Keep existing or set new
+          : null
       }
 
       console.debug('Article data prepared:', articleData)

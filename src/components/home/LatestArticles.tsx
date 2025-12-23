@@ -27,9 +27,29 @@ export function LatestArticles() {
         console.log('Latest Articles loaded:', data)
 
         if (data) {
-          // Filter out articles without valid slugs
-          const validArticles = data.filter(article => article.slug && article.slug !== 'null')
-          setArticles(validArticles)
+          // Get unique author IDs
+          const authorIds = Array.from(new Set(data.map(a => a.author_id).filter(Boolean)))          
+
+          // Fetch author data separately
+          const authors = await Promise.all(
+            authorIds.map(async (id) => {
+              const { data: userData } = await supabase.auth.admin.getUserById(id)
+              return userData?.user ? { id, email: userData.user.email } : null
+            })
+          )
+
+          // Map articles with author info
+          const articlesWithAuthors = data
+            .filter(article => article.slug && article.slug !== 'null')
+            .map(article => ({
+              ...article,
+              author: article.author_id ? {
+                full_name: authors.find(a => a?.id === article.author_id)?.email?.split('@')[0] || 'کاربر',
+                avatar_url: null
+              } : null
+            }))
+          
+          setArticles(articlesWithAuthors)
         }
       } catch (e) {
         console.error('failed to load latest articles', e)

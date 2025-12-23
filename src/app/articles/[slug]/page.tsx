@@ -17,7 +17,6 @@ import {
   Printer,
   ArrowRight
 } from 'lucide-react'
-import { format } from 'date-fns-jalali'
 
 // Define the Article type
 interface Article {
@@ -33,11 +32,7 @@ interface Article {
   reading_time: number
   published_at: string
   allow_comments: boolean
-  author: {
-    full_name: string
-    avatar_url?: string
-    role?: string
-  }
+  author_name?: string
   ratings?: Array<{
     rating: number
     user_id: string
@@ -59,10 +54,35 @@ interface Article {
 
 export default function ArticlePage() {
   const params = useParams()
-  const [article, setArticle] = useState<Article | null>(null)  // ← Properly typed
+  const [article, setArticle] = useState<Article | null>(null)
   const [loading, setLoading] = useState(true)
   const [userRating, setUserRating] = useState(0)
   const supabase = createClient()
+
+  // Format date function
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'تاریخ نامشخص'
+    
+    try {
+      const date = new Date(dateString)
+      
+      if (isNaN(date.getTime())) {
+        return 'تاریخ نامعتبر'
+      }
+      
+      // Use Persian locale for proper formatting
+      const formatter = new Intl.DateTimeFormat('fa-IR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+      
+      return formatter.format(date)
+    } catch (error) {
+      console.error('Date formatting error:', error)
+      return 'تاریخ نامشخص'
+    }
+  }
 
   useEffect(() => {
     if (params.slug) {
@@ -102,18 +122,8 @@ export default function ArticlePage() {
     }
 
     if (data) {
-      // Create a minimal article object with defaults for missing fields
-      const articleData = {
-        ...data,
-        author: {
-          full_name: 'نویسنده',
-          avatar_url: undefined,
-          role: undefined
-        },
-        ratings: [],
-        comments: []
-      }
-      setArticle(articleData as Article)
+      console.log('Article loaded:', data)
+      setArticle(data as Article)
     }
     setLoading(false)
   }
@@ -130,7 +140,7 @@ export default function ArticlePage() {
       // If the function doesn't exist, just update view count directly
       await supabase
         .from('articles')
-        .update({ view_count: article.view_count + 1 })
+        .update({ view_count: (article.view_count || 0) + 1 })
         .eq('id', article.id)
     }
   }
@@ -212,19 +222,19 @@ export default function ArticlePage() {
             <div className="flex flex-wrap items-center gap-4 text-gray-600">
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4" />
-                <span>{article.author.full_name}</span>
+                <span>{article.author_name || 'نویسنده'}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                <span>{format(new Date(article.published_at), 'dd MMMM yyyy')}</span>
+                <span>{formatDate(article.published_at)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
-                <span>{article.reading_time} دقیقه مطالعه</span>
+                <span>{article.reading_time || 5} دقیقه مطالعه</span>
               </div>
               <div className="flex items-center gap-2">
                 <Eye className="w-4 h-4" />
-                <span>{article.view_count} بازدید</span>
+                <span>{article.view_count || 0} بازدید</span>
               </div>
             </div>
 
@@ -298,13 +308,15 @@ export default function ArticlePage() {
           </div>
 
           {/* Comments Section */}
-          <div className="bg-white rounded-xl shadow-lg p-8 mt-6">
-            <CommentSection
-              articleId={article.id}
-              comments={article.comments?.filter(c => c.status === 'approved') || []}
-              allowComments={article.allow_comments}
-            />
-          </div>
+          {article.allow_comments && (
+            <div className="bg-white rounded-xl shadow-lg p-8 mt-6">
+              <CommentSection
+                articleId={article.id}
+                comments={article.comments?.filter(c => c.status === 'approved') || []}
+                allowComments={article.allow_comments}
+              />
+            </div>
+          )}
 
           {/* Related Articles */}
           <div className="mt-8">

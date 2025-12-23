@@ -23,7 +23,6 @@ export default function ArticleAdminPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [stats, setStats] = useState({
     totalArticles: 0,
-    totalViews: 0,
     totalComments: 0,
     averageRating: 0
   })
@@ -53,18 +52,19 @@ export default function ArticleAdminPage() {
   }
 
   const loadStats = async () => {
-    // آمار کلی مقالات
-    const { data: articleStats } = await supabase
+    // ✅ exact row count without fetching all rows
+    const { count: totalArticles, error: countError } = await supabase
       .from('articles')
-      .select('view_count')
-    
-    const totalViews = articleStats?.reduce((sum, a) => sum + a.view_count, 0) || 0
-    
+      .select('*', { count: 'exact', head: true })
+
+    if (countError) {
+      console.error(countError)
+    }
+
     setStats({
-      totalArticles: articleStats?.length || 0,
-      totalViews,
-      totalComments: 0, // محاسبه از دیتابیس
-      averageRating: 0 // محاسبه از دیتابیس
+      totalArticles: totalArticles ?? 0,
+      totalComments: 0,
+      averageRating: 0,
     })
   }
 
@@ -134,14 +134,10 @@ export default function ArticleAdminPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div className="bg-blue-50 p-4 rounded-lg">
             <div className="text-blue-600 text-2xl font-bold">{stats.totalArticles}</div>
             <div className="text-gray-600">تعداد مقالات</div>
-          </div>
-          <div className="bg-green-50 p-4 rounded-lg">
-            <div className="text-green-600 text-2xl font-bold">{stats.totalViews}</div>
-            <div className="text-gray-600">کل بازدیدها</div>
           </div>
           <div className="bg-yellow-50 p-4 rounded-lg">
             <div className="text-yellow-600 text-2xl font-bold">{stats.totalComments}</div>

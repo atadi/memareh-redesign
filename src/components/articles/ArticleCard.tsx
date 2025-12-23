@@ -22,10 +22,7 @@ interface ArticleCardProps {
     view_count: number
     reading_time?: number
     published_at: string
-    author?: {
-      full_name: string
-      avatar_url?: string
-    }
+    author_name?: string
     averageRating?: number
     ratingCount?: number
     _count?: {
@@ -64,19 +61,28 @@ export function ArticleCard({ article }: ArticleCardProps) {
   }
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const months = [
-      'فروردین', 'اردیبهشت', 'خرداد',
-      'تیر', 'مرداد', 'شهریور', 
-      'مهر', 'آبان', 'آذر',
-      'دی', 'بهمن', 'اسفند'
-    ]
+    if (!dateString) return 'تاریخ نامشخص'
     
-    // Simple Persian date representation (you might want to use a proper library)
-    const month = months[date.getMonth()] || months[0]
-    const day = date.getDate()
-    
-    return `${day} ${month}`
+    try {
+      const date = new Date(dateString)
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return 'تاریخ نامعتبر'
+      }
+      
+      // Use Persian locale for proper formatting
+      const formatter = new Intl.DateTimeFormat('fa-IR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+      
+      return formatter.format(date)
+    } catch (error) {
+      console.error('Date formatting error:', error)
+      return 'تاریخ نامشخص'
+    }
   }
 
   return (
@@ -164,21 +170,13 @@ export function ArticleCard({ article }: ArticleCardProps) {
           {/* Footer */}
           <div className="flex items-center justify-between pt-3 border-t">
             <div className="flex items-center gap-2">
-              {article.author?.avatar_url ? (
-                <img
-                  src={article.author.avatar_url}
-                  alt={article.author.full_name}
-                  width={24}
-                  height={24}
-                  className="rounded-full"
-                />
-              ) : (
+              {(
                 <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
                   <User className="w-3 h-3 text-gray-500" />
                 </div>
               )}
               <span className="text-xs text-gray-600">
-                {article.author?.full_name || 'ناشناس'}
+                {article.author_name || 'ناشناس'}
               </span>
             </div>
             

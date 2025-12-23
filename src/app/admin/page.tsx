@@ -13,25 +13,16 @@ import {
   UserCheck,
   Newspaper
 } from 'lucide-react'
-import { DashboardStats } from '@/components/admin/DashboardStats'
-import { RequestsManager } from '@/components/admin/RequestsManager'
-import { TechniciansManager } from '@/components/admin/TechniciansManager'
-import { RevenueAnalytics } from '@/components/admin/RevenueAnalytics'
-import { EmergencyMonitor } from '@/components/admin/EmergencyMonitor'
+import { CommentModeration } from '@/components/admin/CommentModeration'
 
 export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState('overview')
   const router = useRouter()
 
   const menuItems = [
-    { id: 'overview', label: 'نمای کلی', icon: TrendingUp },
-    { id: 'requests', label: 'مدیریت درخواست‌ها', icon: FileText },
-    { id: 'technicians', label: 'مدیریت تکنسین‌ها', icon: UserCheck },
+    { id: 'users', label: 'کاربران', icon: Users, isLink: true, href: '/admin/users' },
     { id: 'articles', label: 'مقالات', icon: Newspaper, isLink: true, href: '/admin/articles' },
-    { id: 'emergency', label: 'مانیتور اضطراری', icon: AlertCircle },
-    { id: 'revenue', label: 'گزارش مالی', icon: DollarSign },
-    { id: 'schedule', label: 'برنامه‌ریزی', icon: Calendar },
-    { id: 'settings', label: 'تنظیمات', icon: Settings },
+    { id: 'comments', label: 'مدیریت نظرات', icon: Newspaper, isLink: true, href: '/admin/comments' },
   ]
 
   return (
@@ -70,11 +61,7 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
         <div className="p-8">
-          {activeSection === 'overview' && <DashboardStats />}
-          {activeSection === 'requests' && <RequestsManager />}
-          {activeSection === 'technicians' && <TechniciansManager />}
-          {activeSection === 'emergency' && <EmergencyMonitor />}
-          {activeSection === 'revenue' && <RevenueAnalytics />}
+          {/* {activeSection === 'overview' && <DashboardStats />} */}
         </div>
       </main>
     </div>
