@@ -24,7 +24,7 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0(@supabase/supabase-js@2.89.0)
       '@supabase/supabase-js':
-        specifier: ^2.58.0
+        specifier: ^2.89.0
         version: 2.89.0
       '@tanstack/react-table':
         specifier: ^8.21.3
@@ -154,7 +154,7 @@ importers:
         specifier: ^1.9.15
         version: 1.9.21
       '@types/node':
-        specifier: ^20
+        specifier: ^20.19.27
         version: 20.19.27
       '@types/react':
         specifier: ^19

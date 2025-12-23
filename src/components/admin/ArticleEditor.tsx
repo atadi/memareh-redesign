@@ -3,10 +3,13 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { createClient } from '@/lib/supabase/client'
+import { uploadFeaturedImage, deleteFeaturedImage } from '@/lib/uploadImage'
 import {
   Save,
   X,
-  Eye
+  Eye,
+  Upload,
+  Trash2
 } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import toast from 'react-hot-toast'
@@ -24,21 +27,26 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
   const [showHtmlCode, setShowHtmlCode] = useState(false)
   const supabase = useMemo(() => createClient(), [])
   
-const { register, handleSubmit, setValue, watch } = useForm({
-  defaultValues: {
-    title: article?.title || '',
-    slug: article?.slug || '',
-    excerpt: article?.excerpt || '',
-    category: article?.category || 'safety_tips',
-    tags: article?.tags?.join(', ') || '',
-    featured_image: article?.featured_image || '',
-    allow_comments: article?.allow_comments ?? true,
-    status: article?.status || 'draft',
-    meta_title: article?.meta_title || '',
-    meta_description: article?.meta_description || '',
-    meta_keywords: article?.meta_keywords?.join(', ') || ''
-  }
-})
+  // Image upload states
+  const [featuredImage, setFeaturedImage] = useState<File | null>(null)
+  const [featuredImagePreview, setFeaturedImagePreview] = useState<string>(article?.featured_image || '')
+  const [isUploading, setIsUploading] = useState(false)
+  
+  const { register, handleSubmit, setValue, watch } = useForm({
+    defaultValues: {
+      title: article?.title || '',
+      slug: article?.slug || '',
+      excerpt: article?.excerpt || '',
+      category: article?.category || 'safety_tips',
+      tags: article?.tags?.join(', ') || '',
+      featured_image: article?.featured_image || '',
+      allow_comments: article?.allow_comments ?? true,
+      status: article?.status || 'draft',
+      meta_title: article?.meta_title || '',
+      meta_description: article?.meta_description || '',
+      meta_keywords: article?.meta_keywords?.join(', ') || ''
+    }
+  })
 
   const slugify = (text: string) => {
     // Persian to English transliteration map
@@ -71,10 +79,68 @@ const { register, handleSubmit, setValue, watch } = useForm({
     if (!article?.id && titleValue && !slugValue) {
       setValue('slug', slugify(titleValue))
     }
-  }, [titleValue])
+  }, [titleValue, article?.id, slugValue, setValue])
 
   const [saving, setSaving] = useState(false)
   const isPublished = article?.status === 'published'
+
+  // Handle image file selection
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('🔍 File input triggered!', e.target.files)
+    
+    const file = e.target.files?.[0]
+    if (!file) {
+      console.log('❌ No file selected')
+      return
+    }
+
+    console.log('📁 File selected:', {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      sizeInMB: (file.size / 1024 / 1024).toFixed(2) + 'MB'
+    })
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      console.log('❌ Not an image file:', file.type)
+      toast.error('لطفا یک فایل تصویری انتخاب کنید')
+      return
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      console.log('❌ File too large:', (file.size / 1024 / 1024).toFixed(2) + 'MB')
+      toast.error('حجم تصویر نباید بیشتر از 5 مگابایت باشد')
+      return
+    }
+
+    console.log('✅ File validation passed, creating preview...')
+    setFeaturedImage(file)
+    
+    // Create preview
+    const reader = new FileReader()
+    reader.onloadstart = () => {
+      console.log('📖 Starting to read file...')
+    }
+    reader.onloadend = () => {
+      console.log('✅ Preview created successfully')
+      setFeaturedImagePreview(reader.result as string)
+    }
+    reader.onerror = (error) => {
+      console.error('❌ FileReader error:', error)
+      toast.error('خطا در خواندن فایل')
+    }
+    reader.readAsDataURL(file)
+  }
+
+  // Handle removing selected image
+  const handleRemoveImage = () => {
+    console.log('🗑️ Removing image')
+    setFeaturedImage(null)
+    setFeaturedImagePreview('')
+    setValue('featured_image', '')
+  }
 
   // Handle save with specific status
   const handleSaveWithStatus = async (status: 'draft' | 'published') => {
@@ -88,8 +154,6 @@ const { register, handleSubmit, setValue, watch } = useForm({
   // ذخیره مقاله
   const onSubmitForm = async (data: any) => {
     try {
-      // debug: log that submit was invoked
-      // eslint-disable-next-line no-console
       console.debug('ArticleEditor.onSubmitForm invoked', { data })
 
       // Prevent multiple submissions
@@ -99,97 +163,93 @@ const { register, handleSubmit, setValue, watch } = useForm({
       }
 
       setSaving(true)
+      setIsUploading(true)
+
       console.debug('Getting user...')
       const { data: { user } } = await supabase.auth.getUser()
       console.debug('User:', user)
 
-      // If trying to publish, require an authenticated user (RLS expects author_id = auth.uid())
+      // If trying to publish, require an authenticated user
       if (data.status === 'published' && !user?.id) {
         toast.error('برای انتشار مقاله باید وارد شوید')
         setSaving(false)
+        setIsUploading(false)
         return
       }
 
+      // Upload featured image if a new one was selected
+      let imageUrl = data.featured_image || featuredImagePreview
+
+      if (featuredImage) {
+        console.log('🚀 Starting image upload...', {
+          fileName: featuredImage.name,
+          fileSize: featuredImage.size,
+          fileType: featuredImage.type
+        })
+        
+        toast.loading('در حال آپلود تصویر...')
+        const { url, error: uploadError } = await uploadFeaturedImage(featuredImage)
+        
+        console.log('📤 Upload result:', { url, error: uploadError })
+        
+        if (uploadError) {
+          console.error('❌ Upload failed:', uploadError)
+          toast.dismiss()
+          toast.error(uploadError)
+          setSaving(false)
+          setIsUploading(false)
+          return
+        }
+        
+        if (url) {
+          console.log('✅ Image uploaded successfully:', url)
+          imageUrl = url
+          toast.dismiss()
+          toast.success('تصویر با موفقیت آپلود شد')
+          
+          // Delete old image if updating and URL has changed
+          if (article?.featured_image && article.featured_image !== imageUrl) {
+            console.log('🗑️ Deleting old image:', article.featured_image)
+            await deleteFeaturedImage(article.featured_image)
+          }
+        }
+      }
+
       const articleData = {
-        ...data,
-        // content now contains raw HTML; sanitize before saving
+        title: data.title,
+        slug: data.slug,
+        excerpt: data.excerpt,
+        category: data.category,
         content: DOMPurify.sanitize(content),
+        featured_image: imageUrl,
         tags: data.tags.split(',').map((t: string) => t.trim()).filter(Boolean),
+        meta_title: data.meta_title,
+        meta_description: data.meta_description,
         meta_keywords: data.meta_keywords.split(',').map((k: string) => k.trim()).filter(Boolean),
+        allow_comments: data.allow_comments,
+        status: data.status,
         author_id: article?.author_id || user?.id,
-        reading_time: Math.ceil(content.split(' ').length / 200), // تخمین زمان مطالعه
+        reading_time: Math.ceil(content.split(' ').length / 200),
         published_at: data.status === 'published' ? new Date().toISOString() : null
       }
 
       console.debug('Article data prepared:', articleData)
 
-      let error
+      let result
       if (article?.id) {
         console.debug('Updating existing article:', article.id)
-        const result = await supabase
+        result = await supabase
           .from('articles')
           .update(articleData)
           .eq('id', article.id)
-        error = result.error
-        // If update was forbidden by RLS/permissions, fall back to direct REST attempt
-        if (error && /permission|forbidden|403/i.test(error.message || '')) {
-          try {
-            const { data: { session } } = await supabase.auth.getSession()
-            let url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/articles?id=eq.${article.id}`
-            const headers: any = { 'Content-Type': 'application/json', 'Accept': 'application/json' }
-            if (session?.access_token) {
-              headers['Authorization'] = `Bearer ${session.access_token}`
-            } else {
-              // fallback to using anon apikey header (safer than only query param)
-              headers['apikey'] = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-            }
-            const resp = await fetch(url, {
-              method: 'PATCH',
-              headers,
-              body: JSON.stringify(articleData)
-            })
-            if (!resp.ok) {
-              error = { message: `REST fallback failed: ${resp.status} ${resp.statusText}` }
-            } else {
-              error = null
-            }
-          } catch (e: any) {
-            error = { message: e.message }
-          }
-        }
       } else {
         console.debug('Inserting new article')
-        const result = await supabase
+        result = await supabase
           .from('articles')
           .insert(articleData)
-        error = result.error
-        // If insert was forbidden by RLS/permissions, fall back to direct REST attempt
-        if (error && /permission|forbidden|403/i.test(error.message || '')) {
-          try {
-            const { data: { session } } = await supabase.auth.getSession()
-            let url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/articles`
-            const headers: any = { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Prefer': 'return=representation' }
-            if (session?.access_token) {
-              headers['Authorization'] = `Bearer ${session.access_token}`
-            } else {
-              // fallback to using anon apikey header (safer than only query param)
-              headers['apikey'] = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-            }
-            const resp = await fetch(url, {
-              method: 'POST',
-              headers,
-              body: JSON.stringify(articleData)
-            })
-            if (!resp.ok) {
-              error = { message: `REST fallback failed: ${resp.status} ${resp.statusText}` }
-            } else {
-              error = null
-            }
-          } catch (e: any) {
-            error = { message: e.message }
-          }
-        }
       }
+
+      const { error } = result
 
       console.debug('Save completed, error:', error)
 
@@ -203,35 +263,38 @@ const { register, handleSubmit, setValue, watch } = useForm({
         onSave()
       }
       setSaving(false)
+      setIsUploading(false)
       console.debug('Save process finished')
     } catch (err) {
       console.error('Unexpected error in onSubmitForm:', err)
       toast.error('خطای غیرمنتظره: ' + (err instanceof Error ? err.message : String(err)))
       setSaving(false)
+      setIsUploading(false)
     }
   }
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmitForm, (errors) => {
-        // eslint-disable-next-line no-console
-        console.debug('ArticleEditor validation errors', errors)
-        toast.error('لطفا فیلدهای لازم را پر کنید')
-      })}
-      className="bg-white rounded-xl shadow-lg p-6"
-    >
+    <form onSubmit={handleSubmit(onSubmitForm)} className="max-w-7xl mx-auto p-6">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex items-center justify-between mb-6 pb-4 border-b">
         <h2 className="text-2xl font-bold">
-          {article ? 'ویرایش مقاله' : 'مقاله جدید'}
+          {article?.id ? 'ویرایش مقاله' : 'مقاله جدید'}
         </h2>
         
         <div className="flex gap-2">
           <button
             type="button"
+            onClick={() => setPreview(!preview)}
+            className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 flex items-center gap-2"
+          >
+            <Eye className="w-4 h-4" />
+            {preview ? 'ویرایش' : 'پیش‌نمایش'}
+          </button>
+          <button
+            type="button"
             onClick={() => handleSaveWithStatus('draft')}
-            disabled={saving}
-            className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={saving || isUploading}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <Save className="w-4 h-4" />
             {saving ? 'در حال ذخیره...' : 'ذخیره پیش‌نویس'}
@@ -239,7 +302,7 @@ const { register, handleSubmit, setValue, watch } = useForm({
           <button
             type="button"
             onClick={() => handleSaveWithStatus('published')}
-            disabled={saving}
+            disabled={saving || isUploading}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'در حال انتشار...' : 'انتشار مقاله'}
@@ -344,22 +407,63 @@ const { register, handleSubmit, setValue, watch } = useForm({
 
         {/* Settings Column */}
         <div className="space-y-4">
-          {/* Featured Image */}
-          <div>
-            <label className="block text-sm font-medium mb-2">تصویر شاخص</label>
-            <input
-              type="url"
-              {...register('featured_image')}
-              className="w-full px-4 py-2 border rounded-lg"
-              placeholder="URL تصویر شاخص..."
-            />
-            {watch('featured_image') && (
-              <img
-                src={watch('featured_image')}
-                alt="تصویر شاخص"
-                className="mt-2 w-full rounded-lg"
-              />
+          {/* Featured Image Upload */}
+          <div className="border rounded-lg p-4 bg-gray-50">
+            <label className="block text-sm font-medium mb-3">تصویر شاخص</label>
+            
+            {/* File Input */}
+            <div className="mb-3">
+              <label 
+                htmlFor="featured-image-input"
+                className="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
+              >
+                <div className="flex flex-col items-center">
+                  <Upload className="w-6 h-6 text-gray-400 mb-1" />
+                  <span className="text-sm text-gray-600">انتخاب تصویر</span>
+                  <span className="text-xs text-gray-400 mt-1">حداکثر 5 مگابایت</span>
+                </div>
+                <input
+                  id="featured-image-input"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                  disabled={isUploading}
+                />
+              </label>
+            </div>
+
+            {/* Image Preview */}
+            {featuredImagePreview && (
+              <div className="relative mb-3">
+                <img
+                  src={featuredImagePreview}
+                  alt="پیش‌نمایش تصویر شاخص"
+                  className="w-full h-auto rounded-lg border-2 border-gray-200"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 shadow-lg transition-colors"
+                  title="حذف تصویر"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             )}
+
+            {/* Or URL Input */}
+            <div className="mt-3">
+              <input
+                type="url"
+                {...register('featured_image')}
+                value={featuredImagePreview}
+                onChange={(e) => setFeaturedImagePreview(e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg text-sm"
+                placeholder="یا URL تصویر را وارد کنید..."
+                disabled={!!featuredImage}
+              />
+            </div>
           </div>
 
           {/* Category */}
