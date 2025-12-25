@@ -270,3 +270,47 @@ body {
   .clear-start { clear: inline-start; }
   .clear-end { clear: inline-end; }
 }
+
+/* ==================================================
+   CMS ARTICLE SPACING FIX (Tailwind v4 + Typography)
+================================================== */
+
+/* Normal paragraphs */
+.prose p {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+  line-height: 1.9;
+}
+
+/* Empty paragraphs (force vertical space) */
+.prose p:empty {
+  display: block;
+  min-height: 1em;
+}
+
+/* Paragraphs inside lists need more breathing room */
+.prose li p {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+}
+
+/* Remove useless empty list paragraphs */
+.prose li p:empty {
+  display: none;
+}
+
+/* Headings spacing */
+.prose h2 {
+  margin-top: 2.5em;
+  margin-bottom: 1em;
+}
+
+.prose h3 {
+  margin-top: 2em;
+  margin-bottom: 0.75em;
+}
+
+.prose h4 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
