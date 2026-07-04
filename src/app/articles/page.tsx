@@ -202,7 +202,7 @@ export default function ArticlesPage() {
               </div>
 
               <div className="mt-8 pt-6 border-t">
-                <h3 className="font-bold mb-3">مرتب‌سازی</h3>
+                <h3 className="font-bold mb-3">مرتب‌ سازی</h3>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as typeof sortBy)}

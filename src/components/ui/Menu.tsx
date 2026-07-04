@@ -1,5 +1,5 @@
-import React from 'react'
-import { Search, BookOpen } from 'lucide-react'
+import React from "react";
+import { Search, BookOpen } from "lucide-react";
 
 export function Menu() {
   return (
@@ -18,7 +18,7 @@ export function Menu() {
 
         <a
           href="/articles"
-          className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-semibold px-4 py-2 rounded-xl shadow-md hover:scale-[1.02] transform transition-all"
+          className="inline-flex items-center gap-2 bg-linear-to-r from-yellow-400 to-orange-400 text-white font-semibold px-4 py-2 rounded-xl shadow-md hover:scale-[1.02] transform transition-all"
         >
           <BookOpen className="w-4 h-4" />
           مقالات
@@ -41,7 +41,7 @@ export function Menu() {
         </a>
       </div>
     </div>
-  )
+  );
 }
 
-export default Menu
+export default Menu;

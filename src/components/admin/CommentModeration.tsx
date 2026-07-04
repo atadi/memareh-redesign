@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
   Check,
@@ -10,6 +10,8 @@ import {
   AlertCircle,
   Clock,
   User,
+  ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
 import { format } from "date-fns-jalali";
 import toast from "react-hot-toast";
@@ -42,6 +44,8 @@ export function CommentModeration() {
     "pending",
   );
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const COMMENTS_PER_PAGE = 10;
   const supabase = createClient();
 
   useEffect(() => {
@@ -170,10 +174,22 @@ export function CommentModeration() {
     rejected: comments.filter((c) => c.status === "rejected").length,
   };
 
+  const totalPages = Math.ceil(comments.length / COMMENTS_PER_PAGE);
+  const paginatedComments = comments.slice(
+    (currentPage - 1) * COMMENTS_PER_PAGE,
+    currentPage * COMMENTS_PER_PAGE,
+  );
+
+  const handleFilterChange = (newFilter: "pending" | "approved" | "rejected") => {
+    setCurrentPage(1);
+    setFilter(newFilter);
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+    <div className="pt-14 px-4">
+      <div className="bg-white rounded-xl shadow-lg p-4">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold flex items-center gap-2">
           <MessageCircle className="w-6 h-6" />
           مدیریت نظرات مقالات
@@ -182,7 +198,7 @@ export function CommentModeration() {
         {/* Filter Tabs */}
         <div className="flex gap-2">
           <button
-            onClick={() => setFilter("pending")}
+            onClick={() => handleFilterChange("pending")}
             className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
               filter === "pending"
                 ? "bg-yellow-100 text-yellow-700"
@@ -193,7 +209,7 @@ export function CommentModeration() {
             در انتظار ({stats.pending})
           </button>
           <button
-            onClick={() => setFilter("approved")}
+            onClick={() => handleFilterChange("approved")}
             className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
               filter === "approved"
                 ? "bg-green-100 text-green-700"
@@ -204,7 +220,7 @@ export function CommentModeration() {
             تایید شده
           </button>
           <button
-            onClick={() => setFilter("rejected")}
+            onClick={() => handleFilterChange("rejected")}
             className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
               filter === "rejected"
                 ? "bg-red-100 text-red-700"
@@ -229,7 +245,7 @@ export function CommentModeration() {
         </div>
       ) : (
         <div className="space-y-4">
-          {comments.map((comment) => (
+          {paginatedComments.map((comment) => (
             <div
               key={comment.id}
               className="border rounded-lg p-4 hover:shadow-md transition-shadow"
@@ -343,6 +359,35 @@ export function CommentModeration() {
           ))}
         </div>
       )}
+
+      {/* Pagination */}
+      {!loading && totalPages > 1 && (
+        <div className="flex items-center justify-between mt-6 pt-4 border-t">
+          <span className="text-sm text-gray-600">
+            نمایش {((currentPage - 1) * COMMENTS_PER_PAGE) + 1} تا {Math.min(currentPage * COMMENTS_PER_PAGE, comments.length)} از {comments.length} نظر
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="p-2 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm">
+              {currentPage} / {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+      </div>
     </div>
   );
 }

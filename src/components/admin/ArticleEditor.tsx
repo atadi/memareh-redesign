@@ -488,7 +488,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
   const errorClasses = "text-xs text-red-600 mt-1"
 
   return (
-    <form onSubmit={handleSubmit(onSubmitForm)} className="max-w-7xl mx-auto p-6">
+    <form onSubmit={handleSubmit(onSubmitForm)} className="px-4 py-2">
       {/* Header */}
       <div className="flex items-center justify-between mb-6 pb-4 border-b">
         <h2 className="text-2xl font-bold">{article?.id ? 'ویرایش مقاله' : 'مقاله جدید'}</h2>
@@ -541,8 +541,8 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
 
       {/* ================ TAB: CONTENT ================ */}
       {activeTab === 'content' && (
-        <div className="grid grid-cols-3 gap-6">
-          <div className="col-span-2 space-y-4">
+        <div className="space-y-4">
+          <div className="space-y-4">
             {/* Title */}
             <div>
               <label className={labelClasses}>عنوان مقاله *</label>
@@ -655,48 +655,13 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
                 <span className="text-xs text-gray-400">{excerptValue?.length || 0} / 300</span>
               </div>
               <textarea {...register('excerpt', { required: true })}
-                rows={3} maxLength={300}
+                rows={6} maxLength={300}
                 className={inputClasses} placeholder="خلاصه‌ای از مقاله..." />
-            </div>
-
-            {/* Content */}
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <label className="block text-sm font-medium">محتوای مقاله *</label>
-                <div className="flex items-center gap-3 text-xs text-gray-500">
-                  <span>{wordCount} کلمه</span>
-                  <span>{charCount} کاراکتر</span>
-                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{estimatedReadingTime} دقیقه</span>
-                  {!preview && !showHtmlCode && (
-                    <button type="button" onClick={() => setShowHtmlCode(true)}
-                      className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-gray-700">
-                      &lt;/&gt; HTML
-                    </button>
-                  )}
-                </div>
-              </div>
-              {preview ? (
-                <div className="prose prose-lg max-w-none p-4 border rounded-lg min-h-[400px]">
-                  <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }} />
-                </div>
-              ) : showHtmlCode ? (
-                <div className="relative">
-                  <button type="button" onClick={() => setShowHtmlCode(false)}
-                    className="absolute top-2 left-2 z-10 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm">
-                    بازگشت به ویرایشگر
-                  </button>
-                  <textarea value={content} onChange={(e) => setContent(e.target.value)}
-                    className="w-full px-4 py-2 pt-12 border rounded-lg font-mono text-sm min-h-[400px] bg-gray-50"
-                    placeholder="کد HTML محتوای مقاله..." />
-                </div>
-              ) : (
-                <RichTextEditor key={editorKey} content={content} onChange={setContent} />
-              )}
             </div>
           </div>
 
-          {/* Right sidebar */}
-          <div className="space-y-4">
+          {/* Sidebar items as horizontal cards */}
+          <div className="grid grid-cols-3 gap-4">
             {/* Featured Image */}
             <div className="border rounded-lg p-4 bg-gray-50">
               <label className={labelClasses}>تصویر شاخص</label>
@@ -751,6 +716,42 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
               </div>
             </div>
           </div>
+
+          {/* Content / RichTextEditor - last row */}
+          <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-sm font-medium">محتوای مقاله *</label>
+                <div className="flex items-center gap-3 text-xs text-gray-500">
+                  <span>{wordCount} کلمه</span>
+                  <span>{charCount} کاراکتر</span>
+                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{estimatedReadingTime} دقیقه</span>
+                  {!preview && !showHtmlCode && (
+                    <button type="button" onClick={() => setShowHtmlCode(true)}
+                      className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-gray-700">
+                      &lt;/&gt; HTML
+                    </button>
+                  )}
+                </div>
+              </div>
+              {preview ? (
+                <div className="prose prose-lg max-w-none p-4 border rounded-lg min-h-[400px]">
+                  <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }} />
+                </div>
+              ) : showHtmlCode ? (
+                <div className="relative">
+                  <button type="button" onClick={() => setShowHtmlCode(false)}
+                    className="absolute top-2 left-2 z-10 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm">
+                    بازگشت به ویرایشگر
+                  </button>
+                  <textarea value={content} onChange={(e) => setContent(e.target.value)}
+                    className="w-full px-4 py-2 pt-12 border rounded-lg font-mono text-sm min-h-[400px] bg-gray-50"
+                    placeholder="کد HTML محتوای مقاله..." />
+                </div>
+              ) : (
+                <RichTextEditor key={editorKey} content={content} onChange={setContent} />
+              )}
+            </div>
+
         </div>
       )}
 
