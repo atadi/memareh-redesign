@@ -1,157 +1,174 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { 
-  Check, 
-  X, 
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import {
+  Check,
+  X,
   Trash2,
   MessageCircle,
   AlertCircle,
   Clock,
-  User
-} from 'lucide-react'
-import { format } from 'date-fns-jalali'
-import toast from 'react-hot-toast'
+  User,
+} from "lucide-react";
+import { format } from "date-fns-jalali";
+import toast from "react-hot-toast";
 
 interface Comment {
-  id: string
-  status: 'pending' | 'approved' | 'rejected'
-  content: string
-  created_at: string
-  rejection_reason?: string
+  id: string;
+  status: "pending" | "approved" | "rejected";
+  content: string;
+  created_at: string;
+  rejection_reason?: string;
   article: {
-    title: string
-    slug: string
-  }
+    title: string;
+    slug: string;
+  };
   user: {
-    full_name: string
-    avatar_url?: string
-  }
+    full_name: string;
+    avatar_url?: string;
+  };
   parent?: {
-    content: string
+    content: string;
     user: {
-      full_name: string
-    }
-  }
+      full_name: string;
+    };
+  };
 }
 
 export function CommentModeration() {
-  const [comments, setComments] = useState<Comment[]>([])
-  const [filter, setFilter] = useState<'pending' | 'approved' | 'rejected'>('pending')
-  const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [filter, setFilter] = useState<"pending" | "approved" | "rejected">(
+    "pending",
+  );
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
   useEffect(() => {
-    loadComments()
-  }, [filter])
+    loadComments();
+  }, [filter]);
 
   const loadComments = async () => {
-    setLoading(true)
-    
+    setLoading(true);
+
     const { data } = await supabase
-      .from('article_comments')
-      .select(`
+      .from("article_comments")
+      .select(
+        `
         *,
         article:articles(title, slug)
-      `)
-      .eq('status', filter)
-      .order('created_at', { ascending: false })
+      `,
+      )
+      .eq("status", filter)
+      .order("created_at", { ascending: false });
 
     if (data) {
       // Fetch user profiles for each comment
-      const userIds = [...new Set(data.map(c => c.user_id))]
+      const userIds = Array.from(
+        new Set(data.map((c) => c.user_id).filter(Boolean)),
+      );
       const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, full_name, avatar_url')
-        .in('id', userIds)
+        .from("profiles")
+        .select("id, full_name, avatar_url")
+        .in("id", userIds);
 
-      const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p]))
+      const profileMap = Object.fromEntries(
+        (profiles ?? []).map((p) => [p.id, p]),
+      );
 
       // Also fetch parent comment info
-      const parentIds = data.filter(c => c.parent_id).map(c => c.parent_id)
-      let parentMap: Record<string, any> = {}
+      const parentIds = data.filter((c) => c.parent_id).map((c) => c.parent_id);
+      let parentMap: Record<string, any> = {};
       if (parentIds.length > 0) {
         const { data: parents } = await supabase
-          .from('article_comments')
-          .select('id, content, user_id')
-          .in('id', parentIds)
+          .from("article_comments")
+          .select("id, content, user_id")
+          .in("id", parentIds);
         if (parents) {
-          const parentUserIds = [...new Set(parents.map(p => p.user_id))]
+          const parentUserIds = [...new Set(parents.map((p) => p.user_id))];
           const { data: parentProfiles } = await supabase
-            .from('profiles')
-            .select('id, full_name')
-            .in('id', parentUserIds)
-          const parentProfileMap = Object.fromEntries((parentProfiles ?? []).map(p => [p.id, p.full_name]))
-          parentMap = Object.fromEntries(parents.map(p => [p.id, {
-            content: p.content,
-            user: { full_name: parentProfileMap[p.user_id] || 'کاربر' }
-          }]))
+            .from("profiles")
+            .select("id, full_name")
+            .in("id", parentUserIds);
+          const parentProfileMap = Object.fromEntries(
+            (parentProfiles ?? []).map((p) => [p.id, p.full_name]),
+          );
+          parentMap = Object.fromEntries(
+            parents.map((p) => [
+              p.id,
+              {
+                content: p.content,
+                user: { full_name: parentProfileMap[p.user_id] || "کاربر" },
+              },
+            ]),
+          );
         }
       }
 
-      const enriched = data.map(c => ({
+      const enriched = data.map((c) => ({
         ...c,
-        user: profileMap[c.user_id] || { full_name: 'کاربر', avatar_url: null },
+        user: profileMap[c.user_id] || { full_name: "کاربر", avatar_url: null },
         parent: c.parent_id ? parentMap[c.parent_id] : null,
-      }))
-      setComments(enriched)
+      }));
+      setComments(enriched);
     }
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   const handleApprove = async (commentId: string) => {
-    const { data: { user } } = await supabase.auth.getUser()
-    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     const { error } = await supabase
-      .from('article_comments')
+      .from("article_comments")
       .update({
-        status: 'approved',
+        status: "approved",
         approved_by: user?.id,
-        approved_at: new Date().toISOString()
+        approved_at: new Date().toISOString(),
       })
-      .eq('id', commentId)
+      .eq("id", commentId);
 
     if (!error) {
-      toast.success('نظر تایید شد')
-      setComments(comments.filter(c => c.id !== commentId))
+      toast.success("نظر تایید شد");
+      setComments(comments.filter((c) => c.id !== commentId));
     }
-  }
+  };
 
   const handleReject = async (commentId: string, reason?: string) => {
     const { error } = await supabase
-      .from('article_comments')
+      .from("article_comments")
       .update({
-        status: 'rejected',
-        rejection_reason: reason
+        status: "rejected",
+        rejection_reason: reason,
       })
-      .eq('id', commentId)
+      .eq("id", commentId);
 
     if (!error) {
-      toast.success('نظر رد شد')
-      setComments(comments.filter(c => c.id !== commentId))
+      toast.success("نظر رد شد");
+      setComments(comments.filter((c) => c.id !== commentId));
     }
-  }
+  };
 
   const handleDelete = async (commentId: string) => {
-    if (!confirm('آیا از حذف این نظر اطمینان دارید؟')) return
-    
+    if (!confirm("آیا از حذف این نظر اطمینان دارید؟")) return;
+
     const { error } = await supabase
-      .from('article_comments')
+      .from("article_comments")
       .delete()
-      .eq('id', commentId)
+      .eq("id", commentId);
 
     if (!error) {
-      toast.success('نظر حذف شد')
-      setComments(comments.filter(c => c.id !== commentId))
+      toast.success("نظر حذف شد");
+      setComments(comments.filter((c) => c.id !== commentId));
     }
-  }
+  };
 
   const stats = {
-    pending: comments.filter(c => c.status === 'pending').length,
-    approved: comments.filter(c => c.status === 'approved').length,
-    rejected: comments.filter(c => c.status === 'rejected').length
-  }
+    pending: comments.filter((c) => c.status === "pending").length,
+    approved: comments.filter((c) => c.status === "approved").length,
+    rejected: comments.filter((c) => c.status === "rejected").length,
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
@@ -165,33 +182,33 @@ export function CommentModeration() {
         {/* Filter Tabs */}
         <div className="flex gap-2">
           <button
-            onClick={() => setFilter('pending')}
+            onClick={() => setFilter("pending")}
             className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-              filter === 'pending' 
-                ? 'bg-yellow-100 text-yellow-700' 
-                : 'bg-gray-100 text-gray-700'
+              filter === "pending"
+                ? "bg-yellow-100 text-yellow-700"
+                : "bg-gray-100 text-gray-700"
             }`}
           >
             <Clock className="w-4 h-4" />
             در انتظار ({stats.pending})
           </button>
           <button
-            onClick={() => setFilter('approved')}
+            onClick={() => setFilter("approved")}
             className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-              filter === 'approved' 
-                ? 'bg-green-100 text-green-700' 
-                : 'bg-gray-100 text-gray-700'
+              filter === "approved"
+                ? "bg-green-100 text-green-700"
+                : "bg-gray-100 text-gray-700"
             }`}
           >
             <Check className="w-4 h-4" />
             تایید شده
           </button>
           <button
-            onClick={() => setFilter('rejected')}
+            onClick={() => setFilter("rejected")}
             className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-              filter === 'rejected' 
-                ? 'bg-red-100 text-red-700' 
-                : 'bg-gray-100 text-gray-700'
+              filter === "rejected"
+                ? "bg-red-100 text-red-700"
+                : "bg-gray-100 text-gray-700"
             }`}
           >
             <X className="w-4 h-4" />
@@ -212,21 +229,29 @@ export function CommentModeration() {
         </div>
       ) : (
         <div className="space-y-4">
-          {comments.map(comment => (
-            <div key={comment.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+          {comments.map((comment) => (
+            <div
+              key={comment.id}
+              className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+            >
               {/* Comment Header */}
               <div className="flex justify-between items-start mb-3">
                 <div>
                   <div className="flex items-center gap-2">
                     <User className="w-4 h-4 text-gray-400" />
-                    <span className="font-medium">{comment.user.full_name}</span>
+                    <span className="font-medium">
+                      {comment.user.full_name}
+                    </span>
                     <span className="text-sm text-gray-500">
-                      {format(new Date(comment.created_at), 'dd MMMM yyyy - HH:mm')}
+                      {format(
+                        new Date(comment.created_at),
+                        "dd MMMM yyyy - HH:mm",
+                      )}
                     </span>
                   </div>
                   <div className="text-sm text-gray-600 mt-1">
-                    مقاله: 
-                    <a 
+                    مقاله:
+                    <a
                       href={`/articles/${comment.article.slug}`}
                       target="_blank"
                       className="text-blue-600 hover:underline mr-1"
@@ -237,16 +262,18 @@ export function CommentModeration() {
                 </div>
 
                 {/* Status Badge */}
-                <span className={`px-2 py-1 rounded-full text-xs ${
-                  comment.status === 'pending' 
-                    ? 'bg-yellow-100 text-yellow-700'
-                    : comment.status === 'approved'
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-red-100 text-red-700'
-                }`}>
-                  {comment.status === 'pending' && 'در انتظار'}
-                  {comment.status === 'approved' && 'تایید شده'}
-                  {comment.status === 'rejected' && 'رد شده'}
+                <span
+                  className={`px-2 py-1 rounded-full text-xs ${
+                    comment.status === "pending"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : comment.status === "approved"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {comment.status === "pending" && "در انتظار"}
+                  {comment.status === "approved" && "تایید شده"}
+                  {comment.status === "rejected" && "رد شده"}
                 </span>
               </div>
 
@@ -254,19 +281,23 @@ export function CommentModeration() {
               {comment.parent && (
                 <div className="bg-gray-50 p-3 rounded mb-3 text-sm">
                   <span className="text-gray-600">در پاسخ به: </span>
-                  <span className="font-medium">{comment.parent.user.full_name}</span>
+                  <span className="font-medium">
+                    {comment.parent.user.full_name}
+                  </span>
                   <p className="mt-1 text-gray-700">{comment.parent.content}</p>
                 </div>
               )}
 
               {/* Comment Content */}
               <div className="bg-gray-50 p-4 rounded-lg mb-3">
-                <p className="text-gray-800 whitespace-pre-wrap">{comment.content}</p>
+                <p className="text-gray-800 whitespace-pre-wrap">
+                  {comment.content}
+                </p>
               </div>
 
               {/* Action Buttons */}
               <div className="flex gap-2">
-                {comment.status === 'pending' && (
+                {comment.status === "pending" && (
                   <>
                     <button
                       onClick={() => handleApprove(comment.id)}
@@ -277,8 +308,11 @@ export function CommentModeration() {
                     </button>
                     <button
                       onClick={() => {
-                        const reason = prompt('دلیل رد نظر (اختیاری):')
-                        handleReject(comment.id, reason === null ? undefined : reason)
+                        const reason = prompt("دلیل رد نظر (اختیاری):");
+                        handleReject(
+                          comment.id,
+                          reason === null ? undefined : reason,
+                        );
                       }}
                       className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 flex items-center gap-2"
                     >
@@ -297,10 +331,12 @@ export function CommentModeration() {
               </div>
 
               {/* Rejection Reason (if rejected) */}
-              {comment.status === 'rejected' && comment.rejection_reason && (
+              {comment.status === "rejected" && comment.rejection_reason && (
                 <div className="mt-3 p-3 bg-red-50 rounded-lg text-sm">
                   <span className="text-red-700 font-medium">دلیل رد: </span>
-                  <span className="text-red-600">{comment.rejection_reason}</span>
+                  <span className="text-red-600">
+                    {comment.rejection_reason}
+                  </span>
                 </div>
               )}
             </div>
@@ -308,5 +344,5 @@ export function CommentModeration() {
         </div>
       )}
     </div>
-  )
+  );
 }
