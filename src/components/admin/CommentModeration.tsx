@@ -53,15 +53,49 @@ export function CommentModeration() {
       .from('article_comments')
       .select(`
         *,
-        article:articles(title, slug),
-        user:profiles(full_name, avatar_url),
-        parent:article_comments(content, user:profiles(full_name))
+        article:articles(title, slug)
       `)
       .eq('status', filter)
       .order('created_at', { ascending: false })
 
     if (data) {
-      setComments(data)
+      // Fetch user profiles for each comment
+      const userIds = [...new Set(data.map(c => c.user_id))]
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .in('id', userIds)
+
+      const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p]))
+
+      // Also fetch parent comment info
+      const parentIds = data.filter(c => c.parent_id).map(c => c.parent_id)
+      let parentMap: Record<string, any> = {}
+      if (parentIds.length > 0) {
+        const { data: parents } = await supabase
+          .from('article_comments')
+          .select('id, content, user_id')
+          .in('id', parentIds)
+        if (parents) {
+          const parentUserIds = [...new Set(parents.map(p => p.user_id))]
+          const { data: parentProfiles } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .in('id', parentUserIds)
+          const parentProfileMap = Object.fromEntries((parentProfiles ?? []).map(p => [p.id, p.full_name]))
+          parentMap = Object.fromEntries(parents.map(p => [p.id, {
+            content: p.content,
+            user: { full_name: parentProfileMap[p.user_id] || 'کاربر' }
+          }]))
+        }
+      }
+
+      const enriched = data.map(c => ({
+        ...c,
+        user: profileMap[c.user_id] || { full_name: 'کاربر', avatar_url: null },
+        parent: c.parent_id ? parentMap[c.parent_id] : null,
+      }))
+      setComments(enriched)
     }
     setLoading(false)
   }

@@ -7,9 +7,136 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export type ArticleStatus = 'draft' | 'published' | 'archived' | 'scheduled'
+
+export interface ArticleTag {
+  id: string
+  name: string
+  slug: string
+  created_at: string | null
+}
+
+export interface ArticleRow {
+  id: string
+  title: string
+  slug: string | null
+  excerpt: string | null
+  content: string | null
+  featured_image: string | null
+  featured_image_alt: string | null
+  category: string | null
+  author_id: string | null
+  author_name: string | null
+  allow_comments: boolean | null
+  status: ArticleStatus
+  meta_title: string | null
+  meta_description: string | null
+  meta_keywords: string[] | null
+  canonical_url: string | null
+  og_image: string | null
+  reading_time: number | null
+  view_count: number | null
+  is_featured: boolean | null
+  video_url: string | null
+  scheduled_at: string | null
+  published_at: string | null
+  created_at: string | null
+  updated_at: string | null
+  tags?: ArticleTag[]
+}
+
 export interface Database {
   memareh: {
     Tables: {
+      articles: {
+        Row: ArticleRow
+        Insert: {
+          id?: string
+          title: string
+          slug?: string | null
+          excerpt?: string | null
+          content?: string | null
+          featured_image?: string | null
+          featured_image_alt?: string | null
+          category?: string | null
+          author_id?: string | null
+          author_name?: string | null
+          allow_comments?: boolean | null
+          status?: ArticleStatus
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string[] | null
+          canonical_url?: string | null
+          og_image?: string | null
+          reading_time?: number | null
+          view_count?: number | null
+          is_featured?: boolean | null
+          video_url?: string | null
+          scheduled_at?: string | null
+          published_at?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          title?: string
+          slug?: string | null
+          excerpt?: string | null
+          content?: string | null
+          featured_image?: string | null
+          featured_image_alt?: string | null
+          category?: string | null
+          author_id?: string | null
+          author_name?: string | null
+          allow_comments?: boolean | null
+          status?: ArticleStatus
+          meta_title?: string | null
+          meta_description?: string | null
+          meta_keywords?: string[] | null
+          canonical_url?: string | null
+          og_image?: string | null
+          reading_time?: number | null
+          view_count?: number | null
+          is_featured?: boolean | null
+          video_url?: string | null
+          scheduled_at?: string | null
+          published_at?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      article_tags: {
+        Row: ArticleTag
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          created_at?: string | null
+        }
+      }
+      article_tag_relations: {
+        Row: {
+          article_id: string
+          tag_id: string
+          created_at: string | null
+        }
+        Insert: {
+          article_id: string
+          tag_id: string
+          created_at?: string | null
+        }
+        Update: {
+          article_id?: string
+          tag_id?: string
+          created_at?: string | null
+        }
+      }
       services: {
         Row: {
           id: string
@@ -194,9 +321,91 @@ export interface Database {
           updated_at: string | null
         }
       }
+      article_comments: {
+        Row: {
+          id: string
+          article_id: string
+          user_id: string
+          parent_id: string | null
+          content: string
+          status: 'pending' | 'approved' | 'rejected'
+          rejection_reason: string | null
+          approved_by: string | null
+          approved_at: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          article_id: string
+          user_id: string
+          parent_id?: string | null
+          content: string
+          status?: 'pending' | 'approved' | 'rejected'
+          rejection_reason?: string | null
+          approved_by?: string | null
+          approved_at?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          article_id?: string
+          user_id?: string
+          parent_id?: string | null
+          content?: string
+          status?: 'pending' | 'approved' | 'rejected'
+          rejection_reason?: string | null
+          approved_by?: string | null
+          approved_at?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      comment_likes: {
+        Row: {
+          comment_id: string
+          user_id: string
+          created_at: string | null
+        }
+        Insert: {
+          comment_id: string
+          user_id: string
+          created_at?: string | null
+        }
+        Update: {
+          comment_id?: string
+          user_id?: string
+          created_at?: string | null
+        }
+      }
     }
-    Views: {}
-    Functions: {}
+    Views: {
+      article_tags_view: {
+        Row: {
+          article_id: string
+          tags: Json
+        }
+      }
+    }
+    Functions: {
+      increment_article_view: {
+        Args: { article_uuid: string }
+        Returns: void
+      }
+      search_articles: {
+        Args: { search_query: string }
+        Returns: ArticleRow[]
+      }
+      migrate_tags_to_relations: {
+        Args: Record<string, never>
+        Returns: string
+      }
+      auto_publish_scheduled: {
+        Args: Record<string, never>
+        Returns: number
+      }
+    }
     Enums: {}
   }
 }

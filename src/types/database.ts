@@ -1,5 +1,45 @@
 // Database types matching memareh schema
 
+export interface ArticleTag {
+  id: string
+  name: string
+  slug: string
+}
+
+export interface Article {
+  id: string
+  title: string
+  slug: string
+  excerpt: string | null
+  content: string | null
+  featured_image: string | null
+  featured_image_alt: string | null
+  category: string | null
+  author_id: string | null
+  author_name: string | null
+  allow_comments: boolean
+  status: 'draft' | 'published' | 'archived' | 'scheduled'
+  meta_title: string | null
+  meta_description: string | null
+  meta_keywords: string[] | null
+  canonical_url: string | null
+  og_image: string | null
+  reading_time: number | null
+  view_count: number
+  is_featured: boolean
+  video_url: string | null
+  scheduled_at: string | null
+  published_at: string | null
+  created_at: string
+  updated_at: string
+  tags?: ArticleTag[]
+  averageRating?: number
+  ratingCount?: number
+  _count?: {
+    comments: number
+  }
+}
+
 export interface Service {
   id: string
   name_fa: string
@@ -90,4 +130,29 @@ export interface BookingFormData {
   isEmergency: boolean
   images?: string[]
   locationDetails?: string
+}
+
+export interface ArticleComment {
+  id: string
+  article_id: string
+  user_id: string
+  parent_id: string | null
+  content: string
+  status: 'pending' | 'approved' | 'rejected'
+  rejection_reason: string | null
+  approved_by: string | null
+  approved_at: string | null
+  created_at: string
+  updated_at: string | null
+  user?: {
+    full_name: string
+    avatar_url?: string
+  }
+  replies?: ArticleComment[]
+}
+
+export interface CommentLike {
+  comment_id: string
+  user_id: string
+  created_at: string | null
 }

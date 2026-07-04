@@ -1,8 +1,8 @@
 import type { Metadata } from "next/types";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from "react-hot-toast";
 import "./globals.css";
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
 
 const geistSans = Geist({
@@ -16,9 +16,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://memareh.com"),
   title: "معماره - خدمات برقکاری حرفه‌ای و مطمئن",
-  description: "دسترسی سریع به تکنسین برقکار در تهران. خدمات اضطراری ۲۴ ساعته، نصب، تعمیر و نگهداری تاسیسات برقی با کیفیت و سرعت.",
-  keywords: ["برقکار", "خدمات برقکاری", "تکنسین برق", "نصب برق", "تعمیر برق", "سیم‌کشی", "معماره"],
+  description:
+    "دسترسی سریع به تکنسین برقکار در تهران. خدمات اضطراری ۲۴ ساعته، نصب، تعمیر و نگهداری تاسیسات برقی با کیفیت و سرعت.",
+  keywords: [
+    "برقکار",
+    "خدمات برقکاری",
+    "تکنسین برق",
+    "نصب برق",
+    "تعمیر برق",
+    "سیم‌کشی",
+    "معماره",
+  ],
   authors: [{ name: "معماره" }],
   creator: "معماره",
   publisher: "معماره",
@@ -28,9 +38,7 @@ export const metadata: Metadata = {
       { url: "/assets/logo/fav-logo.png", sizes: "32x32", type: "image/png" },
       { url: "/assets/logo/fav-logo.png", sizes: "16x16", type: "image/png" },
     ],
-    apple: [
-      { url: "/assets/logo/fav-logo.png" },
-    ],
+    apple: [{ url: "/assets/logo/fav-logo.png" }],
     shortcut: "/assets/logo/fav-logo.png",
   },
   openGraph: {
@@ -70,7 +78,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isProduction = process.env.NODE_ENV === "production";
 
   return (
     <html lang="fa" dir="rtl">
@@ -93,7 +101,9 @@ export default function RootLayout({
           </>
         )}
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         <Toaster position="top-center" />
         <main>
           {children}

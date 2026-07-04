@@ -1,49 +1,49 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { ArrowRight, Share2, Printer } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Share2, Printer } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ArticleInteractions({
   articleId,
 }: {
-  articleId: string
+  articleId: string;
 }) {
-  const supabase = createClient()
-  const router = useRouter()
+  const supabase = createClient();
+  const router = useRouter();
 
   // Track article view
   useEffect(() => {
     const trackView = async () => {
       try {
-        await supabase.rpc('increment_article_view', {
+        await supabase.rpc("increment_article_view", {
           article_uuid: articleId,
-        })
+        });
       } catch {
         // Safe to ignore
       }
-    }
+    };
 
-    trackView()
-  }, [articleId, supabase])
+    trackView();
+  }, [articleId, supabase]);
 
   const handleBack = () => {
     if (window.history.length > 1) {
-      router.back()
+      router.back();
     } else {
-      router.push('/articles')
+      router.push("/articles");
     }
-  }
+  };
 
   const handleShare = async () => {
     if (navigator.share) {
       await navigator.share({
         title: document.title,
         url: window.location.href,
-      })
+      });
     }
-  }
+  };
 
   return (
     <div className="mt-8 flex flex-wrap gap-3">
@@ -98,5 +98,5 @@ export default function ArticleInteractions({
         چاپ
       </button>
     </div>
-  )
+  );
 }

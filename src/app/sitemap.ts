@@ -10,7 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { data: articles } = await supabase
     .from('articles')
     .select('slug, updated_at')
-    .eq('published', true)
+    .eq('status', 'published')
 
   const baseUrl = 'https://memareh.com'
 

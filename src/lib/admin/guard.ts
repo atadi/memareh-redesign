@@ -1,3 +1,6 @@
+// Roll back changes to use public schema instead of memareh
+// for admin and auth-related functions
+
 import "server-only";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";

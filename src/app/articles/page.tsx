@@ -75,7 +75,10 @@ export default function ArticlesPage() {
   const loadArticles = async () => {
     try {
       const supabase = createClient()
-      
+
+      // Auto-publish any past-due scheduled articles
+      await supabase.rpc('auto_publish_scheduled').maybeSingle()
+
       console.log('🔍 About to fetch articles...')
 
       let query = supabase

@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import ArticleInteractions from './ArticleInteractions'
+import { CommentSection } from '@/components/articles/CommentSection'
 
 export const revalidate = 300 // ISR – 5 minutes
 
@@ -48,6 +49,9 @@ export default async function ArticlePage({
   const { slug } = await params
   const supabase = await createClient()
 
+  // Auto-publish any past-due scheduled articles
+  await supabase.rpc('auto_publish_scheduled')
+
   const { data, error } = await supabase
     .from('articles')
     .select('*')
@@ -56,6 +60,25 @@ export default async function ArticlePage({
 
   const article = data?.[0]
   if (error || !article) notFound()
+
+  // Load approved comments
+  const { data: commentRows, error: commentError } = await supabase
+    .from('article_comments')
+    .select('*')
+    .eq('article_id', article.id)
+    .eq('status', 'approved')
+    .order('created_at', { ascending: false })
+
+  const comments = (commentRows ?? []).map((c: any) => ({
+    id: c.id,
+    content: c.content,
+    created_at: c.created_at,
+    parent_id: c.parent_id,
+    user: { full_name: 'کاربر', avatar_url: null },
+    like_count: 0,
+    is_pinned: false,
+    replies: [],
+  }))
 
   return (
     <article className="min-h-screen bg-gray-50">
@@ -83,6 +106,15 @@ export default async function ArticlePage({
       />
 
       </main>
+
+      {/* Comments section */}
+      <section className="max-w-4xl mx-auto px-6 py-10">
+        <CommentSection
+          articleId={article.id}
+          comments={comments}
+          allowComments={article.allow_comments ?? true}
+        />
+      </section>
     </article>
   )
 }

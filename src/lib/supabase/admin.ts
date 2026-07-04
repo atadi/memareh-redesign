@@ -12,5 +12,8 @@ export function createSupabaseAdmin() {
       persistSession: false,
       autoRefreshToken: false,
     },
+    db: {
+      schema: 'memareh'
+    }
   });
 }

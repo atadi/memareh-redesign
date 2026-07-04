@@ -96,10 +96,7 @@ export function CommentSection({ articleId, comments: initialComments, allowComm
         content: newComment,
         status: 'pending'
       })
-      .select(`
-        *,
-        user:profiles(full_name, avatar_url)
-      `)
+      .select()
       .single()
 
     if (error) {
