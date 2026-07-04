@@ -74,7 +74,7 @@ export default async function ArticlePage({
     content: c.content,
     created_at: c.created_at,
     parent_id: c.parent_id,
-    user: { full_name: 'کاربر', avatar_url: null },
+    user: { full_name: 'کاربر' },
     like_count: 0,
     is_pinned: false,
     replies: [],
