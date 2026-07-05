@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { createClient } from '@/lib/supabase/client'
-import { uploadFeaturedImage, deleteStorageFile } from '@/lib/uploadImage'
+import { uploadFeaturedImage, deleteStorageFile, uploadContentImage, uploadVideoFile } from '@/lib/uploadImage'
 import {
   Save,
   X,
@@ -23,6 +23,7 @@ import {
   Video,
   Star,
   Loader2,
+  FileImage,
 } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import toast from 'react-hot-toast'
@@ -99,6 +100,9 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
   const [featuredImagePreview, setFeaturedImagePreview] = useState('')
   const [ogImage, setOgImage] = useState<File | null>(null)
   const [ogImagePreview, setOgImagePreview] = useState('')
+  const [videoFile, setVideoFile] = useState<File | null>(null)
+  const [videoPreview, setVideoPreview] = useState('')
+  const [uploadingVideo, setUploadingVideo] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
 
   // Author & tags
@@ -110,6 +114,17 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
   const [showTagDropdown, setShowTagDropdown] = useState(false)
   const [slugExists, setSlugExists] = useState(false)
   const [checkingSlug, setCheckingSlug] = useState(false)
+  const [showGallery, setShowGallery] = useState(false)
+  const [galleryImages, setGalleryImages] = useState<string[]>([])
+  const [loadingGallery, setLoadingGallery] = useState(false)
+  const [showVideoGallery, setShowVideoGallery] = useState(false)
+  const [galleryVideos, setGalleryVideos] = useState<string[]>([])
+  const [loadingVideoGallery, setLoadingVideoGallery] = useState(false)
+  const [showOgGallery, setShowOgGallery] = useState(false)
+  const [galleryOgImages, setGalleryOgImages] = useState<string[]>([])
+  const [loadingOgGallery, setLoadingOgGallery] = useState(false)
+  const [metaKeywords, setMetaKeywords] = useState<string[]>([])
+  const [keywordInput, setKeywordInput] = useState('')
   const tagInputRef = useRef<HTMLInputElement>(null)
 
   // Load data on mount
@@ -160,6 +175,70 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     if (data) setTags(data)
   }
 
+  const loadGalleryImages = async () => {
+    setLoadingGallery(true)
+    const { data } = await supabase.storage
+      .from('article-images')
+      .list('featured', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
+    if (data) {
+      const urls = data
+        .filter(f => f.metadata?.mimetype?.startsWith('image/'))
+        .map(f => {
+          const { data: { publicUrl } } = supabase.storage
+            .from('article-images')
+            .getPublicUrl(`featured/${f.name}`)
+          return publicUrl
+        })
+      setGalleryImages(urls)
+    }
+    setLoadingGallery(false)
+  }
+
+  const loadVideoGallery = async () => {
+    setLoadingVideoGallery(true)
+    const { data } = await supabase.storage
+      .from('article-images')
+      .list('videos', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
+    if (data) {
+      const urls = data.map(f => {
+          const { data: { publicUrl } } = supabase.storage
+            .from('article-images')
+            .getPublicUrl(`videos/${f.name}`)
+          return publicUrl
+        })
+      setGalleryVideos(urls)
+    }
+    setLoadingVideoGallery(false)
+  }
+
+  const loadOgGallery = async () => {
+    setLoadingOgGallery(true)
+    const { data } = await supabase.storage
+      .from('article-images')
+      .list('og', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
+    if (data) {
+      const urls = data
+        .filter(f => f.metadata?.mimetype?.startsWith('image/'))
+        .map(f => {
+          const { data: { publicUrl } } = supabase.storage
+            .from('article-images')
+            .getPublicUrl(`og/${f.name}`)
+          return publicUrl
+        })
+      setGalleryOgImages(urls)
+    }
+    setLoadingOgGallery(false)
+  }
+
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setVideoFile(file)
+    const reader = new FileReader()
+    reader.onloadend = () => setVideoPreview(reader.result as string)
+    reader.readAsDataURL(file)
+  }
+
   const resetForm = (article: any) => {
     setValue('title', article.title || '')
     setValue('slug', article.slug || '')
@@ -169,7 +248,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     setValue('status', article.status || 'draft')
     setValue('meta_title', article.meta_title || '')
     setValue('meta_description', article.meta_description || '')
-    setValue('meta_keywords', article.meta_keywords?.join(', ') || '')
+    setMetaKeywords(article.meta_keywords || [])
     setValue('canonical_url', article.canonical_url || '')
     setValue('featured_image_alt', article.featured_image_alt || '')
     setValue('is_featured', article.is_featured || false)
@@ -178,6 +257,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     setContent(article.content || '')
     setFeaturedImagePreview(article.featured_image || '')
     setOgImagePreview(article.og_image || '')
+    setVideoPreview(article.video_url || '')
     setSelectedAuthorId(article.author_id || '')
     setEditorKey(prev => prev + 1)
     setPreview(false)
@@ -259,6 +339,13 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     }
     if (!metaDescValue && excerptValue) {
       setValue('meta_description', excerptValue)
+    }
+    if (metaKeywords.length === 0 && selectedTags.length > 0) {
+      setMetaKeywords(selectedTags.map(t => t.name))
+    }
+    const canonicalVal = watch('canonical_url')
+    if (!canonicalVal && slugValue) {
+      setValue('canonical_url', `${window.location.origin}/articles/${slugValue}`)
     }
     toast.success('فیلدهای متا تکمیل شدند')
   }
@@ -363,6 +450,17 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
         }
       }
 
+      let videoUrl = data.video_url
+      if (videoFile) {
+        const toastId = toast.loading('در حال آپلود ویدیو...')
+        const { url, error } = await uploadVideoFile(videoFile)
+        if (error) { toast.error(error, { id: toastId }); setSaving(false); setIsUploading(false); return }
+        if (url) {
+          videoUrl = url
+          toast.success('ویدیو آپلود شد', { id: toastId })
+        }
+      }
+
       const canonicalUrl = data.canonical_url || `${window.location.origin}/articles/${data.slug}`
 
       // Sync tags: ensure all selected tags exist, then link them
@@ -400,12 +498,10 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
         featured_image_alt: data.featured_image_alt,
         og_image: ogImageUrl,
         canonical_url: canonicalUrl,
-        video_url: data.video_url,
+        video_url: videoUrl,
         meta_title: data.meta_title,
         meta_description: data.meta_description,
-        meta_keywords: data.meta_keywords
-          ? data.meta_keywords.split(',').map((k: string) => k.trim()).filter(Boolean)
-          : [],
+        meta_keywords: metaKeywords,
         allow_comments: data.allow_comments,
         status: data.status,
         is_featured: data.is_featured,
@@ -652,10 +748,10 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className={labelClasses}>خلاصه مقاله *</label>
-                <span className="text-xs text-gray-400">{excerptValue?.length || 0} / 300</span>
+                <span className="text-xs text-gray-400">{excerptValue?.length || 0} / 1000</span>
               </div>
               <textarea {...register('excerpt', { required: true })}
-                rows={6} maxLength={300}
+                rows={6} maxLength={1000}
                 className={inputClasses} placeholder="خلاصه‌ای از مقاله..." />
             </div>
           </div>
@@ -664,7 +760,14 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
           <div className="grid grid-cols-3 gap-4">
             {/* Featured Image */}
             <div className="border rounded-lg p-4 bg-gray-50">
-              <label className={labelClasses}>تصویر شاخص</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium">تصویر شاخص</label>
+                <button type="button" onClick={() => { loadGalleryImages(); setShowGallery(true) }}
+                  className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 flex items-center gap-1">
+                  <FileImage className="w-3 h-3" />
+                  گالری
+                </button>
+              </div>
               {uploadedImageUploader('featured-image-input', featuredImagePreview, handleFeaturedImageChange, () => {
                 setFeaturedImage(null); setFeaturedImagePreview('')
               })}
@@ -680,12 +783,119 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
               </div>
             </div>
 
-            {/* Video URL */}
+            {/* Gallery Modal */}
+            {showGallery && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowGallery(false)}>
+                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[80vh] overflow-hidden" onClick={e => e.stopPropagation()}>
+                  <div className="flex items-center justify-between p-4 border-b">
+                    <h3 className="font-bold text-lg">گالری تصاویر</h3>
+                    <button type="button" onClick={() => setShowGallery(false)} className="p-1 hover:bg-gray-100 rounded-lg">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="p-4 overflow-y-auto max-h-[60vh]">
+                    {loadingGallery ? (
+                      <div className="flex items-center justify-center py-20">
+                        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                      </div>
+                    ) : galleryImages.length === 0 ? (
+                      <div className="text-center py-20 text-gray-400">
+                        <FileImage className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                        <p>تصویری یافت نشد</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-4 gap-3">
+                        {galleryImages.map((url, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => { setFeaturedImagePreview(url); setFeaturedImage(null); setShowGallery(false) }}
+                            className={`relative aspect-video rounded-lg overflow-hidden border-2 hover:border-blue-500 transition-colors ${
+                              featuredImagePreview === url ? 'border-blue-500' : 'border-gray-200'
+                            }`}
+                          >
+                            <img src={url} alt="" className="w-full h-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Video */}
             <div className="border rounded-lg p-4 bg-gray-50">
-              <label className={labelClasses}><Video className="w-4 h-4 inline ml-1" />ویدیو</label>
-              <input type="url" {...register('video_url')}
-                className={inputClasses} placeholder="https://youtube.com/..." />
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium"><Video className="w-4 h-4 inline ml-1" />ویدیو</label>
+                <button type="button" onClick={() => { loadVideoGallery(); setShowVideoGallery(true) }}
+                  className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 flex items-center gap-1">
+                  <FileImage className="w-3 h-3" />
+                  گالری
+                </button>
+              </div>
+              <label className="flex items-center justify-center w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors text-sm text-gray-500">
+                <Upload className="w-4 h-4 ml-2" />
+                {videoFile ? videoFile.name : 'آپلود ویدیو'}
+                <input type="file" accept="video/*" onChange={handleVideoChange} className="hidden" disabled={uploadingVideo} />
+              </label>
+              {videoPreview && (
+                <div className="mt-2 relative">
+                  <video src={videoPreview} className="w-full rounded-lg border max-h-32" controls />
+                  <button type="button" onClick={() => { setVideoFile(null); setVideoPreview('') }}
+                    className="absolute top-1 right-1 p-1 bg-red-600 text-white rounded-full hover:bg-red-700">
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+              <div className="mt-2">
+                <input type="url" {...register('video_url')}
+                  className="w-full px-3 py-2 border rounded-lg text-sm" placeholder="https://youtube.com/..."
+                  disabled={!!videoFile} />
+              </div>
             </div>
+
+            {/* Video Gallery Modal */}
+            {showVideoGallery && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowVideoGallery(false)}>
+                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[80vh] overflow-hidden" onClick={e => e.stopPropagation()}>
+                  <div className="flex items-center justify-between p-4 border-b">
+                    <h3 className="font-bold text-lg">گالری ویدیوها</h3>
+                    <button type="button" onClick={() => setShowVideoGallery(false)} className="p-1 hover:bg-gray-100 rounded-lg">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="p-4 overflow-y-auto max-h-[60vh]">
+                    {loadingVideoGallery ? (
+                      <div className="flex items-center justify-center py-20">
+                        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                      </div>
+                    ) : galleryVideos.length === 0 ? (
+                      <div className="text-center py-20 text-gray-400">
+                        <Video className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                        <p>ویدیویی یافت نشد</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-3">
+                        {galleryVideos.map((url, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => { setValue('video_url', url); setShowVideoGallery(false) }}
+                            className="relative aspect-video rounded-lg overflow-hidden border-2 hover:border-blue-500 transition-colors bg-gray-900"
+                          >
+                            <video src={url} className="w-full h-full object-cover" preload="metadata" />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <Video className="w-8 h-8 text-white opacity-80" />
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* SEO quick summary */}
             <div className="border rounded-lg p-4 bg-gray-50">
@@ -788,9 +998,36 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
             </div>
 
             <div>
-              <label className="text-sm font-medium">کلمات کلیدی (جداسازی با کاما)</label>
-              <input type="text" {...register('meta_keywords')}
-                className={inputClasses} placeholder="برق, ایمنی, تعمیرات..." />
+              <label className="text-sm font-medium">کلمات کلیدی</label>
+              <div className="flex flex-wrap gap-1.5 p-2 border rounded-lg min-h-[42px] bg-white cursor-text" onClick={() => document.getElementById('keyword-input')?.focus()}>
+                {metaKeywords.map((kw, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
+                    {kw}
+                    <button type="button" onClick={() => setMetaKeywords(prev => prev.filter((_, j) => j !== i))} className="hover:text-red-600">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+                <input
+                  id="keyword-input"
+                  type="text"
+                  value={keywordInput}
+                  onChange={(e) => setKeywordInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ',') {
+                      e.preventDefault()
+                      const val = keywordInput.trim()
+                      if (val && !metaKeywords.includes(val)) {
+                        setMetaKeywords(prev => [...prev, val])
+                      }
+                      setKeywordInput('')
+                    }
+                  }}
+                  className="flex-1 min-w-[120px] outline-none border-none text-sm bg-transparent"
+                  placeholder="کلیدواژه جدید..."
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Enter یا کاما برای افزودن هر کلیدواژه</p>
             </div>
 
             <div>
@@ -800,9 +1037,18 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
               <p className="text-xs text-gray-500 mt-1">اگر خالی بماند، آدرس پیش‌فرض استفاده می‌شود</p>
             </div>
 
-            <div>
-              <label className="text-sm font-medium">تصویر Open Graph (OG)</label>
-              <p className="text-xs text-gray-500 mb-2">تصویری که در اشتراک‌گذاری شبکه‌های اجتماعی نمایش داده می‌شود</p>
+            <div className="border rounded-lg p-4 bg-gray-50">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <label className="text-sm font-medium">تصویر Open Graph (OG)</label>
+                  <p className="text-xs text-gray-500">تصویری که در اشتراک‌گذاری شبکه‌های اجتماعی نمایش داده می‌شود</p>
+                </div>
+                <button type="button" onClick={() => { loadOgGallery(); setShowOgGallery(true) }}
+                  className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 flex items-center gap-1">
+                  <FileImage className="w-3 h-3" />
+                  گالری
+                </button>
+              </div>
               {uploadedImageUploader('og-image-input', ogImagePreview, handleOgImageChange, () => {
                 setOgImage(null); setOgImagePreview('')
               })}
@@ -812,6 +1058,47 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
                   disabled={!!ogImage} />
               </div>
             </div>
+
+            {/* OG Gallery Modal */}
+            {showOgGallery && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowOgGallery(false)}>
+                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[80vh] overflow-hidden" onClick={e => e.stopPropagation()}>
+                  <div className="flex items-center justify-between p-4 border-b">
+                    <h3 className="font-bold text-lg">گالری تصاویر OG</h3>
+                    <button type="button" onClick={() => setShowOgGallery(false)} className="p-1 hover:bg-gray-100 rounded-lg">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="p-4 overflow-y-auto max-h-[60vh]">
+                    {loadingOgGallery ? (
+                      <div className="flex items-center justify-center py-20">
+                        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                      </div>
+                    ) : galleryOgImages.length === 0 ? (
+                      <div className="text-center py-20 text-gray-400">
+                        <FileImage className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                        <p>تصویری یافت نشد</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-4 gap-3">
+                        {galleryOgImages.map((url, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => { setOgImagePreview(url); setOgImage(null); setShowOgGallery(false) }}
+                            className={`relative aspect-video rounded-lg overflow-hidden border-2 hover:border-blue-500 transition-colors ${
+                              ogImagePreview === url ? 'border-blue-500' : 'border-gray-200'
+                            }`}
+                          >
+                            <img src={url} alt="" className="w-full h-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right: SEO Preview */}

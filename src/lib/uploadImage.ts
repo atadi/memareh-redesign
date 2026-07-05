@@ -5,16 +5,17 @@ const supabase = createClient()
 async function uploadImage(
   file: File,
   pathPrefix: string,
-  maxSizeMB: number = 5
+  maxSizeMB: number = 5,
+  acceptVideo: boolean = false
 ): Promise<{ url: string | null; error: string | null }> {
   try {
-    if (!file.type.startsWith('image/')) {
+    if (!acceptVideo && !file.type.startsWith('image/')) {
       return { url: null, error: 'فایل باید از نوع تصویر باشد' }
     }
 
     const maxBytes = maxSizeMB * 1024 * 1024
     if (file.size > maxBytes) {
-      return { url: null, error: `حجم تصویر نباید بیشتر از ${maxSizeMB} مگابایت باشد` }
+      return { url: null, error: `حجم فایل نباید بیشتر از ${maxSizeMB} مگابایت باشد` }
     }
 
     const fileExt = file.name.split('.').pop()
@@ -38,7 +39,7 @@ async function uploadImage(
 
     return { url: publicUrl, error: null }
   } catch (error) {
-    return { url: null, error: 'خطای غیرمنتظره در آپلود تصویر' }
+    return { url: null, error: 'خطای غیرمنتظره در آپلود' }
   }
 }
 
@@ -48,6 +49,10 @@ export async function uploadFeaturedImage(file: File): Promise<{ url: string | n
 
 export async function uploadContentImage(file: File): Promise<{ url: string | null; error: string | null }> {
   return uploadImage(file, 'content', 10)
+}
+
+export async function uploadVideoFile(file: File): Promise<{ url: string | null; error: string | null }> {
+  return uploadImage(file, 'videos', 50, true)
 }
 
 export async function deleteStorageFile(url: string): Promise<boolean> {
