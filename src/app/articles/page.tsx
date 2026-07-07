@@ -78,8 +78,12 @@ export default function ArticlesPage() {
     try {
       const supabase = createClient();
 
-      // Auto-publish any past-due scheduled articles
-      await supabase.rpc("auto_publish_scheduled").maybeSingle();
+      // Auto-publish any past-due scheduled articles (best-effort, RPC may be denied for anon)
+      try {
+        await supabase.rpc("auto_publish_scheduled").maybeSingle();
+      } catch {
+        // ignore – scheduled articles will be published via admin panel or server detail page
+      }
 
       console.log("🔍 About to fetch articles...");
 
@@ -146,24 +150,6 @@ export default function ArticlesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="bg-linear-to-l from-blue-600 to-blue-800 text-white py-16">
-        <div className="container mx-auto px-4">
-          <a
-            href="/"
-            className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-6 transition-colors"
-          >
-            <ArrowRight className="w-4 h-4" />
-            <span>بازگشت به صفحه اصلی</span>
-          </a>
-
-          <h1 className="text-4xl font-bold mb-4">مقالات و آموزش‌های برق</h1>
-          <p className="text-xl opacity-90">
-            آموزش‌های کاربردی، نکات ایمنی و راهنمای عیب‌یابی
-          </p>
-        </div>
-      </div>
-
       <div className="container mx-auto px-4 py-8">
         {/* Show error if any */}
         {error && (
@@ -175,7 +161,7 @@ export default function ArticlesPage() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar - Categories */}
           <aside className="lg:w-1/4">
-            <div className="bg-white rounded-xl shadow-lg p-6 sticky top-4">
+            <div className="bg-white rounded-xl shadow-lg p-6 sticky top-[60px]">
               <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                 <Filter className="w-5 h-5" />
                 دسته‌بندی‌ها

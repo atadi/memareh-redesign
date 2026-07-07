@@ -1,9 +1,10 @@
-import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import ArticleInteractions from './ArticleInteractions'
-import { CommentSection } from '@/components/articles/CommentSection'
+import { notFound } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import ArticleInteractions from "./ArticleInteractions";
+import { CommentSection } from "@/components/articles/CommentSection";
 
-export const revalidate = 300 // ISR – 5 minutes
+export const revalidate = 300; // ISR – 5 minutes
 
 // -----------------------------
 // Metadata (SEO)
@@ -11,31 +12,31 @@ export const revalidate = 300 // ISR – 5 minutes
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params
-  const supabase = await createClient()
+  const { slug } = await params;
+  const supabase = await createClient();
 
   const { data } = await supabase
-    .from('articles')
-    .select('title, excerpt, featured_image')
-    .eq('slug', slug)
-    .limit(1)
+    .from("articles")
+    .select("title, excerpt, featured_image")
+    .eq("slug", slug)
+    .limit(1);
 
-  const article = data?.[0]
-  if (!article) return {}
+  const article = data?.[0];
+  if (!article) return {};
 
   return {
     title: article.title,
     description: article.excerpt,
-    metadataBase: new URL('http://localhost:3000'), // change in prod
+    metadataBase: new URL("http://localhost:3000"), // change in prod
     openGraph: {
       title: article.title,
       description: article.excerpt,
-      type: 'article',
+      type: "article",
       images: article.featured_image ? [article.featured_image] : [],
     },
-  }
+  };
 }
 
 // -----------------------------
@@ -44,53 +45,45 @@ export async function generateMetadata({
 export default async function ArticlePage({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params
-  const supabase = await createClient()
+  const { slug } = await params;
+  const supabase = await createClient();
 
-  // Auto-publish any past-due scheduled articles
-  await supabase.rpc('auto_publish_scheduled')
+  // Auto-publish any past-due scheduled articles (admin client bypasses RLS)
+  const adminClient = createSupabaseAdmin();
+  await adminClient.rpc("auto_publish_scheduled");
 
   const { data, error } = await supabase
-    .from('articles')
-    .select('*')
-    .eq('slug', slug)
-    .limit(1)
+    .from("articles")
+    .select("*")
+    .eq("slug", slug)
+    .limit(1);
 
-  const article = data?.[0]
-  if (error || !article) notFound()
+  const article = data?.[0];
+  if (error || !article) notFound();
 
   // Load approved comments
   const { data: commentRows, error: commentError } = await supabase
-    .from('article_comments')
-    .select('*')
-    .eq('article_id', article.id)
-    .eq('status', 'approved')
-    .order('created_at', { ascending: false })
+    .from("article_comments")
+    .select("*")
+    .eq("article_id", article.id)
+    .eq("status", "approved")
+    .order("created_at", { ascending: false });
 
   const comments = (commentRows ?? []).map((c: any) => ({
     id: c.id,
     content: c.content,
     created_at: c.created_at,
     parent_id: c.parent_id,
-    user: { full_name: 'کاربر' },
+    user: { full_name: "کاربر" },
     like_count: 0,
     is_pinned: false,
     replies: [],
-  }))
+  }));
 
   return (
     <article className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-4xl mx-auto px-6 py-8">
-          <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
-
-          {/* Client-side interactions */}
-          <ArticleInteractions articleId={article.id} />
-        </div>
-      </header>
-
       <main className="max-w-4xl mx-auto px-6 py-10 bg-white">
         {article.featured_image && (
           <img
@@ -100,11 +93,10 @@ export default async function ArticlePage({
           />
         )}
 
-      <div
-        className="prose prose-lg max-w-none dark:prose-invert"
-        dangerouslySetInnerHTML={{ __html: article.content }}
-      />
-
+        <div
+          className="prose prose-lg max-w-none dark:prose-invert"
+          dangerouslySetInnerHTML={{ __html: article.content }}
+        />
       </main>
 
       {/* Comments section */}
@@ -116,5 +108,5 @@ export default async function ArticlePage({
         />
       </section>
     </article>
-  )
+  );
 }

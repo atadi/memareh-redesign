@@ -23,17 +23,6 @@ export function Hero() {
       })
     }
   }
-  // Hotspot config: specify region labels and fallback percentage positions.
-  // Because we now use a PNG image, anchoring is done via these percentage coordinates.
-  const hotspotsConfig = [
-    { id: 1, region: 'منطقه ۱', fallback: { top: '30%', left: '73%' } },
-    { id: 2, region: 'منطقه ۵', fallback: { top: '40%', left: '40%' } },
-    { id: 3, region: 'منطقه ۲', fallback: { top: '35%', left: '53%' } },
-    { id: 4, region: 'منطقه ۳', fallback: { top: '37%', left: '62%' } },
-  ]
-
-  const [hotspots] = useState(() => hotspotsConfig.map(h => ({ id: h.id, top: h.fallback.top, left: h.fallback.left })))
-
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-[100vh]">
       {/* Animated Background Effects */}
@@ -162,15 +151,7 @@ export function Hero() {
                 className="w-full h-full object-contain"
               />
 
-              {hotspots.map(h => (
-                <div key={h.id} className="absolute" style={{ top: h.top, left: h.left, transform: 'translate(-50%, -50%)' }}>
-                  <span className="absolute inline-block w-2 h-2 rounded-full bg-yellow-400/90 ring-2 ring-amber-900" />
-                  <span
-                    className="absolute inline-block w-20 h-20 rounded-full bg-amber-400/30 -z-10 animate-ping"
-                    style={{ left: '-42px', top: '-40px' }}
-                  />
-                </div>
-              ))}
+
             </div>
           </motion.div>
 

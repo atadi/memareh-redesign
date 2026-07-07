@@ -408,3 +408,12 @@ CREATE TRIGGER trg_update_article_comments_updated_at
 BEFORE UPDATE ON memareh.article_comments
 FOR EACH ROW
 EXECUTE FUNCTION memareh.update_comment_updated_at();
+
+-- Schema permissions for Supabase roles
+GRANT USAGE ON SCHEMA memareh TO anon, authenticated;
+GRANT SELECT ON ALL TABLES IN SCHEMA memareh TO anon;
+GRANT ALL ON ALL TABLES IN SCHEMA memareh TO authenticated;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA memareh TO anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA memareh GRANT SELECT ON TABLES TO anon;
+ALTER DEFAULT PRIVILEGES IN SCHEMA memareh GRANT ALL ON TABLES TO authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA memareh GRANT EXECUTE ON FUNCTIONS TO anon, authenticated;

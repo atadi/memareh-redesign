@@ -1,6 +1,7 @@
 import type { Metadata } from "next/types";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "react-hot-toast";
+import { ClientShell } from "@/components/ClientShell";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
@@ -105,10 +106,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Toaster position="top-center" />
-        <main>
+        <ClientShell>
           {children}
-          <Analytics />
-        </main>
+        </ClientShell>
+        <Analytics />
       </body>
     </html>
   );
