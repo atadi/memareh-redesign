@@ -1,13 +1,13 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { createSupabaseAdmin } from "@/lib/supabase/admin";
-import ArticleInteractions from "./ArticleInteractions";
 import { CommentSection } from "@/components/articles/CommentSection";
 
-export const revalidate = 300; // ISR – 5 minutes
+export const revalidate = 300;
+
+const siteUrl = "https://www.memareh.com";
 
 // -----------------------------
-// Metadata (SEO)
+// Metadata SEO
 // -----------------------------
 export async function generateMetadata({
   params,
@@ -17,24 +17,65 @@ export async function generateMetadata({
   const { slug } = await params;
   const supabase = await createClient();
 
-  const { data } = await supabase
+  const { data: article } = await supabase
     .from("articles")
-    .select("title, excerpt, featured_image")
+    .select("title, excerpt, featured_image, published_at, updated_at")
     .eq("slug", slug)
-    .limit(1);
+    .eq("status", "published")
+    .single();
 
-  const article = data?.[0];
-  if (!article) return {};
+  if (!article) {
+    return {
+      title: "مقاله پیدا نشد | معماره",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  const articleUrl = `${siteUrl}/articles/${slug}`;
+  const image =
+    article.featured_image || `${siteUrl}/assets/logo/cover-image.jpg`;
 
   return {
     title: article.title,
     description: article.excerpt,
-    metadataBase: new URL("http://localhost:3000"), // change in prod
+    metadataBase: new URL(siteUrl),
+
+    alternates: {
+      canonical: articleUrl,
+    },
+
     openGraph: {
       title: article.title,
       description: article.excerpt,
+      url: articleUrl,
+      siteName: "معماره",
+      locale: "fa_IR",
       type: "article",
-      images: article.featured_image ? [article.featured_image] : [],
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: article.title,
+        },
+      ],
+      publishedTime: article.published_at,
+      modifiedTime: article.updated_at,
+    },
+
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.excerpt,
+      images: [image],
+    },
+
+    robots: {
+      index: true,
+      follow: true,
     },
   };
 }
@@ -50,21 +91,18 @@ export default async function ArticlePage({
   const { slug } = await params;
   const supabase = await createClient();
 
-  // Auto-publish any past-due scheduled articles (admin client bypasses RLS)
-  const adminClient = createSupabaseAdmin();
-  await adminClient.rpc("auto_publish_scheduled");
-
-  const { data, error } = await supabase
+  const { data: article, error } = await supabase
     .from("articles")
     .select("*")
     .eq("slug", slug)
-    .limit(1);
+    .eq("status", "published")
+    .single();
 
-  const article = data?.[0];
-  if (error || !article) notFound();
+  if (error || !article) {
+    notFound();
+  }
 
-  // Load approved comments
-  const { data: commentRows, error: commentError } = await supabase
+  const { data: commentRows } = await supabase
     .from("article_comments")
     .select("*")
     .eq("article_id", article.id)
@@ -82,31 +120,72 @@ export default async function ArticlePage({
     replies: [],
   }));
 
+  const articleUrl = `${siteUrl}/articles/${slug}`;
+  const image =
+    article.featured_image || `${siteUrl}/assets/logo/cover-image.jpg`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.excerpt,
+    image,
+    url: articleUrl,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": articleUrl,
+    },
+    author: {
+      "@type": "Organization",
+      name: "معماره",
+      url: siteUrl,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "معماره",
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/assets/logo/logo.png`,
+      },
+    },
+    datePublished: article.published_at,
+    dateModified: article.updated_at || article.published_at,
+    inLanguage: "fa-IR",
+  };
+
   return (
-    <article className="min-h-screen bg-gray-50">
-      <main className="max-w-4xl mx-auto px-6 py-10 bg-white">
-        {article.featured_image && (
-          <img
-            src={article.featured_image}
-            alt={article.title}
-            className="w-full rounded-xl mb-8"
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd),
+        }}
+      />
+
+      <article className="min-h-screen bg-gray-50">
+        <main className="max-w-4xl mx-auto px-6 py-10 bg-white">
+          {article.featured_image && (
+            <img
+              src={article.featured_image}
+              alt={article.title}
+              className="w-full rounded-xl mb-8"
+            />
+          )}
+
+          <div
+            className="prose prose-lg max-w-none dark:prose-invert"
+            dangerouslySetInnerHTML={{ __html: article.content }}
           />
-        )}
+        </main>
 
-        <div
-          className="prose prose-lg max-w-none dark:prose-invert"
-          dangerouslySetInnerHTML={{ __html: article.content }}
-        />
-      </main>
-
-      {/* Comments section */}
-      <section className="max-w-4xl mx-auto px-6 py-10">
-        <CommentSection
-          articleId={article.id}
-          comments={comments}
-          allowComments={article.allow_comments ?? true}
-        />
-      </section>
-    </article>
+        <section className="max-w-4xl mx-auto px-6 py-10">
+          <CommentSection
+            articleId={article.id}
+            comments={comments}
+            allowComments={article.allow_comments ?? true}
+          />
+        </section>
+      </article>
+    </>
   );
 }
