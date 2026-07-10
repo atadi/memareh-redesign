@@ -126,6 +126,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
   const [metaKeywords, setMetaKeywords] = useState<string[]>([])
   const [keywordInput, setKeywordInput] = useState('')
   const tagInputRef = useRef<HTMLInputElement>(null)
+  const tagSelecting = useRef(false)
 
   // Load data on mount
   useEffect(() => {
@@ -373,6 +374,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
   }
 
   const handleTagSelect = (tag: ArticleTag) => {
+    tagSelecting.current = true
     if (!selectedTags.find(t => t.id === tag.id)) {
       setSelectedTags([...selectedTags, tag])
     }
@@ -385,10 +387,10 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     setSelectedTags(selectedTags.filter(t => t.id !== tagId))
   }
 
-  const filteredTags = tagSearch
+  const filteredTags = tagSearch.trim()
     ? tags.filter(
         t =>
-          t.name.includes(tagSearch) &&
+          t.name.includes(tagSearch.trim()) &&
           !selectedTags.find(st => st.id === t.id)
       )
     : tags.filter(t => !selectedTags.find(st => st.id === t.id))
@@ -467,7 +469,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
       const tagIds: string[] = []
       for (const tag of selectedTags) {
         let tagId = tag.id
-        if (!tagId) {
+        if (!tagId || tagId.startsWith('new_')) {
           const slug = slugify(tag.name)
           const { data: existing } = await supabase
             .from('article_tags')
@@ -536,11 +538,30 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
 
       // Sync tag relations
       if (articleId) {
+        const { data: oldRelations } = await supabase
+          .from('article_tag_relations')
+          .select('tag_id')
+          .eq('article_id', articleId)
+        const oldTagIds: string[] = (oldRelations || []).map(r => r.tag_id)
+
         await supabase.from('article_tag_relations').delete().eq('article_id', articleId)
         if (tagIds.length > 0) {
           await supabase.from('article_tag_relations').insert(
             tagIds.map(tagId => ({ article_id: articleId, tag_id: tagId }))
           )
+        }
+
+        // Clean up tags no longer used by any article
+        const removedTagIds = oldTagIds.filter(id => !tagIds.includes(id))
+        for (const removedId of removedTagIds) {
+          const { data: remaining } = await supabase
+            .from('article_tag_relations')
+            .select('id')
+            .eq('tag_id', removedId)
+            .limit(1)
+          if (!remaining || remaining.length === 0) {
+            await supabase.from('article_tags').delete().eq('id', removedId)
+          }
         }
       }
 
@@ -715,28 +736,31 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
                     type="text"
                     value={tagSearch}
                     onChange={(e) => { setTagSearch(e.target.value); setShowTagDropdown(true) }}
-                    onFocus={() => setShowTagDropdown(true)}
+                    onFocus={() => {
+                      if (tagSelecting.current) { tagSelecting.current = false; return }
+                      setShowTagDropdown(true)
+                    }}
                     className="flex-1 min-w-[120px] outline-none text-sm border-0 p-0"
                     placeholder={selectedTags.length === 0 ? 'جستجو یا ایجاد برچسب...' : ''}
                   />
                 </div>
                 {showTagDropdown && (
-                  <div className="absolute top-full right-0 left-0 mt-1 bg-white border rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
-                    {filteredTags.length > 0 ? (
-                      filteredTags.map(tag => (
-                        <button type="button" key={tag.id} onClick={() => handleTagSelect(tag)}
-                          className="w-full text-right px-3 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
-                          <Tag className="w-3 h-3 text-gray-400" />
-                          {tag.name}
-                        </button>
-                      ))
-                    ) : tagSearch ? (
-                      <button type="button" onClick={() => handleTagSelect({ id: '', name: tagSearch, slug: slugify(tagSearch), created_at: null })}
+                  <div className="absolute top-full right-0 left-0 mt-1 bg-white border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+                    {filteredTags.map(tag => (
+                      <button type="button" key={tag.id} onClick={() => handleTagSelect(tag)}
+                        className="w-full text-right px-3 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
+                        <Tag className="w-3 h-3 text-gray-400" />
+                        {tag.name}
+                      </button>
+                    ))}
+                    {tagSearch.trim() && (
+                      <button type="button" onClick={() => handleTagSelect({ id: `new_${Date.now()}`, name: tagSearch.trim(), slug: slugify(tagSearch.trim()), created_at: null })}
                         className="w-full text-right px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 flex items-center gap-2">
                         <Sparkles className="w-3 h-3" />
-                        ایجاد "{tagSearch}"
+                        ایجاد "{tagSearch.trim()}"
                       </button>
-                    ) : (
+                    )}
+                    {filteredTags.length === 0 && !tagSearch.trim() && (
                       <div className="px-3 py-2 text-sm text-gray-500">برچسبی یافت نشد</div>
                     )}
                   </div>
