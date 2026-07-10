@@ -1,79 +1,22 @@
-"use client"
-
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { ArticleCard } from '@/components/articles/ArticleCard'
 
-export function LatestArticles() {
-  const [articles, setArticles] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+interface LatestArticle {
+  id: string
+  title: string
+  slug: string
+  excerpt: string
+  featured_image?: string
+  category: string
+  view_count: number
+  reading_time?: number
+  published_at: string
+  author_name?: string
+  averageRating?: number
+  ratingCount?: number
+  _count?: { comments: number }
+}
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('articles')
-          .select('*')
-          .eq('status', 'published')
-          .order('published_at', { ascending: false })
-          .limit(3)
-
-        if (error) {
-          console.error('Error loading articles:', error)
-          return
-        }
-
-        console.log('Latest Articles loaded:', data)
-
-        if (data) {
-          // Get unique author IDs
-          const authorIds = Array.from(new Set(data.map(a => a.author_id).filter(Boolean)))          
-
-          // Fetch author data separately
-          const authors = await Promise.all(
-            authorIds.map(async (id) => {
-              const { data: userData } = await supabase.auth.admin.getUserById(id)
-              return userData?.user ? { id, email: userData.user.email } : null
-            })
-          )
-
-          // Map articles with author info
-          const articlesWithAuthors = data
-            .filter(article => article.slug && article.slug !== 'null')
-            .map(article => ({
-              ...article,
-              author: article.author_id ? {
-                full_name: authors.find(a => a?.id === article.author_id)?.email?.split('@')[0] || 'کاربر',
-                avatar_url: null
-              } : null
-            }))
-          
-          setArticles(articlesWithAuthors)
-        }
-      } catch (e) {
-        console.error('failed to load latest articles', e)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    load()
-  }, [])
-
-  if (loading) {
-    return (
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h3 className="text-2xl font-bold text-gray-900 mb-6">آخرین مقالات</h3>
-        <div className="grid md:grid-cols-3 gap-4">
-          {[1,2,3].map(i => (
-            <div key={i} className="animate-pulse bg-gray-100 h-48 rounded-lg" />
-          ))}
-        </div>
-      </div>
-    )
-  }
-
+export function LatestArticles({ articles }: { articles: LatestArticle[] }) {
   if (articles.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-lg p-6">

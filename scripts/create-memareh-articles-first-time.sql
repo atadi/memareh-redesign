@@ -350,3 +350,15 @@ GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA memareh TO anon, authenticated;
 ALTER DEFAULT PRIVILEGES IN SCHEMA memareh GRANT SELECT ON TABLES TO anon;
 ALTER DEFAULT PRIVILEGES IN SCHEMA memareh GRANT ALL ON TABLES TO authenticated;
 ALTER DEFAULT PRIVILEGES IN SCHEMA memareh GRANT EXECUTE ON FUNCTIONS TO anon, authenticated;
+
+-- =============================================================================
+-- Webhook: Notify Next.js to revalidate cache when articles change
+-- Set a REVALIDATION_TOKEN env var in both Supabase and Vercel, then run:
+--   select net.http_post(
+--     url:='https://your-domain.vercel.app/api/revalidate',
+--     headers:='{"authorization":"Bearer <REVALIDATION_TOKEN>"}'::jsonb,
+--     body:='{"type":"article","slug":"' || NEW.slug || '"}'::jsonb
+--   );
+-- Enable via: Supabase Dashboard → Database → Webhooks → Create webhook
+--   Table: articles, Events: INSERT/UPDATE/DELETE
+-- =============================================================================

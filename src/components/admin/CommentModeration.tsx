@@ -102,7 +102,7 @@ export function CommentModeration() {
               p.id,
               {
                 content: p.content,
-                user: { full_name: parentProfileMap[p.user_id] || "کاربر" },
+                user: { full_name: parentProfileMap[p.user_id] || "گروه معماره" },
               },
             ]),
           );
@@ -111,7 +111,7 @@ export function CommentModeration() {
 
       const enriched = data.map((c) => ({
         ...c,
-        user: profileMap[c.user_id] || { full_name: "کاربر", avatar_url: null },
+        user: profileMap[c.user_id] || { full_name: "گروه معماره", avatar_url: null },
         parent: c.parent_id ? parentMap[c.parent_id] : null,
       }));
       setComments(enriched);

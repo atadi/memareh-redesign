@@ -1,5 +1,3 @@
-'use client'
-
 import { Phone, Calendar, UserCheck, CheckCircle } from 'lucide-react'
 
 export function HowItWorks() {

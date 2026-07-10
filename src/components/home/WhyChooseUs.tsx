@@ -1,10 +1,7 @@
-'use client'
-
 import { 
   Award, 
   Clock, 
   Shield, 
-  Users,
   ThumbsUp,
   Banknote
 } from 'lucide-react'

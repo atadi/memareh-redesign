@@ -1,8 +1,18 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { CommentSection } from "@/components/articles/CommentSection";
 
 export const revalidate = 300;
+
+export async function generateStaticParams() {
+  const adminClient = createSupabaseAdmin();
+  const { data } = await adminClient
+    .from("articles")
+    .select("slug")
+    .eq("status", "published");
+  return (data ?? []).map((a) => ({ slug: a.slug }));
+}
 
 const siteUrl = "https://www.memareh.com";
 
@@ -114,7 +124,7 @@ export default async function ArticlePage({
     content: c.content,
     created_at: c.created_at,
     parent_id: c.parent_id,
-    user: { full_name: "کاربر" },
+    user: { full_name: "گروه معماره" },
     like_count: 0,
     is_pinned: false,
     replies: [],

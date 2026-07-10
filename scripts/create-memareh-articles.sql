@@ -417,3 +417,8 @@ GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA memareh TO anon, authenticated;
 ALTER DEFAULT PRIVILEGES IN SCHEMA memareh GRANT SELECT ON TABLES TO anon;
 ALTER DEFAULT PRIVILEGES IN SCHEMA memareh GRANT ALL ON TABLES TO authenticated;
 ALTER DEFAULT PRIVILEGES IN SCHEMA memareh GRANT EXECUTE ON FUNCTIONS TO anon, authenticated;
+
+-- Webhook: Notify Next.js to revalidate cache when articles change
+-- Set REVALIDATION_TOKEN env var in Supabase & Vercel, then via dashboard:
+--   Database → Webhooks → Create webhook on articles (INSERT/UPDATE/DELETE)
+--   Body: {"type":"article","slug":"{{record.slug}}"}
