@@ -4,12 +4,12 @@ import { WhyChooseUs } from '@/components/home/WhyChooseUs'
 import { Testimonials } from '@/components/home/Testimonials'
 import { CTASection } from '@/components/home/CTASection'
 import { LatestArticles } from '@/components/home/LatestArticles'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/server-public'
 
 export const revalidate = 300
 
 export default async function HomePage() {
-  const supabase = await createClient()
+  const supabase = createPublicClient()
 
   const { data: rawArticles } = await supabase
     .from('articles')

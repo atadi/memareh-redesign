@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/server-public'
 import { ArticleCard } from '@/components/articles/ArticleCard'
 import { ArticlesSidebar } from '@/components/articles/ArticlesSidebar'
 import { BookOpen } from 'lucide-react'
@@ -11,7 +11,7 @@ interface PageProps {
 
 export default async function ArticlesPage({ searchParams }: PageProps) {
   const { category, sort } = await searchParams
-  const supabase = await createClient()
+  const supabase = createPublicClient()
 
   let query = supabase
     .from('articles')
