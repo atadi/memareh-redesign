@@ -119,12 +119,32 @@ export default async function ArticlePage({
     .eq("status", "approved")
     .order("created_at", { ascending: false });
 
+  // Resolve comment author names from profiles + admin check
+  const userIds = [...new Set((commentRows ?? []).map((c: any) => c.user_id).filter(Boolean))]
+
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, display_name")
+    .in("id", userIds)
+  const profileMap = Object.fromEntries(
+    (profiles ?? []).map((p: any) => [p.id, p.display_name]),
+  )
+
+  const { data: adminCheck } = await supabase
+    .rpc("check_admin_users", { user_ids: userIds })
+  const adminMap = Object.fromEntries(
+    (adminCheck ?? []).filter((a: any) => a.is_admin).map((a: any) => [a.user_id, true]),
+  )
+
   const comments = (commentRows ?? []).map((c: any) => ({
     id: c.id,
     content: c.content,
     created_at: c.created_at,
     parent_id: c.parent_id,
-    user: { full_name: "گروه معماره" },
+    user: {
+      full_name: profileMap[c.user_id]
+        || (adminMap[c.user_id] ? "گروه معماره" : "کاربر"),
+    },
     like_count: 0,
     is_pinned: false,
     replies: [],
