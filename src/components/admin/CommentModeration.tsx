@@ -74,7 +74,7 @@ export function CommentModeration() {
       const { data: adminCheck } = await supabase
         .rpc('check_admin_users', { user_ids: userIds })
       const adminMap = Object.fromEntries(
-        (adminCheck ?? []).filter(a => a.is_admin).map(a => [a.user_id, true]),
+        (adminCheck ?? []).filter((a: { is_admin: boolean }) => a.is_admin).map((a: { user_id: string }) => [a.user_id, true]),
       );
 
       // Fetch user profiles for each comment
