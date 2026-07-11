@@ -15,6 +15,7 @@ import {
   CheckCircle,
   AlertCircle,
   Menu,
+  LogOut,
 } from "lucide-react";
 import { ArticleModeration } from "@/components/admin/ArticleModeration";
 import { UserModeration } from "@/components/admin/UserModeration";
@@ -69,6 +70,14 @@ export default function AdminDashboard() {
       draftCount: draftCount ?? 0,
       totalViews,
     });
+  };
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut()
+    if (!error) {
+      router.push('/admin/login')
+      router.refresh()
+    }
   };
 
   const menuItems: Array<{
@@ -214,14 +223,16 @@ export default function AdminDashboard() {
         </nav>
 
         <div className="p-4 border-t border-gray-700/50">
-          <div
-            className={`flex items-center gap-3 ${!sidebarOpen && "justify-center"} px-2`}
+          <button
+            onClick={handleLogout}
+            className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-gray-300 hover:text-white hover:bg-white/5 ${!sidebarOpen && "justify-center px-0"}`}
+            title={!sidebarOpen ? "خروج" : undefined}
           >
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <LogOut className="w-5 h-5 shrink-0" />
             {sidebarOpen && (
-              <span className="text-xs text-gray-400">سیستم فعال</span>
+              <span className="text-sm font-medium">خروج</span>
             )}
-          </div>
+          </button>
         </div>
       </aside>
 

@@ -67,10 +67,17 @@ export function CommentModeration() {
       .order("created_at", { ascending: false });
 
     if (data) {
-      // Fetch user profiles for each comment
+      // Check which users are admin/staff
       const userIds = Array.from(
         new Set(data.map((c) => c.user_id).filter(Boolean)),
       );
+      const { data: adminCheck } = await supabase
+        .rpc('check_admin_users', { user_ids: userIds })
+      const adminMap = Object.fromEntries(
+        (adminCheck ?? []).filter(a => a.is_admin).map(a => [a.user_id, true]),
+      );
+
+      // Fetch user profiles for each comment
       const { data: profiles } = await supabase
         .from("profiles")
         .select("id, full_name, avatar_url")
@@ -102,7 +109,7 @@ export function CommentModeration() {
               p.id,
               {
                 content: p.content,
-                user: { full_name: parentProfileMap[p.user_id] || "گروه معماره" },
+                user: { full_name: parentProfileMap[p.user_id] || (adminMap[p.user_id] ? "گروه معماره" : "کاربر") },
               },
             ]),
           );
@@ -111,7 +118,7 @@ export function CommentModeration() {
 
       const enriched = data.map((c) => ({
         ...c,
-        user: profileMap[c.user_id] || { full_name: "گروه معماره", avatar_url: null },
+        user: profileMap[c.user_id] || { full_name: adminMap[c.user_id] ? "گروه معماره" : "کاربر", avatar_url: null },
         parent: c.parent_id ? parentMap[c.parent_id] : null,
       }));
       setComments(enriched);

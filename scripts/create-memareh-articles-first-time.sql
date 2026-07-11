@@ -330,6 +330,19 @@ BEFORE UPDATE ON memareh.article_comments
 FOR EACH ROW
 EXECUTE FUNCTION memareh.update_comment_updated_at();
 
+-- 14) Function: check if given user IDs belong to admin users
+CREATE OR REPLACE FUNCTION memareh.check_admin_users(user_ids uuid[])
+RETURNS TABLE(user_id uuid, is_admin boolean)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+AS $$
+  SELECT id AS user_id,
+    COALESCE((raw_app_meta_data ->> 'role') = 'admin', false) AS is_admin
+  FROM auth.users
+  WHERE id = ANY(user_ids);
+$$;
+
 -- =============================================================================
 -- Schema permissions for Supabase (anon / authenticated)
 -- =============================================================================
@@ -343,7 +356,7 @@ GRANT SELECT ON ALL TABLES IN SCHEMA memareh TO anon;
 -- Authenticated (admin users): full CRUD
 GRANT ALL ON ALL TABLES IN SCHEMA memareh TO authenticated;
 
--- Allow executing functions (auto_publish_scheduled, etc.)
+-- Allow executing functions (auto_publish_scheduled, check_admin_users, etc.)
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA memareh TO anon, authenticated;
 
 -- Apply to future tables/functions as well
