@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { createPublicClient } from "@/lib/supabase/server-public";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { CommentSection } from "@/components/articles/CommentSection";
+import { RelatedArticles } from "@/components/articles/RelatedArticles";
 
 export const revalidate = 300;
 
@@ -207,6 +208,13 @@ export default async function ArticlePage({
             dangerouslySetInnerHTML={{ __html: article.content }}
           />
         </main>
+
+        <section className="max-w-4xl mx-auto px-6 py-10">
+          <RelatedArticles
+            currentArticleId={article.id}
+            category={article.category}
+          />
+        </section>
 
         <section className="max-w-4xl mx-auto px-6 py-10">
           <CommentSection
