@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
@@ -157,15 +157,7 @@ export function RelatedArticles({ currentArticleId, category }: RelatedArticlesP
           >
             {/* Article Image */}
             {article.featured_image ? (
-              <div className="aspect-video relative overflow-hidden">
-                <Image
-                  src={article.featured_image}
-                  alt={article.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
+              <ArticleImage src={article.featured_image} alt={article.title} />
             ) : (
               <div className="aspect-video bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
                 <BookOpen className="w-16 h-16 text-blue-300" />
@@ -224,6 +216,29 @@ export function RelatedArticles({ currentArticleId, category }: RelatedArticlesP
           <ChevronLeft className="w-4 h-4" />
         </Link>
       </div>
+    </div>
+  )
+}
+
+function ArticleImage({ src, alt }: { src: string; alt: string }) {
+  const [imgError, setImgError] = useState(false)
+  if (imgError || !src.startsWith('http')) {
+    return (
+      <div className="aspect-video bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
+        <BookOpen className="w-16 h-16 text-blue-300" />
+      </div>
+    )
+  }
+  return (
+    <div className="aspect-video relative overflow-hidden">
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        onError={() => setImgError(true)}
+        className="object-cover group-hover:scale-105 transition-transform duration-300"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
     </div>
   )
 }

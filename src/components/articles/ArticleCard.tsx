@@ -90,7 +90,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
       <Link href={`/articles/${article.slug}`}>
         {/* Image Section */}
         <div className="aspect-video relative overflow-hidden bg-gray-100">
-          {article.featured_image ? (
+          {article.featured_image && article.featured_image.startsWith('http') ? (
             <img
               src={article.featured_image}
               alt={article.title}
@@ -113,7 +113,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
               </svg>
             </div>
           )}
-          
+
           {/* Category Badge */}
           <div className="absolute top-3 right-3">
             <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(article.category)}`}>
