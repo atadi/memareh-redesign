@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { revalidateArticle } from "@/actions/revalidate";
 import {
   Check,
   X,
@@ -145,6 +146,8 @@ export function CommentModeration() {
 
     if (!error) {
       toast.success("نظر تایید شد");
+      const comment = comments.find((c) => c.id === commentId);
+      if (comment?.article?.slug) revalidateArticle(comment.article.slug);
       setComments(comments.filter((c) => c.id !== commentId));
     }
   };
@@ -160,6 +163,8 @@ export function CommentModeration() {
 
     if (!error) {
       toast.success("نظر رد شد");
+      const comment = comments.find((c) => c.id === commentId);
+      if (comment?.article?.slug) revalidateArticle(comment.article.slug);
       setComments(comments.filter((c) => c.id !== commentId));
     }
   };
@@ -174,6 +179,8 @@ export function CommentModeration() {
 
     if (!error) {
       toast.success("نظر حذف شد");
+      const comment = comments.find((c) => c.id === commentId);
+      if (comment?.article?.slug) revalidateArticle(comment.article.slug);
       setComments(comments.filter((c) => c.id !== commentId));
     }
   };

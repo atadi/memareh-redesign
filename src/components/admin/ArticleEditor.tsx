@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { createClient } from '@/lib/supabase/client'
+import { revalidateArticle } from '@/actions/revalidate'
 import { uploadFeaturedImage, deleteStorageFile, uploadContentImage, uploadVideoFile } from '@/lib/uploadImage'
 import {
   Save,
@@ -567,6 +568,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
 
       toast.success(article?.id ? 'مقاله با موفقیت بروزرسانی شد' : 'مقاله با موفقیت ایجاد شد')
       onSave()
+      revalidateArticle(data.slug).catch(() => {})
     } catch (err) {
       toast.error('خطای غیرمنتظره')
     } finally {
