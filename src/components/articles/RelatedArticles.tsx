@@ -42,7 +42,7 @@ export function RelatedArticles({ currentArticleId, category }: RelatedArticlesP
         view_count,
         reading_time,
         published_at,
-        author:profiles(full_name),
+        author:profiles(display_name),
         ratings:article_ratings(rating)
       `)
       .eq('status', 'published')
@@ -64,7 +64,7 @@ export function RelatedArticles({ currentArticleId, category }: RelatedArticlesP
           view_count,
           reading_time,
           published_at,
-          author:profiles(full_name),
+          author:profiles(display_name),
           ratings:article_ratings(rating)
         `)
         .eq('status', 'published')
@@ -207,7 +207,7 @@ export function RelatedArticles({ currentArticleId, category }: RelatedArticlesP
 
               {/* Author */}
               <div className="mt-3 pt-3 border-t text-xs text-gray-600">
-                نویسنده: {article.author?.full_name}
+                نویسنده: {article.author?.display_name}
               </div>
             </div>
           </Link>

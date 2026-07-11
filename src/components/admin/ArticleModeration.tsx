@@ -66,9 +66,9 @@ export function ArticleModeration({ onBack }: { onBack?: () => void }) {
   }, []);
 
   const loadProfiles = async () => {
-    const { data } = await supabase.from("profiles").select("id, full_name");
+    const { data } = await supabase.from("profiles").select("id, display_name");
     if (data) {
-      setProfiles(Object.fromEntries(data.map((p) => [p.id, p.full_name])));
+      setProfiles(Object.fromEntries(data.map((p) => [p.id, p.display_name])));
     }
   };
 

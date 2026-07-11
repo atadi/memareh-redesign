@@ -80,7 +80,7 @@ export function CommentModeration() {
       // Fetch user profiles for each comment
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, full_name, avatar_url")
+        .select("id, display_name, avatar_url")
         .in("id", userIds);
 
       const profileMap = Object.fromEntries(
@@ -99,10 +99,10 @@ export function CommentModeration() {
           const parentUserIds = [...new Set(parents.map((p) => p.user_id))];
           const { data: parentProfiles } = await supabase
             .from("profiles")
-            .select("id, full_name")
+            .select("id, display_name")
             .in("id", parentUserIds);
           const parentProfileMap = Object.fromEntries(
-            (parentProfiles ?? []).map((p) => [p.id, p.full_name]),
+            (parentProfiles ?? []).map((p) => [p.id, p.display_name]),
           );
           parentMap = Object.fromEntries(
             parents.map((p) => [
@@ -118,7 +118,10 @@ export function CommentModeration() {
 
       const enriched = data.map((c) => ({
         ...c,
-        user: profileMap[c.user_id] || { full_name: adminMap[c.user_id] ? "گروه معماره" : "کاربر", avatar_url: null },
+        user: {
+          full_name: profileMap[c.user_id]?.display_name || (adminMap[c.user_id] ? "گروه معماره" : "کاربر"),
+          avatar_url: profileMap[c.user_id]?.avatar_url || null,
+        },
         parent: c.parent_id ? parentMap[c.parent_id] : null,
       }));
       setComments(enriched);

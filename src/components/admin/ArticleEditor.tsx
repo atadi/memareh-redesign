@@ -106,7 +106,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
   const [isUploading, setIsUploading] = useState(false)
 
   // Author & tags
-  const [authors, setAuthors] = useState<{ id: string; full_name: string }[]>([])
+  const [authors, setAuthors] = useState<{ id: string; display_name: string }[]>([])
   const [selectedAuthorId, setSelectedAuthorId] = useState('')
   const [tags, setTags] = useState<ArticleTag[]>([])
   const [selectedTags, setSelectedTags] = useState<ArticleTag[]>([])
@@ -162,9 +162,9 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
   const loadAuthors = async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('id, full_name')
-      .in('role', ['admin', 'technician'])
-      .order('full_name')
+      .select('id, display_name')
+      .not('display_name', 'eq', '')
+      .order('display_name')
     if (data) setAuthors(data)
   }
 
@@ -411,7 +411,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      const authorName = authors.find(a => a.id === selectedAuthorId)?.full_name
+      const authorName = authors.find(a => a.id === selectedAuthorId)?.display_name
         || user?.user_metadata?.display_name
         || 'کاربر'
       const authorId = selectedAuthorId || user?.id
@@ -701,7 +701,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
                     className={`${inputClasses} pr-10`}>
                     <option value="">نویسنده پیش‌فرض (من)</option>
                     {authors.map(a => (
-                      <option key={a.id} value={a.id}>{a.full_name}</option>
+                      <option key={a.id} value={a.id}>{a.display_name}</option>
                     ))}
                   </select>
                 </div>

@@ -127,7 +127,7 @@ export default async function ArticlePage({
     .select("id, display_name")
     .in("id", userIds)
   const profileMap = Object.fromEntries(
-    (profiles ?? []).map((p: any) => [p.id, p.display_name]),
+    (profiles ?? []).map((p: any) => [p.id, p]),
   )
 
   const { data: adminCheck } = await supabase
@@ -142,7 +142,7 @@ export default async function ArticlePage({
     created_at: c.created_at,
     parent_id: c.parent_id,
     user: {
-      full_name: profileMap[c.user_id]
+      full_name: profileMap[c.user_id]?.display_name
         || (adminMap[c.user_id] ? "گروه معماره" : "کاربر"),
     },
     like_count: 0,

@@ -42,6 +42,11 @@ CREATE POLICY "Users read own profile"
   ON memareh.profiles FOR SELECT
   USING (auth.uid() = id);
 
+-- Public read for comment display (display_name is not sensitive)
+CREATE POLICY "Anyone can read profiles"
+  ON memareh.profiles FOR SELECT
+  USING (true);
+
 CREATE POLICY "Users update own profile"
   ON memareh.profiles FOR UPDATE
   USING (auth.uid() = id)
@@ -49,4 +54,5 @@ CREATE POLICY "Users update own profile"
 
 -- 4) Grants
 GRANT USAGE ON SCHEMA memareh TO anon, authenticated;
+GRANT SELECT ON memareh.profiles TO anon;
 GRANT SELECT, INSERT, UPDATE ON memareh.profiles TO authenticated;
