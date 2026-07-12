@@ -336,15 +336,24 @@ $$;
 CREATE TABLE IF NOT EXISTS memareh.article_comments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   article_id uuid NOT NULL REFERENCES memareh.articles(id) ON DELETE CASCADE,
-  user_id uuid NOT NULL,
+  user_id uuid,
   parent_id uuid REFERENCES memareh.article_comments(id) ON DELETE CASCADE,
   content text NOT NULL,
   status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
   rejection_reason text,
   approved_by uuid,
   approved_at timestamptz,
+  guest_name text,
+  guest_email text,
+  guest_token uuid,
   created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
+  updated_at timestamptz DEFAULT now(),
+  CONSTRAINT article_comments_guest_name_required
+    CHECK (
+      (user_id IS NOT NULL)
+      OR
+      (user_id IS NULL AND guest_name IS NOT NULL AND trim(guest_name) <> '')
+    )
 );
 
 CREATE TABLE IF NOT EXISTS memareh.comment_likes (
@@ -364,6 +373,7 @@ ALTER TABLE memareh.comment_likes ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Public read approved comments" ON memareh.article_comments;
 DROP POLICY IF EXISTS "Auth users insert comments" ON memareh.article_comments;
+DROP POLICY IF EXISTS "Anonymous users insert comments" ON memareh.article_comments;
 DROP POLICY IF EXISTS "Users read own comments" ON memareh.article_comments;
 DROP POLICY IF EXISTS "Admin manage comments" ON memareh.article_comments;
 DROP POLICY IF EXISTS "Auth manage likes" ON memareh.comment_likes;
@@ -381,7 +391,22 @@ USING (auth.uid() = user_id);
 CREATE POLICY "Auth users insert comments"
 ON memareh.article_comments
 FOR INSERT
-WITH CHECK (auth.uid() IS NOT NULL AND auth.uid() = user_id AND status = 'pending');
+WITH CHECK (
+  auth.uid() IS NOT NULL
+  AND auth.uid() = user_id
+  AND status = 'pending'
+);
+
+CREATE POLICY "Anonymous users insert comments"
+ON memareh.article_comments
+FOR INSERT
+WITH CHECK (
+  auth.uid() IS NULL
+  AND status = 'pending'
+  AND user_id IS NULL
+  AND guest_name IS NOT NULL
+  AND trim(guest_name) <> ''
+);
 
 CREATE POLICY "Admin manage comments"
 ON memareh.article_comments
@@ -412,6 +437,7 @@ EXECUTE FUNCTION memareh.update_comment_updated_at();
 -- Schema permissions for Supabase roles
 GRANT USAGE ON SCHEMA memareh TO anon, authenticated;
 GRANT SELECT ON ALL TABLES IN SCHEMA memareh TO anon;
+GRANT INSERT ON memareh.article_comments TO anon;
 GRANT ALL ON ALL TABLES IN SCHEMA memareh TO authenticated;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA memareh TO anon, authenticated;
 ALTER DEFAULT PRIVILEGES IN SCHEMA memareh GRANT SELECT ON TABLES TO anon;

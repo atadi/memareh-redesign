@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { 
   MessageCircle, 
@@ -41,7 +41,16 @@ export function CommentSection({ articleId, comments: initialComments, allowComm
   const [replyTo, setReplyTo] = useState<string | null>(null)
   const [replyContent, setReplyContent] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [user, setUser] = useState<any>(null)
+  const [guestName, setGuestName] = useState('')
+  const [guestEmail, setGuestEmail] = useState('')
   const supabase = createClient()
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user)
+    })
+  }, [supabase])
 
   // سازماندهی نظرات به صورت درختی
   const organizeComments = (comments: Comment[]): Comment[] => {
@@ -74,28 +83,41 @@ export function CommentSection({ articleId, comments: initialComments, allowComm
   }
 
   const handleSubmitComment = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    if (!user) {
-      toast.error('برای ارسال نظر باید وارد شوید')
-      return
-    }
-
     if (!newComment.trim()) {
       toast.error('لطفا نظر خود را وارد کنید')
       return
     }
 
+    if (!user && !guestName.trim()) {
+      toast.error('لطفا نام خود را وارد کنید')
+      return
+    }
+
     setSubmitting(true)
 
-    const { data, error } = await supabase
+    const insertData: any = {
+      article_id: articleId,
+      content: newComment,
+      status: 'pending'
+    }
+
+    if (user) {
+      insertData.user_id = user.id
+    } else {
+      insertData.guest_name = guestName.trim()
+      if (guestEmail.trim()) insertData.guest_email = guestEmail.trim()
+
+      let token = localStorage.getItem('guest_token')
+      if (!token) {
+        token = crypto.randomUUID()
+        localStorage.setItem('guest_token', token)
+      }
+      insertData.guest_token = token
+    }
+
+    const { error } = await supabase
       .from('article_comments')
-      .insert({
-        article_id: articleId,
-        user_id: user.id,
-        content: newComment,
-        status: 'pending'
-      })
+      .insert(insertData)
       .select()
       .single()
 
@@ -104,35 +126,52 @@ export function CommentSection({ articleId, comments: initialComments, allowComm
     } else {
       toast.success('نظر شما پس از تایید مدیر نمایش داده خواهد شد')
       setNewComment('')
+      if (!user) {
+        setGuestName('')
+        setGuestEmail('')
+      }
     }
 
     setSubmitting(false)
   }
 
   const handleSubmitReply = async (parentId: string) => {
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    if (!user) {
-      toast.error('برای ارسال پاسخ باید وارد شوید')
-      return
-    }
-
     if (!replyContent.trim()) {
       toast.error('لطفا پاسخ خود را وارد کنید')
       return
     }
 
+    if (!user && !guestName.trim()) {
+      toast.error('لطفا نام خود را وارد کنید')
+      return
+    }
+
     setSubmitting(true)
+
+    const insertData: any = {
+      article_id: articleId,
+      content: replyContent,
+      parent_id: parentId,
+      status: 'pending'
+    }
+
+    if (user) {
+      insertData.user_id = user.id
+    } else {
+      insertData.guest_name = guestName.trim()
+      if (guestEmail.trim()) insertData.guest_email = guestEmail.trim()
+
+      let token = localStorage.getItem('guest_token')
+      if (!token) {
+        token = crypto.randomUUID()
+        localStorage.setItem('guest_token', token)
+      }
+      insertData.guest_token = token
+    }
 
     const { error } = await supabase
       .from('article_comments')
-      .insert({
-        article_id: articleId,
-        user_id: user.id,
-        content: replyContent,
-        parent_id: parentId,
-        status: 'pending'
-      })
+      .insert(insertData)
 
     if (error) {
       toast.error('خطا در ارسال پاسخ')
@@ -140,6 +179,10 @@ export function CommentSection({ articleId, comments: initialComments, allowComm
       toast.success('پاسخ شما پس از تایید نمایش داده خواهد شد')
       setReplyContent('')
       setReplyTo(null)
+      if (!user) {
+        setGuestName('')
+        setGuestEmail('')
+      }
     }
 
     setSubmitting(false)
@@ -255,6 +298,26 @@ export function CommentSection({ articleId, comments: initialComments, allowComm
           {/* Reply Form */}
           {replyTo === comment.id && (
             <div className="mt-3 mr-12">
+              {!user && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                  <input
+                    type="text"
+                    value={guestName}
+                    onChange={(e) => setGuestName(e.target.value)}
+                    placeholder="نام شما *"
+                    className="px-4 py-2 border rounded-lg"
+                    disabled={submitting}
+                  />
+                  <input
+                    type="email"
+                    value={guestEmail}
+                    onChange={(e) => setGuestEmail(e.target.value)}
+                    placeholder="ایمیل (اختیاری)"
+                    className="px-4 py-2 border rounded-lg"
+                    disabled={submitting}
+                  />
+                </div>
+              )}
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -309,6 +372,26 @@ export function CommentSection({ articleId, comments: initialComments, allowComm
       {/* New Comment Form */}
       {allowComments ? (
         <div className="bg-gray-50 p-4 rounded-lg">
+          {!user && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+              <input
+                type="text"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                placeholder="نام شما *"
+                className="px-4 py-2 border rounded-lg"
+                disabled={submitting}
+              />
+              <input
+                type="email"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                placeholder="ایمیل (اختیاری)"
+                className="px-4 py-2 border rounded-lg"
+                disabled={submitting}
+              />
+            </div>
+          )}
           <textarea
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}

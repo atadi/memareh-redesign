@@ -94,10 +94,10 @@ export function CommentModeration() {
       if (parentIds.length > 0) {
         const { data: parents } = await supabase
           .from("article_comments")
-          .select("id, content, user_id")
+          .select("id, content, user_id, guest_name")
           .in("id", parentIds);
         if (parents) {
-          const parentUserIds = [...new Set(parents.map((p) => p.user_id))];
+          const parentUserIds = [...new Set(parents.map((p) => p.user_id).filter(Boolean))];
           const { data: parentProfiles } = await supabase
             .from("profiles")
             .select("id, display_name")
@@ -106,25 +106,41 @@ export function CommentModeration() {
             (parentProfiles ?? []).map((p) => [p.id, p.display_name]),
           );
           parentMap = Object.fromEntries(
-            parents.map((p) => [
-              p.id,
-              {
-                content: p.content,
-                user: { full_name: parentProfileMap[p.user_id] || (adminMap[p.user_id] ? "گروه معماره" : "کاربر") },
-              },
-            ]),
+            parents.map((p) => {
+              let full_name: string
+              if (p.user_id) {
+                full_name = parentProfileMap[p.user_id] || (adminMap[p.user_id] ? "گروه معماره" : "کاربر")
+              } else {
+                full_name = p.guest_name?.trim() ? `${p.guest_name.trim()} (مهمان)` : "کاربر مهمان"
+              }
+              return [
+                p.id,
+                {
+                  content: p.content,
+                  user: { full_name },
+                },
+              ]
+            }),
           );
         }
       }
 
-      const enriched = data.map((c) => ({
-        ...c,
-        user: {
-          full_name: profileMap[c.user_id]?.display_name || (adminMap[c.user_id] ? "گروه معماره" : "کاربر"),
-          avatar_url: profileMap[c.user_id]?.avatar_url || null,
-        },
-        parent: c.parent_id ? parentMap[c.parent_id] : null,
-      }));
+      const enriched = data.map((c) => {
+        let full_name: string
+        let avatar_url: string | null = null
+        if (c.user_id) {
+          full_name = profileMap[c.user_id]?.display_name || (adminMap[c.user_id] ? "گروه معماره" : "کاربر")
+          avatar_url = profileMap[c.user_id]?.avatar_url || null
+        } else {
+          full_name = c.guest_name?.trim() ? `${c.guest_name.trim()} (مهمان)` : "کاربر مهمان"
+        }
+
+        return {
+          ...c,
+          user: { full_name, avatar_url },
+          parent: c.parent_id ? parentMap[c.parent_id] : null,
+        }
+      });
       setComments(enriched);
     }
     setLoading(false);

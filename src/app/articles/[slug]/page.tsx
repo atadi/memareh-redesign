@@ -137,19 +137,28 @@ export default async function ArticlePage({
     (adminCheck ?? []).filter((a: any) => a.is_admin).map((a: any) => [a.user_id, true]),
   )
 
-  const comments = (commentRows ?? []).map((c: any) => ({
-    id: c.id,
-    content: c.content,
-    created_at: c.created_at,
-    parent_id: c.parent_id,
-    user: {
-      full_name: profileMap[c.user_id]?.display_name
-        || (adminMap[c.user_id] ? "گروه معماره" : "کاربر"),
-    },
-    like_count: 0,
-    is_pinned: false,
-    replies: [],
-  }));
+  const comments = (commentRows ?? []).map((c: any) => {
+    let full_name: string
+    if (c.user_id) {
+      full_name = profileMap[c.user_id]?.display_name
+        || (adminMap[c.user_id] ? "گروه معماره" : "کاربر")
+    } else {
+      full_name = c.guest_name?.trim() || "کاربر مهمان"
+    }
+
+    return {
+      id: c.id,
+      content: c.content,
+      created_at: c.created_at,
+      parent_id: c.parent_id,
+      user: {
+        full_name,
+      },
+      like_count: 0,
+      is_pinned: false,
+      replies: [],
+    }
+  });
 
   const articleUrl = `${siteUrl}/articles/${slug}`;
   const image =

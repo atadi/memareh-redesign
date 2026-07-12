@@ -325,39 +325,48 @@ export interface Database {
         Row: {
           id: string
           article_id: string
-          user_id: string
+          user_id: string | null
           parent_id: string | null
           content: string
           status: 'pending' | 'approved' | 'rejected'
           rejection_reason: string | null
           approved_by: string | null
           approved_at: string | null
+          guest_name: string | null
+          guest_email: string | null
+          guest_token: string | null
           created_at: string | null
           updated_at: string | null
         }
         Insert: {
           id?: string
           article_id: string
-          user_id: string
+          user_id?: string | null
           parent_id?: string | null
           content: string
           status?: 'pending' | 'approved' | 'rejected'
           rejection_reason?: string | null
           approved_by?: string | null
           approved_at?: string | null
+          guest_name?: string | null
+          guest_email?: string | null
+          guest_token?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
         Update: {
           id?: string
           article_id?: string
-          user_id?: string
+          user_id?: string | null
           parent_id?: string | null
           content?: string
           status?: 'pending' | 'approved' | 'rejected'
           rejection_reason?: string | null
           approved_by?: string | null
           approved_at?: string | null
+          guest_name?: string | null
+          guest_email?: string | null
+          guest_token?: string | null
           created_at?: string | null
           updated_at?: string | null
         }

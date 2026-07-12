@@ -122,3 +122,13 @@ Add scripts or supporting files only when the skill genuinely requires runnable 
 All paths in this repository should reference `.agents/...`.
 
 Do not reference `.claude/...` unless that directory is intentionally added later.
+
+# Vercel safety rules
+
+- Only operate on the Vercel project associated with this repository.
+- Before every mutation, state the Vercel project name and project ID.
+- Never create, delete, rename, transfer, or modify another Vercel project.
+- Never modify production environment variables without explicit approval.
+- Never delete deployments, domains, projects, or environment variables.
+- Prefer preview deployments over production deployments.
+- Ask for confirmation before promoting or deploying to production.
