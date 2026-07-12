@@ -2,20 +2,19 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { 
-  MessageCircle, 
-  Send, 
-  ThumbsUp, 
+import {
+  MessageCircle,
+  Send,
+  ThumbsUp,
   Reply,
   Pin,
   User,
-  Clock
 } from 'lucide-react'
-import { format, formatDistanceToNow } from 'date-fns-jalali'
+import { formatDistanceToNow } from 'date-fns-jalali'
 import { faIR } from 'date-fns/locale'
 import toast from 'react-hot-toast'
 
-interface Comment {
+export interface Comment {
   id: string
   content: string
   created_at: string
@@ -35,224 +34,51 @@ interface CommentSectionProps {
   allowComments: boolean
 }
 
-export function CommentSection({ articleId, comments: initialComments, allowComments }: CommentSectionProps) {
-  const [comments, setComments] = useState(initialComments)
-  const [newComment, setNewComment] = useState('')
-  const [replyTo, setReplyTo] = useState<string | null>(null)
-  const [replyContent, setReplyContent] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const [guestName, setGuestName] = useState('')
-  const [guestEmail, setGuestEmail] = useState('')
-  const supabase = createClient()
+interface CommentItemProps {
+  comment: Comment
+  depth?: number
+  user: any
+  guestName: string
+  guestEmail: string
+  setGuestName: (value: string) => void
+  setGuestEmail: (value: string) => void
+  replyTo: string | null
+  setReplyTo: (id: string | null) => void
+  replyContent: string
+  setReplyContent: (value: string) => void
+  submitting: boolean
+  allowComments: boolean
+  handleLikeComment: (commentId: string) => void
+  handleSubmitReply: (parentId: string) => void
+}
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user)
-    })
-  }, [supabase])
+function CommentItem({
+  comment,
+  depth = 0,
+  user,
+  guestName,
+  guestEmail,
+  setGuestName,
+  setGuestEmail,
+  replyTo,
+  setReplyTo,
+  replyContent,
+  setReplyContent,
+  submitting,
+  allowComments,
+  handleLikeComment,
+  handleSubmitReply,
+}: CommentItemProps) {
+  const hasReplies = comment.replies && comment.replies.length > 0
 
-  // سازماندهی نظرات به صورت درختی
-  const organizeComments = (comments: Comment[]): Comment[] => {
-    const commentMap = new Map()
-    const roots: Comment[] = []
-
-    // ابتدا همه نظرات را در Map قرار می‌دهیم
-    comments.forEach(comment => {
-      commentMap.set(comment.id, { ...comment, replies: [] })
-    })
-
-    // سپس پاسخ‌ها را به والدین متصل می‌کنیم
-    comments.forEach(comment => {
-      if (comment.parent_id) {
-        const parent = commentMap.get(comment.parent_id)
-        if (parent) {
-          parent.replies.push(commentMap.get(comment.id))
-        }
-      } else {
-        roots.push(commentMap.get(comment.id))
-      }
-    })
-
-    // نظرات پین شده را در ابتدا قرار می‌دهیم
-    return roots.sort((a, b) => {
-      if (a.is_pinned && !b.is_pinned) return -1
-      if (!a.is_pinned && b.is_pinned) return 1
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    })
-  }
-
-  const handleSubmitComment = async () => {
-    if (!newComment.trim()) {
-      toast.error('لطفا نظر خود را وارد کنید')
-      return
-    }
-
-    if (!user && !guestName.trim()) {
-      toast.error('لطفا نام خود را وارد کنید')
-      return
-    }
-
-    setSubmitting(true)
-
-    const insertData: any = {
-      article_id: articleId,
-      content: newComment,
-      status: 'pending'
-    }
-
-    if (user) {
-      insertData.user_id = user.id
-    } else {
-      insertData.guest_name = guestName.trim()
-      if (guestEmail.trim()) insertData.guest_email = guestEmail.trim()
-
-      let token = localStorage.getItem('guest_token')
-      if (!token) {
-        token = crypto.randomUUID()
-        localStorage.setItem('guest_token', token)
-      }
-      insertData.guest_token = token
-    }
-
-    if (!user) {
-      // Clear any stale/expired auth token so anonymous requests don't 401
-      try {
-        await supabase.auth.signOut({ scope: 'local' })
-      } catch {
-        // ignore
-      }
-    }
-
-    const { error } = await supabase
-      .from('article_comments')
-      .insert(insertData)
-
-    if (error) {
-      toast.error('خطا در ارسال نظر')
-    } else {
-      toast.success('نظر شما پس از تایید مدیر سایت نمایش داده خواهد شد')
-      setNewComment('')
-      if (!user) {
-        setGuestName('')
-        setGuestEmail('')
-      }
-    }
-
-    setSubmitting(false)
-  }
-
-  const handleSubmitReply = async (parentId: string) => {
-    if (!replyContent.trim()) {
-      toast.error('لطفا پاسخ خود را وارد کنید')
-      return
-    }
-
-    if (!user && !guestName.trim()) {
-      toast.error('لطفا نام خود را وارد کنید')
-      return
-    }
-
-    setSubmitting(true)
-
-    const insertData: any = {
-      article_id: articleId,
-      content: replyContent,
-      parent_id: parentId,
-      status: 'pending'
-    }
-
-    if (user) {
-      insertData.user_id = user.id
-    } else {
-      insertData.guest_name = guestName.trim()
-      if (guestEmail.trim()) insertData.guest_email = guestEmail.trim()
-
-      let token = localStorage.getItem('guest_token')
-      if (!token) {
-        token = crypto.randomUUID()
-        localStorage.setItem('guest_token', token)
-      }
-      insertData.guest_token = token
-    }
-
-    if (!user) {
-      try {
-        await supabase.auth.signOut({ scope: 'local' })
-      } catch {
-        // ignore
-      }
-    }
-
-    const { error } = await supabase
-      .from('article_comments')
-      .insert(insertData)
-
-    if (error) {
-      toast.error('خطا در ارسال پاسخ')
-    } else {
-      toast.success('پاسخ شما پس از تایید نمایش داده خواهد شد')
-      setReplyContent('')
-      setReplyTo(null)
-      if (!user) {
-        setGuestName('')
-        setGuestEmail('')
-      }
-    }
-
-    setSubmitting(false)
-  }
-
-  const handleLikeComment = async (commentId: string) => {
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    if (!user) {
-      toast.error('برای پسندیدن نظر باید وارد شوید')
-      return
-    }
-
-    const { error } = await supabase
-      .from('comment_likes')
-      .insert({
-        comment_id: commentId,
-        user_id: user.id
-      })
-
-    if (error?.code === '23505') {
-      // حذف لایک
-      await supabase
-        .from('comment_likes')
-        .delete()
-        .match({ comment_id: commentId, user_id: user.id })
-      
-      // بروزرسانی تعداد لایک در state
-      setComments(prev => 
-        prev.map(c => 
-          c.id === commentId 
-            ? { ...c, like_count: c.like_count - 1 }
-            : c
-        )
-      )
-    } else if (!error) {
-      // بروزرسانی تعداد لایک در state
-      setComments(prev => 
-        prev.map(c => 
-          c.id === commentId 
-            ? { ...c, like_count: c.like_count + 1 }
-            : c
-        )
-      )
-    }
-  }
-
-  const CommentItem = ({ comment, depth = 0 }: { comment: Comment, depth?: number }) => (
+  return (
     <div className={`${depth > 0 ? 'mr-8 border-r-2 border-gray-200 pr-4' : ''}`}>
       <div className="flex gap-3 mb-4">
         {/* Avatar */}
         <div className="flex-shrink-0">
           {comment.user.avatar_url ? (
-            <img 
-              src={comment.user.avatar_url} 
+            <img
+              src={comment.user.avatar_url}
               alt={comment.user.full_name}
               className="w-10 h-10 rounded-full"
             />
@@ -277,9 +103,9 @@ export function CommentSection({ articleId, comments: initialComments, allowComm
                   </span>
                 )}
                 <span className="text-sm text-gray-500 mr-2">
-                  {formatDistanceToNow(new Date(comment.created_at), { 
+                  {formatDistanceToNow(new Date(comment.created_at), {
                     addSuffix: true,
-                    locale: faIR 
+                    locale: faIR,
                   })}
                 </span>
               </div>
@@ -297,7 +123,7 @@ export function CommentSection({ articleId, comments: initialComments, allowComm
                 <ThumbsUp className="w-4 h-4" />
                 <span>{comment.like_count || 0}</span>
               </button>
-              
+
               {allowComments && depth < 2 && (
                 <button
                   onClick={() => setReplyTo(comment.id)}
@@ -363,10 +189,27 @@ export function CommentSection({ articleId, comments: initialComments, allowComm
           )}
 
           {/* Replies */}
-          {comment.replies && comment.replies.length > 0 && (
+          {hasReplies && (
             <div className="mt-4">
-              {comment.replies.map(reply => (
-                <CommentItem key={reply.id} comment={reply} depth={depth + 1} />
+              {comment.replies!.map((reply) => (
+                <CommentItem
+                  key={reply.id}
+                  comment={reply}
+                  depth={depth + 1}
+                  user={user}
+                  guestName={guestName}
+                  guestEmail={guestEmail}
+                  setGuestName={setGuestName}
+                  setGuestEmail={setGuestEmail}
+                  replyTo={replyTo}
+                  setReplyTo={setReplyTo}
+                  replyContent={replyContent}
+                  setReplyContent={setReplyContent}
+                  submitting={submitting}
+                  allowComments={allowComments}
+                  handleLikeComment={handleLikeComment}
+                  handleSubmitReply={handleSubmitReply}
+                />
               ))}
             </div>
           )}
@@ -374,6 +217,204 @@ export function CommentSection({ articleId, comments: initialComments, allowComm
       </div>
     </div>
   )
+}
+
+export function CommentSection({ articleId, comments: initialComments, allowComments }: CommentSectionProps) {
+  const [comments, setComments] = useState(initialComments)
+  const [newComment, setNewComment] = useState('')
+  const [replyTo, setReplyTo] = useState<string | null>(null)
+  const [replyContent, setReplyContent] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [user, setUser] = useState<any>(null)
+  const [guestName, setGuestName] = useState('')
+  const [guestEmail, setGuestEmail] = useState('')
+  const supabase = createClient()
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user)
+    })
+  }, [supabase])
+
+  // سازماندهی نظرات به صورت درختی
+  const organizeComments = (rawComments: Comment[]): Comment[] => {
+    const commentMap = new Map<string, Comment & { replies: Comment[] }>()
+    const roots: Comment[] = []
+
+    rawComments.forEach((comment) => {
+      commentMap.set(comment.id, { ...comment, replies: [] })
+    })
+
+    rawComments.forEach((comment) => {
+      if (comment.parent_id) {
+        const parent = commentMap.get(comment.parent_id)
+        if (parent) {
+          parent.replies.push(commentMap.get(comment.id)!)
+        }
+      } else {
+        roots.push(commentMap.get(comment.id)!)
+      }
+    })
+
+    return roots.sort((a, b) => {
+      if (a.is_pinned && !b.is_pinned) return -1
+      if (!a.is_pinned && b.is_pinned) return 1
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
+  }
+
+  const handleSubmitComment = async () => {
+    if (!newComment.trim()) {
+      toast.error('لطفا نظر خود را وارد کنید')
+      return
+    }
+
+    if (!user && !guestName.trim()) {
+      toast.error('لطفا نام خود را وارد کنید')
+      return
+    }
+
+    setSubmitting(true)
+
+    const insertData: any = {
+      article_id: articleId,
+      content: newComment,
+      status: 'pending',
+    }
+
+    if (user) {
+      insertData.user_id = user.id
+    } else {
+      insertData.guest_name = guestName.trim()
+      if (guestEmail.trim()) insertData.guest_email = guestEmail.trim()
+
+      let token = localStorage.getItem('guest_token')
+      if (!token) {
+        token = crypto.randomUUID()
+        localStorage.setItem('guest_token', token)
+      }
+      insertData.guest_token = token
+    }
+
+    if (!user) {
+      // Clear any stale/expired auth token so anonymous requests don't 401
+      try {
+        await supabase.auth.signOut({ scope: 'local' })
+      } catch {
+        // ignore
+      }
+    }
+
+    const { error } = await supabase.from('article_comments').insert(insertData)
+
+    if (error) {
+      toast.error('خطا در ارسال نظر')
+    } else {
+      toast.success('نظر شما پس از تایید مدیر سایت نمایش داده خواهد شد')
+      setNewComment('')
+      if (!user) {
+        setGuestName('')
+        setGuestEmail('')
+      }
+    }
+
+    setSubmitting(false)
+  }
+
+  const handleSubmitReply = async (parentId: string) => {
+    if (!replyContent.trim()) {
+      toast.error('لطفا پاسخ خود را وارد کنید')
+      return
+    }
+
+    if (!user && !guestName.trim()) {
+      toast.error('لطفا نام خود را وارد کنید')
+      return
+    }
+
+    setSubmitting(true)
+
+    const insertData: any = {
+      article_id: articleId,
+      content: replyContent,
+      parent_id: parentId,
+      status: 'pending',
+    }
+
+    if (user) {
+      insertData.user_id = user.id
+    } else {
+      insertData.guest_name = guestName.trim()
+      if (guestEmail.trim()) insertData.guest_email = guestEmail.trim()
+
+      let token = localStorage.getItem('guest_token')
+      if (!token) {
+        token = crypto.randomUUID()
+        localStorage.setItem('guest_token', token)
+      }
+      insertData.guest_token = token
+    }
+
+    if (!user) {
+      try {
+        await supabase.auth.signOut({ scope: 'local' })
+      } catch {
+        // ignore
+      }
+    }
+
+    const { error } = await supabase.from('article_comments').insert(insertData)
+
+    if (error) {
+      toast.error('خطا در ارسال پاسخ')
+    } else {
+      toast.success('پاسخ شما پس از تایید نمایش داده خواهد شد')
+      setReplyContent('')
+      setReplyTo(null)
+      if (!user) {
+        setGuestName('')
+        setGuestEmail('')
+      }
+    }
+
+    setSubmitting(false)
+  }
+
+  const handleLikeComment = async (commentId: string) => {
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      toast.error('برای پسندیدن نظر باید وارد شوید')
+      return
+    }
+
+    const { error } = await supabase.from('comment_likes').insert({
+      comment_id: commentId,
+      user_id: user.id,
+    })
+
+    if (error?.code === '23505') {
+      // حذف لایک
+      await supabase
+        .from('comment_likes')
+        .delete()
+        .match({ comment_id: commentId, user_id: user.id })
+
+      // بروزرسانی تعداد لایک در state
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === commentId ? { ...c, like_count: c.like_count - 1 } : c
+        )
+      )
+    } else if (!error) {
+      // بروزرسانی تعداد لایک در state
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === commentId ? { ...c, like_count: c.like_count + 1 } : c
+        )
+      )
+    }
+  }
 
   const organizedComments = organizeComments(comments)
 
@@ -438,8 +479,24 @@ export function CommentSection({ articleId, comments: initialComments, allowComm
       {/* Comments List */}
       <div className="space-y-4">
         {organizedComments.length > 0 ? (
-          organizedComments.map(comment => (
-            <CommentItem key={comment.id} comment={comment} />
+          organizedComments.map((comment) => (
+            <CommentItem
+              key={comment.id}
+              comment={comment}
+              user={user}
+              guestName={guestName}
+              guestEmail={guestEmail}
+              setGuestName={setGuestName}
+              setGuestEmail={setGuestEmail}
+              replyTo={replyTo}
+              setReplyTo={setReplyTo}
+              replyContent={replyContent}
+              setReplyContent={setReplyContent}
+              submitting={submitting}
+              allowComments={allowComments}
+              handleLikeComment={handleLikeComment}
+              handleSubmitReply={handleSubmitReply}
+            />
           ))
         ) : (
           <div className="text-center py-8 text-gray-500">
