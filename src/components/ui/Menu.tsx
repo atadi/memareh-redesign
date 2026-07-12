@@ -8,13 +8,30 @@ import { useRouter } from 'next/navigation'
 
 export function Menu() {
   const [user, setUser] = useState<any>(null)
+  const [displayName, setDisplayName] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user)
+    supabase.auth.getUser().then(async ({ data }) => {
+      const currentUser = data.user
+      setUser(currentUser)
+
+      if (currentUser) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('id', currentUser.id)
+          .single()
+
+        setDisplayName(
+          profile?.display_name ||
+            currentUser.user_metadata?.display_name ||
+            'کاربر'
+        )
+      }
+
       setLoading(false)
     })
   }, [])
@@ -65,7 +82,7 @@ export function Menu() {
                   className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
                 >
                   <User className="w-4 h-4" />
-                  {user.user_metadata?.display_name || 'کاربر'}
+                  {displayName || 'کاربر'}
                 </Link>
                 <button
                   onClick={handleLogout}

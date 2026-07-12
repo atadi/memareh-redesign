@@ -1,6 +1,7 @@
 export const runtime = "nodejs";
 
 import "server-only";
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
 
@@ -9,7 +10,6 @@ export async function PATCH(
   ctx: { params: Promise<{ id: string }> }
 ) {
   try {
-    // ✅ THIS IS THE FIX
     const { id } = await ctx.params;
 
     const body = await req.json().catch(() => null);
@@ -24,10 +24,23 @@ export async function PATCH(
 
     const supabase = createSupabaseAdmin();
 
-    const { data, error } =
-      await supabase.auth.admin.updateUserById(id, {
-        user_metadata: { display_name },
-      });
+    // Update the public profile table (source of truth for comments)
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .upsert({ id, display_name });
+
+    if (profileError) {
+      console.error("Profile upsert error:", profileError);
+      return NextResponse.json(
+        { error: profileError.message },
+        { status: 500 }
+      );
+    }
+
+    // Keep auth metadata in sync for components that still read it
+    const { data, error } = await supabase.auth.admin.updateUserById(id, {
+      user_metadata: { display_name },
+    });
 
     if (error) {
       console.error("Supabase admin error:", error);
@@ -36,6 +49,10 @@ export async function PATCH(
         { status: 500 }
       );
     }
+
+    // Revalidate article pages so comments reflect the new display name
+    revalidatePath("/", "layout");
+    revalidatePath("/articles", "layout");
 
     return NextResponse.json({
       id: data.user.id,
