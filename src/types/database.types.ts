@@ -388,6 +388,29 @@ export interface Database {
           created_at?: string | null
         }
       }
+      article_ratings: {
+        Row: {
+          id: string
+          article_id: string
+          user_id: string
+          rating: number
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          article_id: string
+          user_id: string
+          rating: number
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          article_id?: string
+          user_id?: string
+          rating?: number
+          created_at?: string | null
+        }
+      }
     }
     Views: {
       article_tags_view: {
@@ -413,6 +436,14 @@ export interface Database {
       auto_publish_scheduled: {
         Args: Record<string, never>
         Returns: number
+      }
+      calculate_article_rating: {
+        Args: { article_uuid: string }
+        Returns: {
+          average_rating: number
+          total_ratings: number
+          rating_distribution: Json
+        }
       }
     }
     Enums: {}

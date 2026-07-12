@@ -115,16 +115,23 @@ export function CommentSection({ articleId, comments: initialComments, allowComm
       insertData.guest_token = token
     }
 
+    if (!user) {
+      // Clear any stale/expired auth token so anonymous requests don't 401
+      try {
+        await supabase.auth.signOut({ scope: 'local' })
+      } catch {
+        // ignore
+      }
+    }
+
     const { error } = await supabase
       .from('article_comments')
       .insert(insertData)
-      .select()
-      .single()
 
     if (error) {
       toast.error('خطا در ارسال نظر')
     } else {
-      toast.success('نظر شما پس از تایید مدیر نمایش داده خواهد شد')
+      toast.success('نظر شما پس از تایید مدیر سایت نمایش داده خواهد شد')
       setNewComment('')
       if (!user) {
         setGuestName('')
@@ -167,6 +174,14 @@ export function CommentSection({ articleId, comments: initialComments, allowComm
         localStorage.setItem('guest_token', token)
       }
       insertData.guest_token = token
+    }
+
+    if (!user) {
+      try {
+        await supabase.auth.signOut({ scope: 'local' })
+      } catch {
+        // ignore
+      }
     }
 
     const { error } = await supabase
