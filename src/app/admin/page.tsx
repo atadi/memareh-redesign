@@ -352,7 +352,7 @@ export default function AdminDashboard() {
           <ArticleModeration onBack={() => setActiveSection("overview")} />
         )}
         {activeSection === "users" && <UserModeration />}
-        {activeSection === "comments" && <CommentModeration />}
+        {activeSection === "comments" && <CommentModeration onStatusChange={loadData} />}
       </main>
     </div>
   );

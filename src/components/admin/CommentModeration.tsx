@@ -39,7 +39,11 @@ interface Comment {
   };
 }
 
-export function CommentModeration() {
+interface CommentModerationProps {
+  onStatusChange?: () => void;
+}
+
+export function CommentModeration({ onStatusChange }: CommentModerationProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected">(
     "pending",
@@ -165,6 +169,7 @@ export function CommentModeration() {
       const comment = comments.find((c) => c.id === commentId);
       if (comment?.article?.slug) revalidateArticle(comment.article.slug);
       setComments(comments.filter((c) => c.id !== commentId));
+      onStatusChange?.();
     }
   };
 
@@ -182,6 +187,7 @@ export function CommentModeration() {
       const comment = comments.find((c) => c.id === commentId);
       if (comment?.article?.slug) revalidateArticle(comment.article.slug);
       setComments(comments.filter((c) => c.id !== commentId));
+      onStatusChange?.();
     }
   };
 
@@ -198,6 +204,7 @@ export function CommentModeration() {
       const comment = comments.find((c) => c.id === commentId);
       if (comment?.article?.slug) revalidateArticle(comment.article.slug);
       setComments(comments.filter((c) => c.id !== commentId));
+      onStatusChange?.();
     }
   };
 
