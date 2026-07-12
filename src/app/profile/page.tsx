@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { User, Mail, LogOut, Save, ArrowRight } from 'lucide-react'
+import { revalidateAllArticles } from '@/actions/revalidate'
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
@@ -53,6 +54,12 @@ export default function ProfilePage() {
       toast.error('خطا در ذخیره اطلاعات')
     } else {
       toast.success('اطلاعات با موفقیت ذخیره شد')
+      // Revalidate all article pages so comments show the updated display name
+      try {
+        await revalidateAllArticles()
+      } catch {
+        // ignore revalidation failures
+      }
     }
 
     setSaving(false)
