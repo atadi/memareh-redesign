@@ -102,7 +102,7 @@ function CommentItem({
                     پین شده
                   </span>
                 )}
-                <span className="text-sm text-gray-500 mr-2">
+                <span className="text-sm text-gray-500 mr-2 ml-2">
                   {formatDistanceToNow(new Date(comment.created_at), {
                     addSuffix: true,
                     locale: faIR,
