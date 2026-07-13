@@ -84,6 +84,10 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl">
       <head>
+        <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32x32.png" />
+        <link rel="icon" type="image/svg+xml" sizes="any" href="/assets/logo/favicon.svg" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/assets/logo/apple-touch-icon.png" />
+
         {/* Google Analytics - Only in Production */}
         {isProduction && (
           <>
