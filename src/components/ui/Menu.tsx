@@ -1,17 +1,24 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, BookOpen, User, LogOut } from 'lucide-react'
+import { Search, BookOpen, User, LogOut, Sun, Moon } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { useTheme } from 'next-themes'
 
 export function Menu() {
   const [user, setUser] = useState<any>(null)
   const [displayName, setDisplayName] = useState<string>('')
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+  const { resolvedTheme, setTheme } = useTheme()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -41,6 +48,12 @@ export function Menu() {
     setUser(null)
     router.refresh()
   }
+
+  const toggleTheme = () => {
+    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
+  }
+
+  const ThemeIcon = mounted && resolvedTheme === 'dark' ? Sun : Moon
 
   return (
     <div className="flex items-center justify-between w-full">
@@ -81,6 +94,18 @@ export function Menu() {
           <Search className="w-4 h-4" />
           جستجو
         </Link>
+
+        <button
+          onClick={toggleTheme}
+          aria-label={resolvedTheme === 'dark' ? 'روشن کردن تم' : 'تاریک کردن تم'}
+          className="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition"
+        >
+          {mounted ? (
+            <ThemeIcon className="w-5 h-5" />
+          ) : (
+            <span className="block w-5 h-5" />
+          )}
+        </button>
 
         {!loading && (
           <>
@@ -124,6 +149,17 @@ export function Menu() {
         <Link href="/articles" className="p-2 bg-yellow-400 rounded-lg shadow-md">
           <BookOpen className="w-5 h-5 text-white" />
         </Link>
+        <button
+          onClick={toggleTheme}
+          aria-label={resolvedTheme === 'dark' ? 'روشن کردن تم' : 'تاریک کردن تم'}
+          className="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition"
+        >
+          {mounted ? (
+            <ThemeIcon className="w-5 h-5" />
+          ) : (
+            <span className="block w-5 h-5" />
+          )}
+        </button>
         {user && (
           <Link href="/profile" className="p-2 bg-gray-100 rounded-lg">
             <User className="w-5 h-5 text-gray-600" />

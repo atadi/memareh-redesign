@@ -107,7 +107,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Toaster position="top-center" />
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <ClientShell>
             {children}
           </ClientShell>
