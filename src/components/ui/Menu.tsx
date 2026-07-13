@@ -45,7 +45,16 @@ export function Menu() {
   return (
     <div className="flex items-center justify-between w-full">
       <a href="/" className="flex items-center gap-3">
-        <img src="/assets/logo/logo.png" alt="معماره" className="w-28 h-auto" />
+        <img
+          src="/assets/logo/logo.svg"
+          alt="معماره"
+          className="w-28 h-auto dark:hidden"
+        />
+        <img
+          src="/assets/logo/logo-dark.svg"
+          alt="معماره"
+          className="w-28 h-auto hidden dark:block"
+        />
       </a>
 
       <nav className="hidden md:flex items-center gap-6">

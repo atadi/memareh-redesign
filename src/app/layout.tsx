@@ -2,6 +2,7 @@ import type { Metadata } from "next/types";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import { ClientShell } from "@/components/ClientShell";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
@@ -35,12 +36,11 @@ export const metadata: Metadata = {
   publisher: "معماره",
   icons: {
     icon: [
-      { url: "/assets/logo/fav-logo.png" },
-      { url: "/assets/logo/fav-logo.png", sizes: "32x32", type: "image/png" },
-      { url: "/assets/logo/fav-logo.png", sizes: "16x16", type: "image/png" },
+      { url: "/assets/logo/favicon.svg", type: "image/svg+xml", sizes: "any" },
+      { url: "/assets/logo/favicon-32x32.png", sizes: "32x32", type: "image/png" },
     ],
-    apple: [{ url: "/assets/logo/fav-logo.png" }],
-    shortcut: "/assets/logo/fav-logo.png",
+    apple: [{ url: "/assets/logo/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: "/assets/logo/favicon.svg",
   },
   openGraph: {
     title: "معماره - خدمات برق‌کاری حرفه‌ای",
@@ -104,11 +104,14 @@ export default function RootLayout({
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
         <Toaster position="top-center" />
-        <ClientShell>
-          {children}
-        </ClientShell>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ClientShell>
+            {children}
+          </ClientShell>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

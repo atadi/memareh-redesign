@@ -185,7 +185,7 @@ export default async function ArticlePage({
       name: "معماره",
       logo: {
         "@type": "ImageObject",
-        url: `${siteUrl}/assets/logo/logo.png`,
+        url: `${siteUrl}/assets/logo/logo-square.svg`,
       },
     },
     datePublished: article.published_at,
