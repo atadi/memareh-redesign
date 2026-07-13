@@ -110,15 +110,15 @@ function CommentItem({
           <div className="bg-gray-50 rounded-lg p-4">
             {/* Header */}
             <div className="flex justify-between items-start mb-2">
-              <div>
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-medium">{comment.user.full_name}</span>
                 {comment.is_pinned && (
-                  <span className="mr-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
                     <Pin className="inline w-3 h-3 ml-1" />
                     پین شده
                   </span>
                 )}
-                <span className="text-sm text-gray-500 mr-2 ml-2">
+                <span className="text-sm text-gray-500">
                   {formatDistanceToNow(new Date(comment.created_at), {
                     addSuffix: true,
                     locale: faIR,
