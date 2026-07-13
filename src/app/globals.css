@@ -1,6 +1,9 @@
 /* Tailwind CSS v4 imports */
 @import "tailwindcss";
 
+/* Make Tailwind dark: variant respond to the .dark class set by next-themes */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* shadcn/ui theme variables */
 @theme {
   --color-background: 0 0% 100%;
