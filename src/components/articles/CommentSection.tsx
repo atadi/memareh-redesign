@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   MessageCircle,
@@ -13,6 +13,7 @@ import {
 import { formatDistanceToNow } from 'date-fns-jalali'
 import { faIR } from 'date-fns/locale'
 import toast from 'react-hot-toast'
+import { EmojiPicker } from './EmojiPicker'
 
 export interface Comment {
   id: string
@@ -70,6 +71,21 @@ function CommentItem({
   handleSubmitReply,
 }: CommentItemProps) {
   const hasReplies = comment.replies && comment.replies.length > 0
+  const replyInputRef = useRef<HTMLInputElement>(null)
+
+  const insertReplyEmoji = (emoji: string) => {
+    const input = replyInputRef.current
+    if (!input) return
+    const start = input.selectionStart ?? 0
+    const end = input.selectionEnd ?? 0
+    const newValue = replyContent.slice(0, start) + emoji + replyContent.slice(end)
+    setReplyContent(newValue)
+    requestAnimationFrame(() => {
+      input.focus()
+      const pos = start + emoji.length
+      input.setSelectionRange(pos, pos)
+    })
+  }
 
   return (
     <div className={`${depth > 0 ? 'mr-8 border-r-2 border-gray-200 pr-4' : ''}`}>
@@ -94,15 +110,15 @@ function CommentItem({
           <div className="bg-gray-50 rounded-lg p-4">
             {/* Header */}
             <div className="flex justify-between items-start mb-2">
-              <div className="flex items-center gap-2 flex-wrap">
+              <div>
                 <span className="font-medium">{comment.user.full_name}</span>
                 {comment.is_pinned && (
-                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                  <span className="mr-2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
                     <Pin className="inline w-3 h-3 ml-1" />
                     پین شده
                   </span>
                 )}
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-500 mr-2 ml-2">
                   {formatDistanceToNow(new Date(comment.created_at), {
                     addSuffix: true,
                     locale: faIR,
@@ -161,6 +177,7 @@ function CommentItem({
               )}
               <div className="flex gap-2">
                 <input
+                  ref={replyInputRef}
                   type="text"
                   value={replyContent}
                   onChange={(e) => setReplyContent(e.target.value)}
@@ -168,6 +185,7 @@ function CommentItem({
                   className="flex-1 px-4 py-2 border rounded-lg"
                   disabled={submitting}
                 />
+                <EmojiPicker onSelect={insertReplyEmoji} />
                 <button
                   onClick={() => handleSubmitReply(comment.id)}
                   disabled={submitting}
@@ -229,6 +247,21 @@ export function CommentSection({ articleId, comments: initialComments, allowComm
   const [guestName, setGuestName] = useState('')
   const [guestEmail, setGuestEmail] = useState('')
   const supabase = createClient()
+  const mainCommentRef = useRef<HTMLTextAreaElement>(null)
+
+  const insertMainEmoji = (emoji: string) => {
+    const input = mainCommentRef.current
+    if (!input) return
+    const start = input.selectionStart ?? 0
+    const end = input.selectionEnd ?? 0
+    const newValue = newComment.slice(0, start) + emoji + newComment.slice(end)
+    setNewComment(newValue)
+    requestAnimationFrame(() => {
+      input.focus()
+      const pos = start + emoji.length
+      input.setSelectionRange(pos, pos)
+    })
+  }
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -449,6 +482,7 @@ export function CommentSection({ articleId, comments: initialComments, allowComm
             </div>
           )}
           <textarea
+            ref={mainCommentRef}
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="نظر خود را بنویسید..."
@@ -460,14 +494,17 @@ export function CommentSection({ articleId, comments: initialComments, allowComm
             <p className="text-sm text-gray-500">
               نظر شما پس از تایید مدیر سایت نمایش داده خواهد شد
             </p>
-            <button
-              onClick={handleSubmitComment}
-              disabled={submitting || !newComment.trim()}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
-            >
-              <Send className="w-4 h-4" />
-              ارسال نظر
-            </button>
+            <div className="flex items-center gap-2">
+              <EmojiPicker onSelect={insertMainEmoji} />
+              <button
+                onClick={handleSubmitComment}
+                disabled={submitting || !newComment.trim()}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                ارسال نظر
+              </button>
+            </div>
           </div>
         </div>
       ) : (
