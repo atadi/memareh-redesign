@@ -94,7 +94,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
             <img
               src={article.featured_image}
               alt={article.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
