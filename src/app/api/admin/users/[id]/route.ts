@@ -4,12 +4,16 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { assertIsAdmin } from "@/lib/admin/guard";
 
 export async function PATCH(
   req: Request,
   ctx: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Authorization: only administrators may edit user profiles.
+    await assertIsAdmin();
+
     const { id } = await ctx.params;
 
     const body = await req.json().catch(() => null);
