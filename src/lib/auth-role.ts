@@ -10,7 +10,9 @@
 // privileged APIs.
 
 type UserLike = {
-  app_metadata?: { role?: unknown } | null
+  // Allow both our narrow shape and Supabase's User (whose app_metadata is a
+  // loosely-typed record). We only ever read `app_metadata.role`.
+  app_metadata?: { role?: unknown } | Record<string, unknown> | null
 } | null | undefined
 
 /**

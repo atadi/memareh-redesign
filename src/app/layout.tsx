@@ -84,7 +84,7 @@ export default function RootLayout({
   const isProduction = process.env.NODE_ENV === "production";
 
   return (
-    <html lang="fa" dir="rtl">
+    <html lang="fa" dir="rtl" suppressHydrationWarning>
       <head>
         <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32x32.png" />
         <link rel="icon" type="image/svg+xml" sizes="any" href="/assets/logo/favicon.svg" />
@@ -112,7 +112,6 @@ export default function RootLayout({
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        suppressHydrationWarning
       >
         <Toaster position="top-center" />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>

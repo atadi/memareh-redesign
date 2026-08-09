@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter, usePathname } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { LogOut, Home } from 'lucide-react'
+import { isAdminUser } from '@/lib/auth-role'
 
 export default function AdminLayout({
   children,
@@ -34,6 +35,18 @@ export default function AdminLayout({
         setIsAuthChecking(false)
         setIsAuthenticated(false)
         router.push('/admin/login')
+        return
+      }
+
+      // Enforce admin role, not just "authenticated". A signed-in non-admin must
+      // not reach the admin surface. The authoritative server guard is
+      // `assertIsAdmin` (used by admin API routes); this client-side gate uses
+      // the same app_metadata.role source to redirect early.
+      if (!isAdminUser(user)) {
+        toast.error('دسترسی غیرمجاز')
+        setIsAuthChecking(false)
+        setIsAuthenticated(false)
+        router.push('/')
         return
       }
 

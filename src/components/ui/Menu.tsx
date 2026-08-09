@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, BookOpen, User, LogOut, Sun, Moon } from 'lucide-react'
+import { BookOpen, User, LogOut, Sun, Moon } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -139,14 +139,8 @@ export function Menu() {
           مقالات
         </Link>
 
-        <Link
-          href="/search"
-          className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/10"
-          aria-label="جستجو"
-        >
-          <Search className="w-4 h-4" />
-          جستجو
-        </Link>
+        {/* Search is intentionally NOT in the global nav (the /search route 404s).
+            Article search lives on /articles via ArticleFilters. */}
 
         <button
           onClick={toggleTheme}
