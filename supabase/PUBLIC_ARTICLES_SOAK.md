@@ -38,15 +38,17 @@ Each entry is a read-only checkpoint (use `pnpm check:articles-soak` or manual c
 - Verdict: `SOAK_CONSISTENT` (exit 0)
 - All checks PASS: public.articles=null, legacy=26, memareh=25, hash=54a808c2…, anon 404/404, site 200/200/200.
 
-### 2026-08-09T12:14Z (soak checkpoint slice)
-- Elapsed soak: ~0.047 d (≈1h8m since 2026-08-09T11:06Z). Both 7d (2026-08-16) and 14d (2026-08-23) thresholds NOT reached → `SOAK IN PROGRESS`.
-- Automated checker `check:articles-soak`: `SOAK_CONSISTENT` (exit 0).
-- DB state (read-only): public.articles=null, legacy_articles.articles=26 (hash 54a808c2… = preflight), memareh.articles=25.
-- Repo dep recheck (`src/`): 0 runtime references to `public.articles`/`set_author_name`/`trg_set_author_name`.
-- Archive security: 0 permissive policies, 0 anon/authenticated grants, schema not PostgREST-exposed (anon GET 404).
-- Live site: homepage 200, article listing 200, sitemap 200, article detail 200.
-- Postgres logs since archive: 0 hits on `public.articles`/`legacy_articles`/missing-relation.
-- Backup integrity: DB artifacts present (full combined 1,450,418 B; targeted pre-archive 26-row backup); Storage manifest 38 objects / 50,487,955 B, sampled checksums match. All valid.
+### 2026-08-09T12:42Z (soak checkpoint slice — rare-path resolution)
+- Elapsed soak: ~0.030 d (≈36m since 2026-08-09T11:06Z). 7d (2026-08-16) and 14d (2026-08-23) thresholds NOT reached → `SOAK IN PROGRESS`.
+- Automated checker `check:articles-soak`: `SOAK_CONSISTENT` (exit 0). public.articles=null, legacy_articles.articles=26 (hash 54a808c2… = preflight), memareh.articles=25, anon PostgREST 404/404, site 200/200/200.
+- **Rare-path / admin resolution (key finding):** all Supabase clients in `src/` are constructed with `db: { schema: 'memareh' }` — verified in `lib/supabase/client.ts`, `server.ts`, `server-public.ts`, and `sitemap.ts`. Therefore EVERY `.from('articles')` call (including admin `ArticleEditor.tsx` writes, `ArticleModeration.tsx` `.delete()`, `admin/page.tsx` reads, and sitemap generation) resolves to `memareh.articles`. Zero resolve to `public.articles` — including dormant/low-traffic admin mutation paths.
+- Repo `src/` grep: many `.from('articles')` but 0 reference `public.articles`/`legacy_articles`/`set_author_name`/`trg_set_author_name` by name; resolved to `memareh` via client schema.
+- Live DB catalog: 0 functions/views/FKs/triggers reference old/legacy table or `set_author_name`; legacy_articles 0 policies, 0 anon/authenticated grants.
+- Supabase Postgres logs since archive: 0 hits on `public.articles`/`legacy_articles`/missing-relation.
+- Live smoke (content-bearing): homepage 200, /articles 200 (renders `stablizer-chist` from memareh), sitemap 200 (references canonical slug), article detail 200.
+- Archive security: not PostgREST-exposed; anon/authenticated denied; RLS deny-by-default intact.
+- Vercel logs: NOT PROGRAMMATICALLY VERIFIED (no CLI creds); operator should filter Vercel → project `memareh-redesign` → Logs since 2026-08-09T11:06Z for `public.articles`, `relation "articles" does not exist`, `500`, `/articles`, `/sitemap.xml` errors.
+- Backup health (reconfirmed prior checkpoint): DB artifacts present; Storage manifest 38 objects / 50,487,955 B, checksums valid.
 - Classification: **NO OBSERVED EXTERNAL CONSUMER** (observational).
 - Decision: `SOAK IN PROGRESS` — final deletion NOT authorized.
 
