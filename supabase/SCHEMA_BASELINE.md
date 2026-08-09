@@ -64,9 +64,10 @@ in `supabase/migrations/20260808000000_base_schema_capture.sql`.
   `check_admin_users`, `search_articles`, `is_admin`). Table access is via RLS, not
   direct table grants.
 
-## public.articles (LEGITIMATE duplicate)
+## public.articles (RETIRED FROM ACTIVE SCHEMA — ARCHIVED)
 
-- **Row count (live):** 26
+- **Row count (live):** 26 (archived, not deleted)
+- **Status (2026-08-09):** Moved out of active `public` schema into non-exposed `legacy_articles.articles` by `20260809020000_archive_public_articles.sql` (reversible archive step). The table no longer exists as `public.articles`. Final destructive removal is PENDING a soak period (see `PUBLIC_ARTICLES_RETIREMENT.md`).
 - **Used by:** NOTHING in application code. The prior note claimed `src/app/sitemap.ts`
   resolved `.from('articles')` here, but that is incorrect: every Supabase client in
   `src/` (including `sitemap.ts`'s raw client) is constructed with `db.schema='memareh'`,
@@ -90,7 +91,7 @@ in `supabase/migrations/20260808000000_base_schema_capture.sql`.
   duplicate with no code consumer; the 26 rows are NOT canonical `memareh.articles`
   data and must be archived (not merged). Retirement is gated on a verified production
   backup (see `PUBLIC_ARTICLES_RETIREMENT.md` / `PRODUCTION_BACKUP_RUNBOOK.md`).
-  NO live migration is applied in the audit phase.
+  Archive step APPLIED 2026-08-09; final drop PENDING soak.
 
 ## Storage bucket
 - `article-images`: `public=true`, `file_size_limit=NULL`, `allowed_mime_types=NULL`.

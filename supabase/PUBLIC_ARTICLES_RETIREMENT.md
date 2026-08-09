@@ -115,6 +115,24 @@ low-traffic maintenance window selection (gate 11) remains an operator schedulin
 - [ ] No errors referencing `public.articles`.
 - [ ] Supabase/Postgres logs: no missing-relation errors.
 
+## Archive execution record (2026-08-09)
+
+- **Migration applied:** `20260809020000_archive_public_articles.sql` (reversible, archive step ONLY).
+- **Execution mechanism:** Supabase Management API `/database/query` (no `pg_dump`/CLI needed), UTC ~2026-08-09T11:06Z.
+- **Destructive retirement migration `20260809030000_remove_legacy_public_articles.sql`: NOT applied** (pending soak period).
+- **Preflight values:** `public.articles`=26, `memareh.articles`=25, `article-images`=38, trigger `trg_set_author_name` present, function `set_author_name()` present, 0 repo consumers.
+- **Fresh pre-change backup:** targeted CSV + self-contained SQL (26 rows) and schema/dependency snapshot (sha256 `d30dc121…`); stored at `C:/backups/memareh-prod/`, outside Git.
+- **Result:**
+  - `public.articles` → no longer exists.
+  - `legacy_articles.articles` created with **26/26 rows preserved**; content aggHash `54a808c2…` matches production preflight exactly.
+  - `memareh.articles` unchanged (25 rows).
+  - Archive RLS enabled, **0 permissive policies**, **0 anon/authenticated grants**, schema `legacy_articles` not exposed via PostgREST (anon GET → HTTP 404).
+- **Application smoke tests (post-apply):** homepage 200, article listing 200 (renders `stablizer-chist` from `memareh.articles`), sitemap 200, article detail 200 — identical to pre-apply baseline.
+- **Vercel/Supabase logs:** 0 errors referencing `public.articles`/missing relations.
+- **Rollback status:** NOT REQUIRED. Immediate rollback path remains documented (rename `legacy_articles.articles` → `public.articles`, re-enable trigger, restore 6 policies from `20260808000000_base_schema_capture.sql`).
+- **Soak period:** STARTED 2026-08-09T11:06Z. Final destructive removal authorized ONLY after soak criteria met (see §L in phase report).
+- **Final deletion:** NOT YET AUTHORIZED.
+
 ## Abort conditions
 
 - Backup missing/unverified at apply time.
