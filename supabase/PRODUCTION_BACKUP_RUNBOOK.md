@@ -14,11 +14,15 @@
 > - Artifacts stored at: `C:/backups/memareh-prod/` (OUTSIDE repo AND outside live Supabase)
 > - NOT committed to Git.
 > - Artifact inventory (sha256):
->   - `memareh_full_20260809T100108Z.dump` (49,545 B) 6232f4a5…a2ae2f — full (custom fmt, schema+data)
->   - `memareh_schema_20260809T100437Z.sql` (49,545 B) 6232f4a5…a2ae2f — schema-only SQL
->   - `memareh_data_20260809T100437Z.sql` (1,400,798 B) 90fcef9e…a3622c — data-only SQL (incl. auth.*, memareh.*, public.articles, storage.*)
->   - `public_articles_data_2026-08-09T10-16-00-628Z.csv` (736,238 B) e7b165c4…c45570 — targeted 26-row CSV
->   - `public_articles_targeted_2026-08-09T10-16-00-628Z.sql` (760,054 B) 25d9353c…c28ef2 — targeted 26-row self-contained SQL
+>   - `memareh_full_combined_20260809T103253Z.sql` (1,450,418 B) 472deef5…f6fc — **TRUE full dump (schema+data, plaintext SQL)**; resolves the prior duplicate-hash anomaly (see note below).
+>   - `memareh_schema_20260809T100437Z.sql` (49,545 B) 6232f4a5…a2ae2f — schema-only SQL (auxiliary).
+>   - `memareh_data_20260809T100437Z.sql` (1,400,798 B) 90fcef9e…a3622c — data-only SQL (incl. auth.*, memareh.*, public.articles, storage.*).
+>   - `public_articles_data_2026-08-09T10-16-00-628Z.csv` (736,238 B) e7b165c4…c45570 — targeted 26-row CSV.
+>   - `public_articles_targeted_2026-08-09T10-16-00-628Z.sql` (760,054 B) 25d9353c…c28ef2 — targeted 26-row self-contained SQL.
+>   - `storage/article-images/` — 38 objects, 50,487,955 B; `manifest.json` (19c9c0ab…e4c7) records per-object sha256 + remoteSize; verified byte-exact + deterministic.
+> - **Anomaly resolved (prior "full custom dump" = schema-only duplicate):** the file named `*.dump` was plaintext (no `PGDMP` magic) and byte-identical (same 49,545 B, same SHA-256) to the schema-only `.sql` — it was a mislabeled schema-only dump, NOT a full dump. No `pg_dump` binary is installed, so a true `-Fc` custom dump is not producible; the CLI emits plaintext SQL only. The genuine full backup is `memareh_full_combined_*.sql` (schema+data concatenated). The mislabeled `.dump` was deleted.
+> - Storage byte backup: COMPLETE (see "Storage backup status" below).
+> - Combined-dump restore re-verified 2026-08-09T14:02Z into fresh Docker Postgres: all app table counts matched production exactly.
 > - Restore target: Docker `postgres:17` container `memareh-restore-test` on localhost:5434, trust auth (non-prod).
 > - Restore result: schema + data loaded (exit 0). Application tables restored with EXACT row-count match to production.
 > - Restore warnings (EXPECTED, non-fatal — plain Postgres lacks Supabase-managed objects):
@@ -31,14 +35,14 @@
 >   `public.articles` = 0 differences (26/26 identical).
 > - Targeted backup independently re-restored into a separate schema: 26 rows, `tags` array column correct.
 >
-> ## Storage backup status: PENDING (documented next action)
-> - `article-images` bucket EXISTS (confirmed via Storage API).
-> - DB dump does NOT contain Storage object bytes.
-> - A byte-level sync of bucket objects was NOT performed this phase (requires a Storage
->   list+download sync script; API list returned partial/root-level objects).
-> - NEXT ACTION: run a Storage object export (`supabase` Storage API list + download loop, or
->   dashboard download) to `C:/backups/memareh-prod/storage/` and record object count + size.
->   Until then, treat Storage contents as NOT backed up.
+> ## Storage backup status: COMPLETE (2026-08-09T14:07Z)
+> - Bucket `article-images` EXISTS; recursively listed and all objects downloaded (read-only GET, no remote mutation).
+> - Destination: `C:/backups/memareh-prod/storage/article-images/` (outside repo + outside live Supabase; not Git-tracked).
+> - Result: 38 objects, 50,487,955 bytes (~48 MB).
+> - Verification: per-object `sha256` recorded in `manifest.json`; re-download confirmed byte-identical (deterministic); all files non-zero; magic bytes valid (PNG/JPEG). Catalog `remoteSize` == local bytes for every object (the earlier size discrepancy was a string-vs-binary encoding bug in the first download attempt, now fixed).
+> - First attempt had a binary-corruption bug (response collected as UTF-8 string); corrected to Buffer-based download and re-run; the corrupted copy was discarded.
+> - Residual note: `article-images` objects use `.jpg` extension but are stored as PNG; this is source data shape, not a backup defect.
+> - No off-machine second copy yet (see §12).
 
 ## 1. Current production backup status
 
