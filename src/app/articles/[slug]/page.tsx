@@ -9,6 +9,7 @@ import {
 } from "@/lib/seo";
 import { CommentSection } from "@/components/articles/CommentSection";
 import { RelatedArticles } from "@/components/articles/RelatedArticles";
+import { ArticleContent } from "@/components/articles/ArticleContent";
 
 export const revalidate = 300;
 
@@ -149,10 +150,7 @@ export default async function ArticlePage({
             />
           )}
 
-          <div
-            className="prose prose-lg max-w-none dark:prose-invert"
-            dangerouslySetInnerHTML={{ __html: article.content }}
-          />
+          <ArticleContent content={article.content} />
         </main>
 
         <section className="max-w-4xl mx-auto px-6 py-10">

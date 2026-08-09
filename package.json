@@ -46,6 +46,7 @@
     "date-fns-jalali": "^4.1.0-0",
     "dompurify": "^3.3.1",
     "framer-motion": "^12.23.22",
+    "isomorphic-dompurify": "^3.22.0",
     "jimp": "^1.6.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.544.0",
