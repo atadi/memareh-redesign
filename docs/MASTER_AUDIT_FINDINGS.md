@@ -167,20 +167,20 @@ AN-02 carries a dual `P3 / INFO` tag; counted under P3 above.
 - Category: SEC
 - Confidence: MEDIUM
 - Evidence:
-  - `src/app/articles/[slug]/page.tsx:217` `<div dangerouslySetInnerHTML={{ __html: article.content }} />` — NO DOMPurify.
-  - `src/components/articles/ArticleContent.tsx:12` and `ArticleEditor.tsx:974` DO sanitize with `DOMPurify.sanitize`.
-  - `ArticleEditor.tsx:499` saves `DOMPurify.sanitize(content)` (write-time sanitization).
-- Impact: public render trusts stored HTML. Safe ONLY if every write path sanitizes (editor does). Risk if any legacy/imported/API-inserted content bypassed sanitization, or if DOMPurify config at write time is weak. Defense-in-depth gap.
-- Remediation: sanitize at render too (use ArticleContent component on the public page) OR assert a guaranteed write-time contract + test. Prefer rendering via the already-sanitizing `ArticleContent` component.
+  - `src/app/articles/[slug]/page.tsx` rendered `article.content` via `dangerouslySetInnerHTML` with NO sanitization (the bypass). `ArticleContent.tsx` + `ArticleEditor.tsx` did sanitize with `DOMPurify`. `ArticleEditor.tsx:499` saved `DOMPurify.sanitize(content)` (write-time).
+- Impact: public render trusted stored HTML — safe only if every write path sanitizes; defense-in-depth gap for legacy/imported/API-inserted rows or a weak write-time config.
+- Remediation: single render-time sanitization boundary via `ArticleContent`; centralized `sanitizeHtml` in `src/lib/html-sanitizer.ts` (isomorphic-dompurify, SSR-safe) reused by BOTH the render component and the editor write/preview path (one implementation, no parallel sanitizers).
 - Code change: YES. DB: NO.
+- **Status (SEC hardening): RESOLVED.** The public article page now renders through `ArticleContent` (which calls `sanitizeHtml`) instead of raw `dangerouslySetInnerHTML` — no second raw HTML sink remains on the article page. `sanitizeHtml` (src/lib/html-sanitizer.ts) is the single sanitizer, used by render (`ArticleContent`) and write-time/preview (`ArticleEditor`), with an explicit allow-list (Tiptap tags), event-handler/`javascript:`/`data:` stripping, and a hook forcing `rel="noopener noreferrer"` on links. Server-safe via isomorphic-dompurify so SSG renders sanitized output (protects legacy rows). Verified by `tests/html-sanitizer.test.ts` (XSS removed, Persian + tables + code preserved, safe links/images kept).
 
 ### SEC-02 — No CSP / security headers configured  [P2]
 - Category: SEC
 - Confidence: HIGH
-- Evidence: `next.config.ts` has no `headers()` for CSP/X-Frame-Options/HSTS; middleware sets no security headers. (Vercel may add HSTS at edge by default, but no explicit app policy.)
-- Impact: given `dangerouslySetInnerHTML` usage, a Content-Security-Policy would materially reduce XSS blast radius.
-- Remediation: add a CSP (at least `script-src`, `img-src` for Supabase Storage + self) + `X-Frame-Options`/frameguard + HSTS in `next.config.ts` headers().
+- Evidence: `next.config.ts` had no `headers()`; middleware set no security headers.
+- Impact: given `dangerouslySetInnerHTML` usage, a CSP materially reduces XSS blast radius; missing HSTS/nosniff/frame protections.
+- Remediation: add CSP + browser protections in `next.config.ts` headers() (single authority).
 - Code change: YES. DB: NO.
+- **Status (SEC hardening): PARTIAL — ENFORCED but script/style require `unsafe-inline`.** `next.config.ts` `headers()` now emits: Content-Security-Policy, Strict-Transport-Security (max-age=63072000, no preload/includeSubDomains yet), X-Content-Type-Options: nosniff, Referrer-Policy: strict-origin-when-cross-origin, Permissions-Policy (camera/mic/geolocation/payment/usb/interest-cohort disabled), X-Frame-Options: DENY, COOP/ORCP same-origin. CSP locks `object-src 'none'`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`; allows Supabase (rest/realtime/images), GA4 (gtagmanager + analytics), Vercel Analytics (va.vercel-scripts.com), dicebear avatars, `data:`. `script-src`/`style-src` retain `'unsafe-inline'` because Next.js App Router emits inline hydration scripts and the GA4 tag is an inline `<Script>` — a true strict CSP needs a nonce-based architecture change (out of scope). Maturity documented honestly in `src/lib/security-headers.ts`. Verified by `tests/security-headers.test.ts` + local `pnpm start` `curl -I` (headers present on `/` and `/login`).
 
 ### SEC-03 — `/api/revalidate` is token-protected  [INFO / PASS]
 - Category: SEC

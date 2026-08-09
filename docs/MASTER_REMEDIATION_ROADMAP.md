@@ -43,6 +43,10 @@ Objective: add CSP + frameguard + HSTS; render article content via sanitizing co
 Expected files: `next.config.ts` (headers), `articles/[slug]/page.tsx` (use ArticleContent), optional comment-sanitization review.
 Production risk: LOW–MEDIUM (CSP can break inline scripts if mis-scoped). Backup: NO. Migration: NO.
 Verification: build; GET article page; confirm headers via `curl -I`; confirm content renders; no console CSP violations in browser.
+- **Status: COMPLETE (SEC-01 RESOLVED; SEC-02 PARTIAL).**
+  - SEC-01: `articles/[slug]/page.tsx` now renders via `ArticleContent` (single sanitization boundary); `sanitizeHtml` (src/lib/html-sanitizer.ts, isomorphic-dompurify, SSR-safe) is the one sanitizer reused by render + editor write/preview; XSS vectors stripped, Persian/tables/code preserved (tests/html-sanitizer.test.ts).
+  - SEC-02: `next.config.ts` headers() emits CSP + HSTS + nosniff + Referrer-Policy + Permissions-Policy + X-Frame-Options + COOP/COCP. CSP is ENFORCED but `script-src`/`style-src` keep `'unsafe-inline'` (Next.js inline hydration + inline GA4) → PARTIAL until a nonce-based architecture is adopted (out of scope). Verified by tests/security-headers.test.ts + local `curl -I`.
+  - New dep: `isomorphic-dompurify` (justified: SSR-safe + testable DOMPurify for render-time sanitization).
 
 ## Phase E — Observability foundation  [P2]
 Addresses: OBS-01, AN-01 (telemetry half).
