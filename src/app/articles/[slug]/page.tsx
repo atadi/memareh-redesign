@@ -1,21 +1,18 @@
 import { notFound } from "next/navigation";
 import { createPublicClient } from "@/lib/supabase/server-public";
-import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { getSiteUrl } from "@/lib/config";
+import { getPublishedArticleSlugs } from "@/lib/articles";
 import { CommentSection } from "@/components/articles/CommentSection";
 import { RelatedArticles } from "@/components/articles/RelatedArticles";
 
 export const revalidate = 300;
 
 export async function generateStaticParams() {
-  const adminClient = createSupabaseAdmin();
-  const { data } = await adminClient
-    .from("articles")
-    .select("slug")
-    .eq("status", "published");
-  return (data ?? []).map((a) => ({ slug: a.slug }));
+  const slugs = await getPublishedArticleSlugs();
+  return slugs.map((a) => ({ slug: a.slug }));
 }
 
-const siteUrl = "https://www.memareh.com";
+const siteUrl = getSiteUrl();
 
 // -----------------------------
 // Metadata SEO

@@ -15,15 +15,18 @@ Severity scale: P0 Critical · P1 High · P2 Medium · P3 Low · INFO.
 
 ## Counts
 
-| Severity | Count |
-|----------|-------|
-| P0       | 0     |
-| P1       | 3     |
-| P2       | 11    |
-| P3       | 5     |
-| INFO     | 6     |
+> Normalized during Phase A (prior summary undercounted P2/P3/INFO). Source of
+> truth is the finding ID list below. Total findings: 29.
 
-P1 findings: ARCH-01, DB-02, DEPLOY-02.
+| Severity | Count | Note |
+|----------|-------|------|
+| P0       | 0     | |
+| P1       | 3     | ARCH-01, DB-02, DEPLOY-02 |
+| P2       | 12    | SEO-01, SEO-04, SEO-05, AN-01, PERF-01, PERF-02, SEC-01, SEC-02, DB-01, OBS-01, OPS-01, ARCH-03 |
+| P3       | 7     | SEO-02, SEO-03, AN-02 (dual P3/INFO), PERF-03, DATA-02, ARCH-02, ARCH-04 |
+| INFO     | 7     | SEC-03, SEC-04, DB-03, DB-04, DATA-01, DEPLOY-01, DEPLOY-03 |
+
+AN-02 carries a dual `P3 / INFO` tag; counted under P3 above.
 
 ---
 
@@ -62,6 +65,7 @@ P1 findings: ARCH-01, DB-02, DEPLOY-02.
 - Remediation: verify both `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are present and "exposed for build" in Preview AND Production Vercel env; add a build-time guard that fails fast with a clear message; or decouple sitemap/static-params from service-role (see PERF-02). Operator action required for env verification.
 - Code change: YES (small guard/centralization). DB schema change: NO. Production data mutation: NO. External/operator action: YES (Vercel env confirmation).
 - Classification: REPOSITORY VERIFIED for code path; VERCEL EXTERNAL CONFIGURATION REQUIRES OPERATOR VERIFICATION.
+- **Status (Phase A): PARTIALLY RESOLVED.** Repository-side hardening done: `src/lib/config.ts` centralizes + fails-fast on missing `NEXT_PUBLIC_SUPABASE_URL`/anon key; `generateStaticParams` + sitemap now use the PUBLIC/anon client (no service role at build). Verified: build succeeds WITHOUT `SUPABASE_SERVICE_ROLE_KEY`. Remaining: Vercel dashboard env completeness (operator confirmation) — `NEXT_PUBLIC_SUPABASE_URL`, anon key, `NEXT_PUBLIC_SITE_URL` must be set in Preview+Prod; `SUPABASE_SERVICE_ROLE_KEY` still needed at RUNTIME only (admin API).
 
 ---
 
@@ -75,6 +79,7 @@ P1 findings: ARCH-01, DB-02, DEPLOY-02.
 - Impact: article pages advertise `www.` canonical while home/sitemap/robots use non-www. Search engines may treat them as duplicate hosts → split link equity, inconsistent indexing.
 - Remediation: centralize a single `SITE_URL` constant (no www) and use it everywhere; add a redirect/normalize rule if www is unwanted, or vice versa. No DB change.
 - Code change: YES. DB schema: NO. Data mutation: NO. External: NO.
+- **Status (Phase A): RESOLVED (canonical authority empirically confirmed www).** Live `https://memareh.com/` 301-redirects to `https://www.memareh.com/`, so `www` is the authoritative canonical host. All generated origins now flow from `getSiteUrl()` (backed by `NEXT_PUBLIC_SITE_URL`, set to `https://www.memareh.com`): `layout.tsx` metadataBase + OG url, article canonical/OG/Twitter/JSON-LD, sitemap URLs, robots sitemap URL. Non-www literals removed from `src/`.
 
 ### SEO-02 — robots.txt disallows /login but app links use /login  [P3]
 - Category: SEO
@@ -132,6 +137,7 @@ P1 findings: ARCH-01, DB-02, DEPLOY-02.
 - Impact: deployment reliability; any missing var → no deploy.
 - Remediation: centralize env access; fail fast with explicit message; or make static generation resilient (skip/empty when data unavailable in non-prod). See DEPLOY-02.
 - Code change: YES. DB: NO.
+- **Status (Phase A): RESOLVED.** `src/lib/config.ts` centralizes env + fails fast; `generateStaticParams`/`sitemap` use the public client. Config-error (missing URL) still fails the build with a clear message; temporary upstream failure fails soft (returns [], ISR serves at runtime). Verified by build matrix.
 
 ### PERF-02 — Sitemap uses over-privileged service-role key  [P2]
 - Category: PERF / SEC
@@ -140,6 +146,7 @@ P1 findings: ARCH-01, DB-02, DEPLOY-02.
 - Impact: violates least-privilege; widens blast radius if sitemap code or deps are compromised. Also contributes to build-env coupling (DEPLOY-02).
 - Remediation: use the public/anon client (`createPublicClient`) for published articles in sitemap; reserve service role for admin-only paths.
 - Code change: YES. DB: NO.
+- **Status (Phase A): RESOLVED.** `src/app/sitemap.ts` now uses `createPublicClient()` (anon key) + `getPublishedArticlesForSitemap()`; no `SUPABASE_SERVICE_ROLE_KEY` read. Public "read published articles" RLS already permits this (no policy change). Build matrix confirms build succeeds without the service role.
 
 ### PERF-03 — Article detail issues 4 sequential queries; admin RPC even with zero comments  [P3]
 - Category: PERF

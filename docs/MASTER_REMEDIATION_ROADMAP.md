@@ -15,6 +15,7 @@ Expected files: `lib/site-config.ts` (new SITE_URL constant), `next.config.ts` (
 Production risk: LOW. Backup required: NO. Migration required: NO.
 Verification: `pnpm run build` with env absent → clear error; with env → success; `pnpm check:articles-soak` still consistent; `node scripts/vercel-ignore-build.cjs --files=...` unchanged.
 Rollback: revert commit.
+- **Status: COMPLETE (Phase A implemented).** Files: `src/lib/config.ts` (new central authority + fail-fast), `src/lib/articles.ts` (new public-client queries, fail-soft), `src/lib/supabase/server-public.ts` (uses config), `src/lib/supabase/admin.ts` (`server-only` guard), `src/app/sitemap.ts` (anon client), `src/app/robots.ts` (getSiteUrl), `src/app/layout.tsx` (getSiteUrl), `src/app/articles/[slug]/page.tsx` (getSiteUrl + public slugs), `.env.example` (new). Tests: `tests/config.test.ts`, `tests/articles.test.ts`. Verified: `tsc` clean, 14 unit tests pass, `pnpm run build` passes, build passes WITHOUT `SUPABASE_SERVICE_ROLE_KEY`, build fails fast on missing `NEXT_PUBLIC_SUPABASE_URL`. DEPLOY-02 repo-side RESOLVED; Vercel env completeness still operator-verified.
 
 ## Phase B — Resolve `services`/`service_requests` drift  [P1]
 Addresses: ARCH-01, DB-02, ARCH-04 (dead getServices if feature deferred).

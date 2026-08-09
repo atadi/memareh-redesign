@@ -1,32 +1,20 @@
 import type { MetadataRoute } from 'next'
-import { createClient } from '@supabase/supabase-js'
+import { getSiteUrl } from '@/lib/config'
+import { getPublishedArticlesForSitemap } from '@/lib/articles'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      db: { schema: 'memareh' }
-    }
-  )
+  const baseUrl = getSiteUrl()
 
-  const { data: articles } = await supabase
-    .from('articles')
-    .select('slug, updated_at')
-    .eq('status', 'published')
-
-  const baseUrl = 'https://memareh.com'
+  const articles = await getPublishedArticlesForSitemap()
 
   return [
     {
       url: baseUrl,
       lastModified: new Date(),
     },
-    ...(articles ?? []).map((article) => ({
+    ...articles.map((article) => ({
       url: `${baseUrl}/articles/${article.slug}`,
-      lastModified: article.updated_at
-        ? new Date(article.updated_at)
-        : new Date(),
+      lastModified: article.updated_at ? new Date(article.updated_at) : new Date(),
     })),
   ]
 }

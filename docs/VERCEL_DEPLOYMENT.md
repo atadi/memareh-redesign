@@ -85,3 +85,35 @@ If a docs-only commit must still deploy (e.g. to re-run a Preview):
 - This phase does **not** manage Vercel environment variables or secrets.
 - The `sharp` build-script warning from pnpm is unrelated and intentionally untouched.
 - Production Supabase is never modified by this deployment hygiene.
+
+## Operator environment-variable checklist (REQUIRES OPERATOR VERIFICATION)
+
+After Phase A, the **build** path (sitemap + `generateStaticParams`) uses only the
+public/anon Supabase client and the central site URL. The service-role key is no
+longer required at **build** time — it remains required at **runtime** only for the
+admin API (`/api/admin/*` → `auth.admin.listUsers`).
+
+Verify in the Vercel dashboard for **both Production and Preview**:
+
+### Build-time required
+- `NEXT_PUBLIC_SUPABASE_URL` — set; exposed to build.
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — set; exposed to build.
+- `NEXT_PUBLIC_SITE_URL` — set to the **production canonical origin**, e.g.
+  `https://www.memareh.com` (no trailing slash). Preview must also use this value
+  so Preview never publishes a Preview URL as the canonical SEO origin. Exposed to build.
+
+### Runtime required (server-only — NEVER expose to browser)
+- `SUPABASE_SERVICE_ROLE_KEY` — only needed for admin server operations. NOT required
+  for build after Phase A. Keep server-only.
+- `REVALIDATION_TOKEN` — only needed for `/api/revalidate`.
+
+### Canonical host
+- Live `https://memareh.com/` 301-redirects to `https://www.memareh.com/`, so `www`
+  is the authoritative canonical. Ensure Vercel/DNS redirect (non-www → www) is in
+  place; the app now emits `www` URLs everywhere via `getSiteUrl()`.
+
+### Verification commands (operator, after a deploy)
+- Preview build starts and succeeds.
+- `https://<preview>/sitemap.xml` lists `https://www.memareh.com/articles/<slug>`.
+- Article pages render; canonical `<link rel="canonical">` uses `www.memareh.com`.
+- Confirm `SUPABASE_SERVICE_ROLE_KEY` is absent from any client-side bundle.

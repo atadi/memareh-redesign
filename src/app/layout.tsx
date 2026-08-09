@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
+import { getSiteUrl } from "@/lib/config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://memareh.com"),
+  metadataBase: new URL(getSiteUrl()),
   title: "معماره - خدمات برقکاری حرفه‌ای و مطمئن",
   description:
     "دسترسی سریع به تکنسین برقکار در تهران. خدمات اضطراری ۲۴ ساعته، نصب، تعمیر و نگهداری تاسیسات برقی با کیفیت و سرعت.",
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "معماره - خدمات برق‌کاری حرفه‌ای",
     description: "دسترسی سریع به تکنسین برقکار در سراسر تهران",
-    url: "https://memareh.com",
+    url: getSiteUrl(),
     siteName: "معماره",
     images: [
       {
