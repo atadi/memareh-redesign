@@ -43,6 +43,8 @@ export function Menu() {
     })
   }, [])
 
+  const isAdmin = user?.app_metadata?.role === 'admin'
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     setUser(null)
@@ -111,6 +113,14 @@ export function Menu() {
           <>
             {user ? (
               <div className="flex items-center gap-3">
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-2 text-sm bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition"
+                  >
+                    پنل مدیریت
+                  </Link>
+                )}
                 <Link
                   href="/profile"
                   className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
@@ -161,9 +171,16 @@ export function Menu() {
           )}
         </button>
         {user && (
-          <Link href="/profile" className="p-2 bg-gray-100 rounded-lg">
-            <User className="w-5 h-5 text-gray-600" />
-          </Link>
+          <>
+            {isAdmin && (
+              <Link href="/admin" className="p-2 bg-blue-100 rounded-lg" aria-label="پنل مدیریت">
+                <User className="w-5 h-5 text-blue-600" />
+              </Link>
+            )}
+            <Link href="/profile" className="p-2 bg-gray-100 rounded-lg">
+              <User className="w-5 h-5 text-gray-600" />
+            </Link>
+          </>
         )}
         {!user && !loading && (
           <Link href="/login" className="p-2 bg-blue-100 rounded-lg">
