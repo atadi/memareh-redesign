@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# raw production audit snapshot (contains production identifiers/storage URLs — regenerable)
+scripts/audit-public-articles.out.json

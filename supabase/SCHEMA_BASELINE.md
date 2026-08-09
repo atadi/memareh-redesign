@@ -67,7 +67,11 @@ in `supabase/migrations/20260808000000_base_schema_capture.sql`.
 ## public.articles (LEGITIMATE duplicate)
 
 - **Row count (live):** 26
-- **Used by:** `src/app/sitemap.ts` (queries `from('articles')` with `db.schema='memareh'` → resolves to `public.articles`).
+- **Used by:** NOTHING in application code. The prior note claimed `src/app/sitemap.ts`
+  resolved `.from('articles')` here, but that is incorrect: every Supabase client in
+  `src/` (including `sitemap.ts`'s raw client) is constructed with `db.schema='memareh'`,
+  so `.from('articles')` resolves to `memareh.articles`. `public.articles` is an orphaned
+  duplicate with no code consumer (see `PUBLIC_ARTICLES_DEPENDENCY.md`).
 - **Structure vs `memareh.articles`:** same domain but distinct column set. Public copy
   has `tags text[]`, `featured_image_url`, and lacks `featured_image_alt`,
   `canonical_url`, `og_image`, `video_url`, `scheduled_at`, `meta_keywords` default
@@ -82,8 +86,11 @@ in `supabase/migrations/20260808000000_base_schema_capture.sql`.
   `idx_articles_search_vector` (GIN), `idx_articles_tags` (GIN).
 - **Live policies (6):** 2× public SELECT published, 2× authenticated INSERT
   (author_id=auth.uid()), 2× author UPDATE. Reproduced in base migration.
-- **Retire?** NO — actively used by sitemap.ts and contains 26 real rows. Consolidation
-  is a separate phase (`public.articles Dependency Audit`).
+- **Retire?** YES — eventual retirement is recommended. The table is an orphaned
+  duplicate with no code consumer; the 26 rows are NOT canonical `memareh.articles`
+  data and must be archived (not merged). Retirement is gated on a verified production
+  backup (see `PUBLIC_ARTICLES_RETIREMENT.md` / `PRODUCTION_BACKUP_RUNBOOK.md`).
+  NO live migration is applied in the audit phase.
 
 ## Storage bucket
 - `article-images`: `public=true`, `file_size_limit=NULL`, `allowed_mime_types=NULL`.
