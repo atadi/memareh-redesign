@@ -366,7 +366,47 @@ AN-02 carries a dual `P3 / INFO` tag; counted under P3 above.
 
 ---
 
-## Confidence notes
+## DB-03 — Anonymous/authenticated Article List: `permission denied for schema memareh` (42501)  [P1]
+
+- Category: DB / API
+- Confidence: HIGH
+- Evidence (read-only, live project `uakvurskrcyvksxfvhho`):
+  - Reproduced via `createClient(URL, ANON_KEY, { db:{ schema:'memareh' } }).from('articles').select()` → `42501 permission denied for schema memareh` (both anon and, by symmetry, authenticated).
+  - `has_schema_privilege('anon'|'authenticated','memareh','USAGE')` = **true**.
+  - `has_table_privilege('anon'|'authenticated', 'memareh.<every table/view>', 'SELECT')` = **true** for articles, article_comments, article_ratings, article_tag_relations, article_tags, article_tags_view, comment_likes, profiles.
+  - Live REST API root `GET /rest/v1/` returns 200 but contains **NO `memareh` schema and NO `articles` table** in its OpenAPI definitions.
+- Root cause: `memareh` is **NOT listed in the Supabase Data API Exposed schemas** (`db_schema`). PostgREST only serves exposed schemas; querying a non-exposed schema throws exactly `42501 permission denied for schema <name>`. All object-level GRANTs and RLS policies are already correct — so this is a **project configuration gap, not a SQL privilege defect**.
+  - This surfaced now because the `articles-schema-consolidation` branch moved public article reads to `createPublicClient()` with `schema:'memareh'` (previously reads used the default-exposed `public` schema). The Data API was never reconfigured to expose `memareh`.
+- Remediation (OPERATOR / DASHBOARD — NOT a code or SQL migration):
+  1. Supabase Dashboard → Project `uakvurskrcyvksxfvhho` → **Settings → API → Exposed schemas**.
+  2. Add `memareh` to the list (keep `public` and any others already present — do NOT replace the list).
+  3. Save. This is live; no redeploy needed.
+  - Equivalent via Supabase CLI/Mgmt API: set the project `db_schema` to include `memareh` (e.g. `supabase` project config / `POST /v1/projects/{ref}/config` with `db_schema` = current set + `memareh`). Because the current exposed-set cannot be read back via the Mgmt API GET here, apply it via the Dashboard to avoid accidentally dropping `public`.
+- Why NO migration: a SQL `GRANT USAGE/SELECT` migration would be a **no-op** (grants already exist and are correct). The defect is PostgREST config (`db_schema`), which SQL cannot set. Creating a grant migration would be spurious and misleading.
+- Verification after fix (operator): `GET /rest/v1/articles?select=id&limit=1` (anon) should return 200 with rows; the Article List should load for anon, authenticated, and admin.
+- **Status: ROOT CAUSE PROVEN — OPERATOR CONFIG ACTION REQUIRED (no code/migration change).**
+
+---
+
+## DEPLOY-04 — Vercel shows older-looking site after feature-branch redeploy  [P1]
+
+- Category: DEPLOY
+- Confidence: MEDIUM (builder has no Vercel access; diagnosis from repo evidence + prior verified Preview failure)
+- Two independent likely causes; operator must confirm in Vercel Dashboard:
+  1. **Build fails → stale deployment served.** Prior phase proved that a missing `NEXT_PUBLIC_SITE_URL` makes `pnpm build` fail (`[config] Missing required environment variable NEXT_PUBLIC_SITE_URL`). If the feature-branch Preview env lacks `NEXT_PUBLIC_SITE_URL=https://www.memareh.com`, the build fails and Vercel keeps serving the last *successful* (older) deployment. Fix: set `NEXT_PUBLIC_SITE_URL=https://www.memareh.com` for BOTH Production and Preview in Vercel Project → Environment Variables, then redeploy.
+  2. **Custom domain mapped to a different deployment/branch.** `www.memareh.com` (and `memareh.com`) may be assigned to the **Production** environment (typically `master`/`main`), while the work lives on the `refactor/articles-schema-consolidation` Preview. A custom domain pinned to Production will show the Production deployment regardless of any Preview build. This is NOT a cache defect — Ctrl+F5 / incognito / clear-site-data cannot change it.
+- Operator matrix to fill in (localhost `pnpm dev` vs unique `*.vercel.app` Preview URL vs `www.memareh.com`):
+  - search button present? / admin code behavior? / canonical host? / React #418? / unique fingerprint?
+  - If localhost + unique vercel.app are correct but www is old → **domain/alias issue** (cause 2).
+  - If the unique vercel.app URL itself is old → **deployment issue** (cause 1, build failing).
+- Remediation:
+  - Set `NEXT_PUBLIC_SITE_URL` in Vercel env (cause 1).
+  - In Vercel Dashboard → Project → Settings → Domains, confirm which environment/branch `www.memareh.com` is assigned to. If it must serve this branch, promote the Preview to Production intentionally (do NOT repoint blindly without operator intent).
+- **Status: OPERATOR DASHBOARD VERIFICATION REQUIRED. Recommend NOT promoting the feature branch to the production domain unless the operator explicitly wants it live; report `PREVIEW CORRECT — PRODUCTION DOMAIN STILL ON OLD DEPLOYMENT` if that is the case.**
+
+---
+
+
 - All production DB claims come from read-only `information_schema` / catalog queries via the Supabase Management API (SELECT-only).
 - Build/env claims come from static source review + the documented prior Preview failure.
 - Vercel dashboard/env state is NOT verifiable from this environment → marked REQUIRES OPERATOR VERIFICATION where relevant.
