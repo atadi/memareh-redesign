@@ -27,6 +27,7 @@ Expected files: `supabase/migrations/*.sql` (if b1), `database.types.ts`, `lib/a
 Production risk: MEDIUM (migration). Backup required: YES (fresh pre-change backup). Migration required: YES (if b1).
 Verification: build; runtime booking smoke; RLS tests (env-gated).
 Rollback: down migration / revert removal.
+- **Status: BLOCKED — Option C (pending product decision).** Phase B discovery completed; decision documented in `docs/SERVICES_BOOKING_AUTHORITY_AUDIT.md`. No schema change, no code removal. `/booking` + `/booking/success` are dormant `redirect('/articles')` stubs; `src/components/booking/` absent; booking functions/hooks have zero callers; live DB has no `services`/`service_requests` (nor renamed alternatives); no migration ever created the tables/enums. Feature is intended-but-dormant, so neither removable (b2) nor safe to materialize from TS types alone (b1) without owner answers to the 8 questions in the audit doc. ARCH-01/DB-02 remain BLOCKED until the product owner decides. Next actionable phase is therefore **Phase C (SEO)**, which is independent and safe (see below).
 
 ## Phase C — SEO metadata correctness  [P2]
 Addresses: SEO-01, SEO-04, SEO-05.

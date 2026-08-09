@@ -46,6 +46,7 @@ AN-02 carries a dual `P3 / INFO` tag; counted under P3 above.
 - Code change: YES. DB schema change: YES (if option a). Production data mutation: NO (new tables only). External/operator action: NO.
 - Prereq: user decision on booking feature scope.
 - Classification: DB STALE / CODE STALE / INTENT UNCLEAR.
+- **Status (Phase B): BLOCKED — pending product decision (Option C).** Discovery completed (see `docs/SERVICES_BOOKING_AUTHORITY_AUDIT.md`). `/booking` and `/booking/success` are hard `redirect('/articles')` stubs; `src/components/booking/` does not exist; the 4 `lib/api/services.ts` functions + 2 `useServices` hooks have zero callers; no nav/CTA links. Live DB has no `services`/`service_requests` (nor any renamed alternative). No migration ever created the tables or the four enums. Feature is dormant + non-deployable as written, but clearly *intended* (types + contract + design doc), so it is neither safely removable (B) nor safe to materialize from TS types alone (A) without owner decisions. No schema change, no code removal this phase. Drift remains a known non-breaking discrepancy.
 
 ### DB-02 — Schema/type/code drift (see ARCH-01)  [P1]
 - Category: DB
@@ -53,6 +54,7 @@ AN-02 carries a dual `P3 / INFO` tag; counted under P3 above.
 - Evidence: same as ARCH-01.
 - Impact: integrity/trust; latent runtime failure.
 - Remediation: resolved together with ARCH-01.
+- **Status (Phase B): BLOCKED — pending product decision (Option C).** Same resolution as ARCH-01; see `docs/SERVICES_BOOKING_AUTHORITY_AUDIT.md`.
 
 ### DEPLOY-02 — Build requires Supabase service-role + URL at build time; Vercel env completeness unverified  [P1]
 - Category: DEPLOY
