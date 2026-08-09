@@ -104,6 +104,7 @@ AN-02 carries a dual `P3 / INFO` tag; counted under P3 above.
 - Impact: missed rich-result opportunities (breadcrumbs, sitelinks search box, brand panel).
 - Remediation: add Organization + WebSite + BreadcrumbList JSON-LD; enhance Article with `articleSection`/author profile.
 - Code change: YES. DB: NO.
+- **Status (Phase C): RESOLVED.** Added site-level JSON-LD (`Organization` + `WebSite`) once in `layout.tsx` via `src/components/SiteStructuredData.tsx`. Article pages now emit `Article` + `BreadcrumbList` JSON-LD (`src/lib/seo.ts` builders, consumed by `articles/[slug]/page.tsx`). Article author/publisher reference the shared Organization `@id`. Breadcrumb is Home → Article (no `/articles` index route exists, so a middle "مقالات" crumb is intentionally omitted to avoid a 404). Article JSON-LD unchanged in required fields (headline/image/url/mainEntityOfPage/datePublished/dateModified/inLanguage). No Social/SearchAction invented.
 
 ### SEO-05 — Declared SEO columns unused by generateMetadata  [P2]
 - Category: SEO / DATA
@@ -112,6 +113,7 @@ AN-02 carries a dual `P3 / INFO` tag; counted under P3 above.
 - Impact: either dead schema (confusion) or a missed per-article SEO control. Currently all articles use title/excerpt as title/description.
 - Remediation: wire `meta_title`/`meta_description`/`meta_keywords`/`canonical_url`/`og_image` into generateMetadata with fallback to title/excerpt; or drop the columns if undesired. Decide with user.
 - Code change: YES. DB: NO (columns exist). Data mutation: NO.
+- **Status (Phase C): RESOLVED.** `generateMetadata` now reads the dedicated SEO columns with deterministic fallbacks (via `buildArticleMetadata` in `src/lib/seo.ts`): `meta_title`→`title`→site suffix; `meta_description`→`excerpt`→site fallback; `meta_keywords[]` wired when non-empty; `canonical_url` used only if a valid absolute http(s) URL (else generated `<site>/articles/<slug>`); `og_image`→`featured_image`(absolute storage)→site default; `featured_image_alt`→title. Empty-string values are treated as absent (DB stores '' for og_image/alt). Live audit confirmed all 25 published articles have these columns populated, so author-supplied SEO now renders instead of only title/excerpt. No DB content changed.
 
 ### AN-01 — Analytics is PARTIAL; no event/conversion/search/Web-Vitals instrumentation  [P2]
 - Category: AN

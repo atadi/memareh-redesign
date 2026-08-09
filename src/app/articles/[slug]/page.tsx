@@ -2,6 +2,11 @@ import { notFound } from "next/navigation";
 import { createPublicClient } from "@/lib/supabase/server-public";
 import { getSiteUrl } from "@/lib/config";
 import { getPublishedArticleSlugs } from "@/lib/articles";
+import {
+  buildArticleMetadata,
+  buildArticleJsonLd,
+  buildBreadcrumbJsonLd,
+} from "@/lib/seo";
 import { CommentSection } from "@/components/articles/CommentSection";
 import { RelatedArticles } from "@/components/articles/RelatedArticles";
 
@@ -27,7 +32,9 @@ export async function generateMetadata({
 
   const { data: article } = await supabase
     .from("articles")
-    .select("title, excerpt, featured_image, published_at, updated_at")
+    .select(
+      "slug, title, excerpt, featured_image, featured_image_alt, published_at, updated_at, meta_title, meta_description, meta_keywords, canonical_url, og_image",
+    )
     .eq("slug", slug)
     .eq("status", "published")
     .single();
@@ -42,50 +49,7 @@ export async function generateMetadata({
     };
   }
 
-  const articleUrl = `${siteUrl}/articles/${slug}`;
-  const image =
-    article.featured_image || `${siteUrl}/assets/logo/cover-image.jpg`;
-
-  return {
-    title: article.title,
-    description: article.excerpt,
-    metadataBase: new URL(siteUrl),
-
-    alternates: {
-      canonical: articleUrl,
-    },
-
-    openGraph: {
-      title: article.title,
-      description: article.excerpt,
-      url: articleUrl,
-      siteName: "معماره",
-      locale: "fa_IR",
-      type: "article",
-      images: [
-        {
-          url: image,
-          width: 1200,
-          height: 630,
-          alt: article.title,
-        },
-      ],
-      publishedTime: article.published_at,
-      modifiedTime: article.updated_at,
-    },
-
-    twitter: {
-      card: "summary_large_image",
-      title: article.title,
-      description: article.excerpt,
-      images: [image],
-    },
-
-    robots: {
-      index: true,
-      follow: true,
-    },
-  };
+  return buildArticleMetadata(article, siteUrl);
 }
 
 // -----------------------------
@@ -161,34 +125,10 @@ export default async function ArticlePage({
   const image =
     article.featured_image || `${siteUrl}/assets/logo/cover-image.jpg`;
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: article.title,
-    description: article.excerpt,
-    image,
-    url: articleUrl,
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": articleUrl,
-    },
-    author: {
-      "@type": "Organization",
-      name: "معماره",
-      url: siteUrl,
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "معماره",
-      logo: {
-        "@type": "ImageObject",
-        url: `${siteUrl}/assets/logo/logo-square.svg`,
-      },
-    },
-    datePublished: article.published_at,
-    dateModified: article.updated_at || article.published_at,
-    inLanguage: "fa-IR",
-  };
+  const jsonLd = [
+    buildArticleJsonLd(article, siteUrl),
+    buildBreadcrumbJsonLd(article, siteUrl),
+  ];
 
   return (
     <>

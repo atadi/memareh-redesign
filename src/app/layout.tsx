@@ -7,6 +7,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
 import { getSiteUrl } from "@/lib/config";
+import { SiteStructuredData } from "@/components/SiteStructuredData";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -106,6 +107,8 @@ export default function RootLayout({
             </Script>
           </>
         )}
+
+        <SiteStructuredData />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

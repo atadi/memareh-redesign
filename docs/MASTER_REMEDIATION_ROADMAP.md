@@ -35,6 +35,7 @@ Objective: single canonical domain; wire `meta_title`/`meta_keywords`/`canonical
 Expected files: `lib/site-config.ts`, `layout.tsx`, `articles/[slug]/page.tsx`, `sitemap.ts`, `robots.ts`.
 Production risk: LOW. Backup: NO. Migration: NO.
 Verification: build; fetch `/articles/<slug>` and inspect `<head>` (canonical, OG, JSON-LD) via read-only GET; sitemap/robots domain consistency.
+- **Status: COMPLETE (Phase C implemented).** Files: `src/lib/seo.ts` (deterministic metadata + JSON-LD builders), `src/components/SiteStructuredData.tsx` (Organization + WebSite once in layout), `src/app/layout.tsx` (emits site JSON-LD), `src/app/articles/[slug]/page.tsx` (generateMetadata via builder + Article/BreadcrumbList JSON-LD). Tests: `tests/seo.test.ts` (21 tests). Verified: tsc clean, build exit 0, 21 SEO tests pass, soak `SOAK_CONSISTENT`. SEO-01/SEO-04/SEO-05 marked RESOLVED in findings register. No DB/schema/content changes. Canonical `www` authority preserved. Note: SEO-01's www/non-www split was already resolved in Phase A.
 
 ## Phase D — Security headers & render-time sanitization  [P2]
 Addresses: SEC-01, SEC-02, PERF-02 (service-role removal overlaps Phase A).
