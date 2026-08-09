@@ -38,6 +38,18 @@ Each entry is a read-only checkpoint (use `pnpm check:articles-soak` or manual c
 - Verdict: `SOAK_CONSISTENT` (exit 0)
 - All checks PASS: public.articles=null, legacy=26, memareh=25, hash=54a808c2…, anon 404/404, site 200/200/200.
 
+### 2026-08-09T12:14Z (soak checkpoint slice)
+- Elapsed soak: ~0.047 d (≈1h8m since 2026-08-09T11:06Z). Both 7d (2026-08-16) and 14d (2026-08-23) thresholds NOT reached → `SOAK IN PROGRESS`.
+- Automated checker `check:articles-soak`: `SOAK_CONSISTENT` (exit 0).
+- DB state (read-only): public.articles=null, legacy_articles.articles=26 (hash 54a808c2… = preflight), memareh.articles=25.
+- Repo dep recheck (`src/`): 0 runtime references to `public.articles`/`set_author_name`/`trg_set_author_name`.
+- Archive security: 0 permissive policies, 0 anon/authenticated grants, schema not PostgREST-exposed (anon GET 404).
+- Live site: homepage 200, article listing 200, sitemap 200, article detail 200.
+- Postgres logs since archive: 0 hits on `public.articles`/`legacy_articles`/missing-relation.
+- Backup integrity: DB artifacts present (full combined 1,450,418 B; targeted pre-archive 26-row backup); Storage manifest 38 objects / 50,487,955 B, sampled checksums match. All valid.
+- Classification: **NO OBSERVED EXTERNAL CONSUMER** (observational).
+- Decision: `SOAK IN PROGRESS` — final deletion NOT authorized.
+
 ## Vercel log review
 
 - Vercel CLI credentials are not available in this environment; cannot pull Vercel function logs programmatically.
@@ -68,20 +80,20 @@ Each entry is a read-only checkpoint (use `pnpm check:articles-soak` or manual c
 
 | # | Criterion | State |
 |---|-----------|-------|
-| 1 | Minimum soak period elapsed (≥7d; prefer 14d) | PENDING (window not yet reached) |
-| 2 | `legacy_articles.articles = 26` | PASS (26) |
-| 3 | Archive data hashes still match pre-archive evidence | PASS (54a808c2…) |
-| 4 | `memareh.articles` healthy | PASS (25) |
-| 5 | Repo runtime consumers of `public.articles = 0` | PASS (0) |
+| 1 | Minimum soak period elapsed (≥7d; prefer 14d) | PENDING (elapsed 0.047d; 7d@2026-08-16, 14d@2026-08-23) |
+| 2 | `legacy_articles.articles = 26` | PASS (26, confirmed 2026-08-09T12:14Z) |
+| 3 | Archive data hashes still match pre-archive evidence | PASS (54a808c2…, confirmed 2026-08-09T12:14Z) |
+| 4 | `memareh.articles` healthy | PASS (25, confirmed 2026-08-09T12:14Z) |
+| 5 | Repo runtime consumers of `public.articles = 0` | PASS (0, confirmed 2026-08-09T12:14Z) |
 | 6 | No observed Vercel runtime request/error requiring `public.articles` | PENDING (continue through window) |
-| 7 | No observed Supabase/Postgres runtime request/error requiring it | PASS (0 so far) |
-| 8 | Sitemap healthy | PASS (200) |
-| 9 | Representative article routes healthy | PASS (200) |
+| 7 | No observed Supabase/Postgres runtime request/error requiring it | PASS (0 hits so far, confirmed 2026-08-09T12:14Z) |
+| 8 | Sitemap healthy | PASS (200, confirmed 2026-08-09T12:14Z) |
+| 9 | Representative article routes healthy | PASS (200, confirmed 2026-08-09T12:14Z) |
 | 10 | Admin/read flows healthy | PENDING (manual check per window) |
-| 11 | No external consumer discovered | PENDING (observational) |
-| 12 | Backup checksums still valid | PASS (recorded) |
+| 11 | No external consumer discovered | PENDING (observational; NO OBSERVED so far) |
+| 12 | Backup checksums still valid | PASS (DB + Storage verified 2026-08-09T12:14Z) |
 | 13 | Fresh targeted backup created immediately before final deletion | PENDING (do at deletion time) |
-| 14 | Destructive migration reviewed again | PASS (static review this slice) |
+| 14 | Destructive migration reviewed again | PASS (static review 2026-08-09) |
 | 15 | Rollback/recovery artifact still available | PASS (full backup + archive reversible) |
 
 ## Destructive migration static review (this slice, NOT executed)
