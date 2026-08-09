@@ -32,29 +32,33 @@ AN-02 carries a dual `P3 / INFO` tag; counted under P3 above.
 
 ## Findings
 
-### ARCH-01 — `services` / `service_requests` tables queried in code but absent in DB  [P1]
+### ARCH-01a — Booking / `service_requests` code+types absent in DB, feature removed  [P1]
 - Category: ARCH / DB
 - Confidence: HIGH
 - Evidence:
-  - `src/types/database.types.ts:140` declares `memareh.services`; `:196` declares `memareh.service_requests`.
-  - `src/lib/api/services.ts` calls `supabase.from('services').select('*')` (getServices/getServiceById).
-  - Live catalog introspection: `information_schema.tables` for `services`/`service_requests` across ALL schemas returns `[]`.
-  - `src/app/booking/page.tsx` currently only imports `redirect` (no live caller today), so the break is latent, not actively throwing on the home/booking path.
-- Affected: `lib/api/services.ts`, `database.types.ts`, `docs/BOOKING_INTEGRATION.md`, booking feature.
-- Impact: Any future/active path hitting `services` throws `relation "services" does not exist`. Booking feature is non-functional if wired up. Type/schema/DB disagreement undermines trust in the whole data layer.
-- Remediation: Decide intent — either (a) author + apply a migration creating `services`/`service_requests` with RLS, or (b) remove the dead types/code if the feature is deferred. Requires a production migration + fresh backup.
-- Code change: YES. DB schema change: YES (if option a). Production data mutation: NO (new tables only). External/operator action: NO.
-- Prereq: user decision on booking feature scope.
-- Classification: DB STALE / CODE STALE / INTENT UNCLEAR.
-- **Status (Phase B): BLOCKED — pending product decision (Option C).** Discovery completed (see `docs/SERVICES_BOOKING_AUTHORITY_AUDIT.md`). `/booking` and `/booking/success` are hard `redirect('/articles')` stubs; `src/components/booking/` does not exist; the 4 `lib/api/services.ts` functions + 2 `useServices` hooks have zero callers; no nav/CTA links. Live DB has no `services`/`service_requests` (nor any renamed alternative). No migration ever created the tables or the four enums. Feature is dormant + non-deployable as written, but clearly *intended* (types + contract + design doc), so it is neither safely removable (B) nor safe to materialize from TS types alone (A) without owner decisions. No schema change, no code removal this phase. Drift remains a known non-breaking discrepancy.
+  - `src/types/database.types.ts` declared `memareh.service_requests`; `src/types/database.ts` declared `ServiceRequest` + `BookingFormData` interfaces.
+  - Live catalog introspection: `information_schema.tables` for `service_requests` across ALL schemas returns `[]`.
+  - Booking routes `src/app/booking/page.tsx` + `src/app/booking/success/page.tsx` were hard `redirect('/articles')` stubs; `src/components/booking/` never existed.
+- Affected: `database.types.ts`, `database.ts`, `docs/BOOKING_INTEGRATION.md`, booking feature.
+- Impact (pre-removal): Booking was non-functional (no `service_requests` table); type/schema disagreement undermined data-layer trust.
+- Remediation: product decision — **Booking is not needed** (Phase: remove booking completely). Remove booking routes, booking-only types, and booking doc. Services domain left untouched.
+- Code change: YES (removal only). DB schema change: NO. Production data mutation: NO. External/operator action: NO.
+- Classification: RESOLVED BY REMOVAL.
+- **Status (Phase: Remove Booking): RESOLVED BY REMOVAL.** `src/app/booking/` + `src/app/booking/success/` deleted; `ServiceRequest` + `BookingFormData` removed from `src/types/database.ts`; `service_requests` table removed from `src/types/database.types.ts`; `docs/BOOKING_INTEGRATION.md` deleted. Verified by `tests/booking-removal.test.ts` (booking artifacts gone, Services helpers/types intact). No DB change, no Services change.
 
-### DB-02 — Schema/type/code drift (see ARCH-01)  [P1]
-- Category: DB
+### ARCH-01b / DB-02 — `services` table queried in code but absent in DB (drift REMAINS)  [P1]
+- Category: ARCH / DB
 - Confidence: HIGH
-- Evidence: same as ARCH-01.
-- Impact: integrity/trust; latent runtime failure.
-- Remediation: resolved together with ARCH-01.
-- **Status (Phase B): BLOCKED — pending product decision (Option C).** Same resolution as ARCH-01; see `docs/SERVICES_BOOKING_AUTHORITY_AUDIT.md`.
+- Evidence:
+  - `src/types/database.types.ts:140` declares `memareh.services`; `src/lib/api/services.ts` calls `supabase.from('services').select('*')` (getServices/getServiceById/getServicesByCategory/getEmergencyServices).
+  - `src/hooks/useServices.ts` consumes those helpers.
+  - Live catalog introspection: `information_schema.tables` for `services` across ALL schemas returns `[]`.
+- Affected: `lib/api/services.ts`, `hooks/useServices.ts`, `database.types.ts`, `database.ts` (`Service`/`ServiceWithIcon`).
+- Impact: Any path activating Services throws `relation "services" does not exist`. Services is a SEPARATE, still-unresolved concern from Booking.
+- Remediation: Decide intent — either (a) author + apply a migration creating `services` with RLS, or (b) remove the dead Services types/code. Requires a production migration + fresh backup + product-owner decision. Must NOT be addressed merely because Booking was removed.
+- Code change: NO this phase. DB schema change: NO this phase. Production data mutation: NO. External/operator action: PENDING product decision.
+- Classification: DB STALE / CODE STALE / INTENT UNCLEAR — RE-SCOPED (Booking removed; Services drift remains its own deferred issue).
+- **Status (Phase: Remove Booking): RE-SCOPED / REMAINS OPEN.** Booking removal did NOT touch Services (per explicit product-owner constraint). `Service`, `ServiceWithIcon`, `lib/api/services.ts`, and `hooks/useServices.ts` are all retained intact (verified by `tests/booking-removal.test.ts`). The `services` table drift is a distinct deferred issue awaiting product-owner decision; tracked here so it is not lost.
 
 ### DEPLOY-02 — Build requires Supabase service-role + URL at build time; Vercel env completeness unverified  [P1]
 - Category: DEPLOY

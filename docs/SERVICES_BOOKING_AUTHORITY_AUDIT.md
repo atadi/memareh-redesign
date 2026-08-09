@@ -1,10 +1,13 @@
-# Services / Booking Schema Authority Audit (Phase B)
+# Services / Booking Schema Authority Audit
 
 > Finding under audit: **ARCH-01 / DB-02 — P1** (`memareh.services` / `memareh.service_requests`
 > referenced in code + types but absent in live production DB).
-> Branch: `refactor/articles-schema-consolidation`, starting HEAD `4c6d99d`.
+> Original branch: `refactor/articles-schema-consolidation`, starting HEAD `4c6d99d` (Phase B).
 > Method: READ-ONLY discovery only. No CREATE/ALTER/INSERT/RLS/storage/auth changes.
 > `public.articles` archive soak untouched.
+>
+> **PRODUCT-OWNER DECISION (later phase): BOOKING IS NOT NEEDED — REMOVE BOOKING COMPLETELY.
+> SERVICES MUST REMAIN UNTOUCHED.** See "## RESOLUTION (Booking removed)" at the end.
 
 ## 1. Every repository reference
 
@@ -118,24 +121,49 @@ point, but enum values, FK targets, and RLS must be confirmed by the owner first
 
 **NOT PROVIDED** (design only, blocked on decision).
 
-## DECISION
+## RESOLUTION (Booking removed; Services retained)
 
-# OPTION C — BLOCKED PENDING PRODUCT DECISION
+**Product-owner decision (explicit): Booking is not needed → remove Booking completely.
+Services must remain untouched.**
 
-Rationale:
-- The feature is **clearly intended** (types, query contract, design doc, hooks/lib exist) → not
-  safely deletable as "abandoned" (that would be Option B, premature here).
-- It is **not active and not deployable** (`/booking` redirects; no components; no callers; tables
-  absent) → no operational breakage to fix today.
-- Creating production tables + enums + RLS for a PII-bearing domain **from TypeScript types alone**,
-  when the entry route is disabled and product intent (auth model, fields, statuses, admin workflow,
-  whether it replaces another system) is unresolved, is exactly the speculative action the phase
-  forbids.
-- Therefore: **no schema change, no code removal** this phase. The drift remains a known,
-  non-breaking discrepancy until the owner decides.
+### What was removed (Booking side)
+- Routes: `src/app/booking/page.tsx`, `src/app/booking/success/page.tsx` (deleted).
+- Types: `ServiceRequest` + `BookingFormData` interfaces removed from `src/types/database.ts`.
+- DB declaration: `service_requests` table removed from `src/types/database.types.ts`.
+- Docs: `docs/BOOKING_INTEGRATION.md` deleted.
+- No `src/components/booking/` existed; nothing else booking-specific referenced.
 
-## Required product-owner decisions
+### What remains intact (Services side — explicitly preserved)
+- `src/lib/api/services.ts` (getServices / getServiceById / getServicesByCategory /
+  getEmergencyServices) — unchanged.
+- `src/hooks/useServices.ts` (useServices / useServiceById) — unchanged.
+- `Service` + `ServiceWithIcon` interfaces in `src/types/database.ts` — unchanged.
+- `memareh.services` table declaration in `src/types/database.types.ts` — unchanged.
+- No migration created; no DB/schema change; the `services` table drift (ARCH-01b/DB-02)
+  remains a SEPARATE, still-open, deferred issue awaiting a product-owner decision.
 
+### Verification
+- `tests/booking-removal.test.ts`: booking artifacts gone, Services helpers/types intact.
+- Build: `pnpm run build` passes (exit 0). Auth/nav changes are runtime; Vercel preview
+  requires operator confirmation (see phase report).
+
+---
+
+## (ARCHIVED) Prior DECISION — OPTION C BLOCKED (Phase B, superseded)
+
+# OPTION C — BLOCKED PENDING PRODUCT DECISION (now RESOLVED: Booking removed)
+
+Rationale (historical):
+- The feature was clearly intended (types, query contract, design doc, hooks/lib exist) → not
+  safely deletable as "abandoned".
+- It was not active and not deployable (`/booking` redirected; no components; no callers; tables
+  absent) → no operational breakage to fix at the time.
+- Creating production tables + enums + RLS for a PII-bearing domain from TypeScript types alone,
+  when the entry route was disabled and product intent was unresolved, was speculative and forbidden.
+- Therefore: no schema change, no code removal in Phase B. The drift remained a known,
+  non-breaking discrepancy until the owner decided.
+
+## Required product-owner decisions (historical)
 1. Is Services/Booking a real public feature, or admin-only, or abandoned?
 2. Visitor vs authenticated-only booking? (doc says auth-required; confirm.)
 3. Exact `services` fields needed for launch (do we need `price_unit`, `requires_site_visit`,
@@ -147,4 +175,5 @@ Rationale:
 7. Is this replacing an existing external booking/CRM system?
 8. Approval workflow: are requests auto-confirmed or admin-reviewed?
 
-Until these are answered, ARCH-01/DB-02 stay **BLOCKED**.
+These were answered by the owner as: **Booking is not needed (remove it); Services is retained
+as a separate open concern.**
