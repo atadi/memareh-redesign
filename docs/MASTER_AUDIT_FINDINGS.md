@@ -237,6 +237,50 @@ AN-02 carries a dual `P3 / INFO` tag; counted under P3 above.
 - Code hardening applied this phase (evidence-backed, defensive): `Menu.refreshAuth()` now sets `user`/`setLoading` BEFORE and independent of the optional `profiles` display-name lookup, wrapped in try/finally, so a failing/blocked profile query can NEVER suppress the authenticated or admin UI. Tests: `tests/menu-auth-independence.test.ts` proves admin detection depends only on `app_metadata.role`, not on the profile/display-name value.
 - **Status: DIAGNOSIS COMPLETE — CODE AUTHORITY VERIFIED; FINAL CONFIRMATION OPERATOR-REQUIRED.** Ship the decoupling hardening; the remaining truth (which user logged in / which commit is deployed) must be confirmed by the operator via a browser DevTools check (see report §B/§I). Do NOT add further speculative UI workarounds.
 
+### NAV-01 — Global navigation links to non-existent `/search` (404 RSC spam)  [P2]
+- Category: NAV
+- Confidence: HIGH
+- Evidence: `Menu.tsx` rendered `<Link href="/search">جستجو</Link>` in the desktop nav. No `/search/route.tsx` exists, so the route 404s; client navigation emitted repeated `/search?_rsc=...` requests and polluted Console/Network.
+- Operator decision: remove Search from landing/global navigation; article search is already available on `/articles` via `ArticleFilters` (placeholder `جستجو در مقالات...`).
+- Remediation: removed the global `/search` link from `Menu.tsx` (and dropped the now-unused `Search` import). Article search remains on `/articles`.
+- **Status: RESOLVED.** Local `pnpm start` confirms `GET /search` → 404 and the homepage HTML contains zero `href="/search"` links.
+
+### AUTH-UX-05 — `/admin` protected by authentication only, not admin role  [P1]
+- Category: AUTH-UX / SEC
+- Confidence: HIGH
+- Evidence: `src/app/admin/layout.tsx` called `supabase.auth.getUser()` and only checked `if (!user)` — any authenticated (non-admin) user was allowed into the admin surface. Authoritative server guard `assertIsAdmin` exists for API routes but was not enforced on the `/admin` route/layout.
+- Remediation: `admin/layout.tsx` now also calls `isAdminUser(user)` (same `app_metadata.role` source as `assertIsAdmin`); non-admins are redirected to `/` with a `دسترسی غیرمجاز` toast. Server-side data guards (`assertIsAdmin` in admin API routes) remain the authoritative enforcement.
+- **Status: RESOLVED (defense-in-depth).** UI+redirect gate on the shared role source; server API routes unchanged (already enforced).
+
+### HYD-01 — React production error #418 (hydration mismatch) from theme class  [P1]
+- Category: HYD
+- Confidence: MEDIUM-HIGH
+- Evidence: `app/layout.tsx` placed `suppressHydrationWarning` on `<body>`, but `next-themes` (`ThemeProvider attribute="class"`) injects the theme class onto `<html>` before hydration. The `<html>` element therefore mismatched between server and client → React #418.
+- Remediation: moved `suppressHydrationWarning` to `<html>` (the element `next-themes` mutates), where it belongs; removed it from `<body>`. Menu's initial render is already deterministic (neutral `loading` state on both server and client, with the auth branch produced only after mount) so no further mismatch source there.
+- **Status: RESOLVED (best-effort).** Requires operator browser confirmation that #418 disappears on Preview/Production.
+
+### SEO-06 — Production HTML uses non-www canonical (`https://memareh.com`)  [P2]
+- Category: SEO
+- Confidence: HIGH
+- Evidence: operator-captured production HTML had `og:url = https://memareh.com`. Repo-wide grep found NO hard-coded `memareh.com` (non-www) in `src` — all canonical values derive from `getSiteUrl()` → `NEXT_PUBLIC_SITE_URL`.
+- Root cause: Vercel Production (and/or Preview) env `NEXT_PUBLIC_SITE_URL` is set to the non-www origin, not `https://www.memareh.com`.
+- Remediation: **operator env change, NOT a code change.** Set `NEXT_PUBLIC_SITE_URL=https://www.memareh.com` in Vercel Project → Environment Variables for both Production and Preview, redeploy. Code is already correct.
+- **Status: OPERATOR ACTION REQUIRED (no code defect).** Cannot be fixed from the repo; documented for the operator.
+
+### SEO-07 — 404 page emits conflicting `index, follow` robots  [P2]
+- Category: SEO
+- Confidence: HIGH
+- Evidence: `not-found.tsx` had no metadata, so it inherited root layout `robots: { index: true, follow: true }`, producing a 404 page with both `noindex` (from Next's not-found default) and `index, follow` (from root metadata) — conflicting directives.
+- Remediation: `app/not-found.tsx` now exports `metadata: { robots: { index: false, follow: false } }`.
+- **Status: RESOLVED.** Local `pnpm start` confirms the 404 page emits `<meta name="robots" content="noindex"/>` with no conflicting index directive.
+
+### AUTH-UX-06 — Login/register password fields lack autocomplete  [P3]
+- Category: AUTH-UX
+- Confidence: HIGH
+- Evidence: login/register password inputs had no `autoComplete`, triggering browser warnings.
+- Remediation: login email `autoComplete="email"`, password `autoComplete="current-password"`; register email `email`, both passwords `new-password`.
+- **Status: RESOLVED.**
+
 ### DB-01 — `articles.slug` is NULLABLE but used as route key  [P2]
 - Category: DB
 - Confidence: HIGH
