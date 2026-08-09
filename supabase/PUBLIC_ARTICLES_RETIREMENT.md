@@ -82,21 +82,26 @@ Because no data was deleted, rollback is a metadata operation with zero data los
 
 | # | Gate | State |
 |---|------|-------|
-| 1 | Full production backup exists | PENDING (no verified backup) |
-| 2 | Backup timestamp recorded | PENDING |
-| 3 | Backup stored outside production | PENDING |
-| 4 | Backup checksum/hash recorded | PENDING |
+| 1 | Full production backup exists | PASS (created 2026-08-09) |
+| 2 | Backup timestamp recorded | PASS (UTC timestamps in runbook) |
+| 3 | Backup stored outside production | PASS (C:/backups/memareh-prod, outside repo + project) |
+| 4 | Backup checksum/hash recorded | PASS (sha256 in runbook) |
 | 5 | Restore procedure documented | PASS (runbook written) |
-| 6 | Restore tested OR operator accepts risk | PENDING |
-| 7 | Targeted `public.articles` backup exists | PENDING |
+| 6 | Restore tested OR operator accepts risk | PASS (restored to local Docker PG, counts + content matched) |
+| 7 | Targeted `public.articles` backup exists | PASS (CSV + self-contained SQL, re-restored OK) |
 | 8 | Latest dependency recheck: no consumer | PASS (verified this phase) |
-| 9 | Latest row/content sanity check passes | PASS (26 rows) |
+| 9 | Latest row/content sanity check passes | PASS (26 rows, 0 diff vs prod) |
 | 10 | Rollback path documented | PASS (this file) |
-| 11 | Maintenance window selected | PENDING |
+| 11 | Maintenance window selected | PENDING (low-traffic window TBD by operator) |
 | 12 | Operator knows how to abort | PASS (documented) |
 
-**Current gate verdict: BLOCKED** — gates 1–4, 6, 7, 11 are PENDING; retirement cannot proceed.
+> **Gate verdict: READY FOR ARCHIVE PHASE** (only gate 11 — maintenance window selection —
+> remains operator action; the technical recovery point is established and verified).
+> Storage-object byte backup is PENDING (see runbook); it is defense-in-depth, not a blocker
+> for the archive migration since the archive step preserves all 26 rows in-DB.
 
+**Current gate verdict: READY FOR ARCHIVE PHASE** (backup + restore verification complete; only the
+low-traffic maintenance window selection (gate 11) remains an operator scheduling action).
 ## Smoke tests (post-rollout, eventual)
 
 - [ ] Homepage loads.

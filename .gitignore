@@ -43,3 +43,17 @@ next-env.d.ts
 
 # raw production audit snapshot (contains production identifiers/storage URLs — regenerable)
 scripts/audit-public-articles.out.json
+
+# backup artifacts / operational dumps (never commit; stored outside repo at C:/backups/...)
+*.dump
+*.backup
+*.sql.bak
+prod_map.json
+local_map.json
+public_articles_*.csv
+public_articles_*.sql
+memareh_*.dump
+memareh_*.sql
+
+# supabase CLI local link cache (generated, env-specific — not source)
+supabase/.temp/

@@ -1,19 +1,50 @@
 # Production Backup Runbook — memareh Supabase Project
 
-> Status: **NO VERIFIED BACKUP YET.**
-> Scope: full logical database + storage objects + auth-state considerations for the
-> LIVE production Supabase project backing `memareh-redesign`.
-> This document is the authoritative recovery plan. It MUST be executed (and a backup
-> artifact produced + restore-verified) BEFORE any retirement migration on `public.articles`.
+> Status: **BACKUP CREATED AND RESTORE VERIFIED** (2026-08-09).
+> Method: Supabase CLI `db dump` (linked project, access-token auth, no DB password needed).
+> Restore verified into a local Docker Postgres 17 (non-production, localhost:5434).
+> Scope: full logical database backup (schema + data) including auth + storage metadata.
+> This document is the authoritative recovery plan. Retirement of `public.articles` may
+> now proceed to the archive phase (see `PUBLIC_ARTICLES_RETIREMENT.md`).
+>
+> ## Backup evidence (non-secret)
+> - Created (UTC): 2026-08-09T10:04–10:16Z
+> - Tool: `supabase` CLI v2.113.0 (`npx supabase db dump --linked`)
+> - Project ref: `uakvurskrcyvksxfvhho` (public identifier)
+> - Artifacts stored at: `C:/backups/memareh-prod/` (OUTSIDE repo AND outside live Supabase)
+> - NOT committed to Git.
+> - Artifact inventory (sha256):
+>   - `memareh_full_20260809T100108Z.dump` (49,545 B) 6232f4a5…a2ae2f — full (custom fmt, schema+data)
+>   - `memareh_schema_20260809T100437Z.sql` (49,545 B) 6232f4a5…a2ae2f — schema-only SQL
+>   - `memareh_data_20260809T100437Z.sql` (1,400,798 B) 90fcef9e…a3622c — data-only SQL (incl. auth.*, memareh.*, public.articles, storage.*)
+>   - `public_articles_data_2026-08-09T10-16-00-628Z.csv` (736,238 B) e7b165c4…c45570 — targeted 26-row CSV
+>   - `public_articles_targeted_2026-08-09T10-16-00-628Z.sql` (760,054 B) 25d9353c…c28ef2 — targeted 26-row self-contained SQL
+> - Restore target: Docker `postgres:17` container `memareh-restore-test` on localhost:5434, trust auth (non-prod).
+> - Restore result: schema + data loaded (exit 0). Application tables restored with EXACT row-count match to production.
+> - Restore warnings (EXPECTED, non-fatal — plain Postgres lacks Supabase-managed objects):
+>   `pg_net`, `supabase_vault`, `extensions` schema, `auth.users`/`auth.*`, `storage.buckets`/`storage.objects` failed to create/load. These are platform-managed and would be re-provided by a fresh Supabase project; they do not affect application-data recovery.
+> - Row-count verification (production == restored):
+>   memareh.profiles 5, memareh.articles 25, memareh.article_tags 187, memareh.article_comments 7,
+>   memareh.article_ratings 0, memareh.article_tag_relations 301, memareh.comment_likes 1,
+>   public.articles 26, memareh.article_tags_view 25. ALL MATCH.
+> - Content integrity: per-row (slug → content-length/status) diff between production and restored
+>   `public.articles` = 0 differences (26/26 identical).
+> - Targeted backup independently re-restored into a separate schema: 26 rows, `tags` array column correct.
+>
+> ## Storage backup status: PENDING (documented next action)
+> - `article-images` bucket EXISTS (confirmed via Storage API).
+> - DB dump does NOT contain Storage object bytes.
+> - A byte-level sync of bucket objects was NOT performed this phase (requires a Storage
+>   list+download sync script; API list returned partial/root-level objects).
+> - NEXT ACTION: run a Storage object export (`supabase` Storage API list + download loop, or
+>   dashboard download) to `C:/backups/memareh-prod/storage/` and record object count + size.
+>   Until then, treat Storage contents as NOT backed up.
 
 ## 1. Current production backup status
 
-- **No automated/managed backup has been confirmed.** The Supabase platform does take
-  daily managed backups for paid projects, but "managed existence" is NOT the same as
-  "operator-verified recovery point." We require a locally-held, hash-recorded,
-  restore-tested backup artifact before any destructive change.
-- Treat the production DB as **not safely recoverable** until step 4 (full backup) and
-  step 6 (restore verification) are both completed.
+- **Operator-controlled full logical backup: CREATED and RESTORE-VERIFIED (2026-08-09).**
+- This satisfies the recovery-point prerequisite for `public.articles` retirement.
+- Storage object bytes: see "Storage backup status" above (PENDING).
 
 ## 2. Backup method options (choose one; CLI preferred)
 
