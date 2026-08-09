@@ -10,7 +10,8 @@
     "test:watch": "vitest",
     "test:rls": "vitest run tests/rls",
     "test:rls:storage": "SUPABASE_RLS_TEST_MODE=1 vitest run tests/rls/storage-api.test.ts",
-    "supabase:test:reset": "supabase db reset && pnpm test:rls"
+    "supabase:test:reset": "supabase db reset && pnpm test:rls",
+    "check:articles-soak": "node scripts/check-public-articles-soak.cjs"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
