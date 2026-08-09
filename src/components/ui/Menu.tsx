@@ -6,6 +6,22 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
+import { isAdminUser } from '@/lib/auth-role'
+
+/**
+ * Pure derivation of the menu's auth display state from the resolved Supabase
+ * user + profile row. Kept side-effect free so it is independently testable
+ * without a DOM / Supabase client.
+ */
+export function deriveAuthState(
+  user: { app_metadata?: { role?: unknown } | null } | null,
+  displayName: string,
+): { isAdmin: boolean; displayName: string } {
+  return {
+    isAdmin: isAdminUser(user),
+    displayName: displayName || 'کاربر',
+  }
+}
 
 export function Menu() {
   const [user, setUser] = useState<any>(null)
@@ -16,38 +32,56 @@ export function Menu() {
   const supabase = createClient()
   const { resolvedTheme, setTheme } = useTheme()
 
+  const refreshAuth = async () => {
+    const { data } = await supabase.auth.getUser()
+    const currentUser = data.user
+
+    if (currentUser) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', currentUser.id)
+        .single()
+
+      setDisplayName(
+        profile?.display_name ||
+          (currentUser.user_metadata as { display_name?: string })?.display_name ||
+          '',
+      )
+    } else {
+      setDisplayName('')
+    }
+
+    setUser(currentUser)
+    setLoading(false)
+  }
+
+  // Initial load.
   useEffect(() => {
     setMounted(true)
+    refreshAuth()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Keep the menu in sync with auth state changes (login / logout / session
+  // refresh) without requiring a full page reload. This is the fix for the
+  // stale-nav defect: the Menu lives in the persistent layout and does not
+  // remount on client navigation, so a one-time getUser() left it showing the
+  // pre-login state until a manual refresh.
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      const currentUser = data.user
-      setUser(currentUser)
-
-      if (currentUser) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('display_name')
-          .eq('id', currentUser.id)
-          .single()
-
-        setDisplayName(
-          profile?.display_name ||
-            currentUser.user_metadata?.display_name ||
-            'کاربر'
-        )
-      }
-
-      setLoading(false)
+    const { data: sub } = supabase.auth.onAuthStateChange(() => {
+      refreshAuth()
     })
+    return () => sub.subscription.unsubscribe()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const isAdmin = user?.app_metadata?.role === 'admin'
+  const { isAdmin } = deriveAuthState(user, displayName)
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
     setUser(null)
+    setDisplayName('')
     router.refresh()
   }
 
@@ -131,6 +165,7 @@ export function Menu() {
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-1 text-sm text-red-500 hover:text-red-700 transition"
+                  aria-label="خروج"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>

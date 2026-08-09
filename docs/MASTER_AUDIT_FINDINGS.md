@@ -195,6 +195,33 @@ AN-02 carries a dual `P3 / INFO` tag; counted under P3 above.
 - Impact: acceptable. Caveat: client-side `updateUser({data})` changes only `user_metadata`, not `raw_app_meta_data`, so admin claims can't be self-escalated via the anon client. Low risk.
 - Remediation: none required; document the contract.
 
+### AUTH-UX-01 — Authenticated UI does not update after login without manual refresh  [P2]
+- Category: AUTH-UX
+- Confidence: HIGH
+- Evidence: `src/components/ui/Menu.tsx` called `supabase.auth.getUser()` exactly once in a mount `useEffect` with **no `onAuthStateChange` listener**. `Menu` is rendered inside the persistent layout (`ClientShell`), so it does NOT remount on client navigation after login. Result: the `user` state stays at its initial server/empty value and the header keeps showing the pre-login (anonymous) state until a full browser refresh.
+- Impact: after a successful login the user still sees `ورود`/`ثبت‌نام`; profile/admin controls never appear until refresh. Unacceptable UX.
+- Remediation: subscribe to `supabase.auth.onAuthStateChange` and re-resolve the user (and profile display name) on every SIGNED_IN/SIGNED_OUT/TOKEN_REFRESHED event, so the menu re-renders immediately. Scoped to `Menu` only; server guards untouched.
+- Code change: YES. DB: NO.
+- **Status (auth-sync hardening): RESOLVED.** `Menu.tsx` now uses `onAuthStateChange` to refresh user/profile state without remount; `refreshAuth()` replaces the one-shot `getUser()`. Verified locally (build + logic tests).
+
+### AUTH-UX-02 — Authenticated profile control effectively routed to `/login` (stale anonymous branch)  [P2]
+- Category: AUTH-UX
+- Confidence: HIGH
+- Evidence: the link itself targets `/profile` (`Menu.tsx`), which is a real, appropriate page (`src/app/profile/page.tsx`). The defect arose because, under AUTH-UX-01, `user` stayed `null` after login, so the menu rendered the **anonymous** branch whose primary control is `<Link href="/login">ورود</Link>` — i.e. the surface the user saw pointed at `/login`.
+- Impact: an authenticated user clicking the account affordance (or seeing the anonymous `ورود` control) was sent to the login page.
+- Remediation: fix the stale-state root cause (AUTH-UX-01). Once `user` is live, the authenticated branch (with the `/profile` link) renders; the `/login` link is only shown when `!user`. No fake profile feature invented.
+- Code change: YES (via AUTH-UX-01). DB: NO.
+- **Status (auth-sync hardening): RESOLVED** (same fix as AUTH-UX-01; `/profile` is the truthful destination).
+
+### AUTH-UX-03 — Admin (`پنل مدیریت`) button not shown after admin login  [P2]
+- Category: AUTH-UX
+- Confidence: HIGH
+- Evidence: `Menu.tsx` derived `isAdmin` from the (stale) `user?.app_metadata?.role === 'admin'`. With `user` stuck at `null` (AUTH-UX-01), `isAdmin` was always false, so `پنل مدیریت` (and the mobile variant) never rendered even for admins.
+- Impact: authenticated admins could not see the Admin Panel entry in the header.
+- Remediation: after AUTH-UX-01 fix, `user` is the live Supabase user and `app_metadata.role` is available; `isAdmin` now uses the shared `isAdminUser()` helper (same source as the server `assertIsAdmin` guard). Admin Panel link targets canonical `/admin` on both desktop and mobile.
+- Code change: YES. Authz change: NO (server guard unchanged).
+- **Status (auth-sync hardening): RESOLVED.** `isAdmin` now uses `isAdminUser()` from `src/lib/auth-role.ts` (UI-only; `/admin` route + API guards remain server-enforced).
+
 ### DB-01 — `articles.slug` is NULLABLE but used as route key  [P2]
 - Category: DB
 - Confidence: HIGH
