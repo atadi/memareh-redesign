@@ -222,6 +222,21 @@ AN-02 carries a dual `P3 / INFO` tag; counted under P3 above.
 - Code change: YES. Authz change: NO (server guard unchanged).
 - **Status (auth-sync hardening): RESOLVED.** `isAdmin` now uses `isAdminUser()` from `src/lib/auth-role.ts` (UI-only; `/admin` route + API guards remain server-enforced).
 
+### AUTH-UX-04 — Operator browser evidence: admin button still missing after hard refresh  [P1 — DIAGNOSIS]
+- Category: AUTH-UX
+- Confidence: HIGH (diagnosis, not a new code bug)
+- Operator evidence: after admin login the header did NOT update; **manual refresh, Ctrl+F5, and clearing site data did NOT reveal `پنل مدیریت`**. A hard reload re-reads the session cookie via `getUser()`, so a pure "stale React state" bug is ruled OUT by this evidence.
+- Proven facts from this diagnosis (read-only):
+  1. `Menu.tsx` is the ONLY nav component, imported via `ClientShell` → `app/layout.tsx`. No alternate/duplicate nav exists. → `MENU_COMPONENT_NOT_USED` RULED OUT.
+  2. Every admin check in the repo reads `app_metadata.role` (UI `isAdminUser`, server `assertIsAdmin`, login/register redirects, `make-admin.mjs`, `memareh.is_admin()` SQL). Code authority is consistent. → `UI_ROLE_SOURCE_WRONG` RULED OUT.
+  3. Repo references exactly ONE Supabase project (`uakvurskrcyvksxfvhho`) in `.env.local`, build manifest, and all artifacts. → `WRONG_SUPABASE_PROJECT` RULED OUT.
+  4. Read-only `auth.users` inspection of that project shows exactly one admin: id prefix `3bd2aeb1…`, `raw_app_meta_data.role = 'admin'`. Authority/grant is correct in production. → `ADMIN_METADATA_MISSING` RULED OUT.
+- Leading hypotheses remaining (require operator confirmation, NOT provable from builder):
+  - `TEST_USER_NOT_ADMIN`: the account used for manual testing is not `3bd2aeb1…` and has no admin claim. This exactly explains a correct-but-absent button after hard refresh.
+  - `DEPLOYMENT_MISMATCH`: the tested URL is not actually serving commit `2cceda8` (e.g. operator tested Production while Preview is the deployed target, or Preview not redeployed). Must be confirmed by checking the deployment's commit in the Vercel dashboard.
+- Code hardening applied this phase (evidence-backed, defensive): `Menu.refreshAuth()` now sets `user`/`setLoading` BEFORE and independent of the optional `profiles` display-name lookup, wrapped in try/finally, so a failing/blocked profile query can NEVER suppress the authenticated or admin UI. Tests: `tests/menu-auth-independence.test.ts` proves admin detection depends only on `app_metadata.role`, not on the profile/display-name value.
+- **Status: DIAGNOSIS COMPLETE — CODE AUTHORITY VERIFIED; FINAL CONFIRMATION OPERATOR-REQUIRED.** Ship the decoupling hardening; the remaining truth (which user logged in / which commit is deployed) must be confirmed by the operator via a browser DevTools check (see report §B/§I). Do NOT add further speculative UI workarounds.
+
 ### DB-01 — `articles.slug` is NULLABLE but used as route key  [P2]
 - Category: DB
 - Confidence: HIGH

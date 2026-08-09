@@ -33,27 +33,44 @@ export function Menu() {
   const { resolvedTheme, setTheme } = useTheme()
 
   const refreshAuth = async () => {
-    const { data } = await supabase.auth.getUser()
-    const currentUser = data.user
+    try {
+      const { data } = await supabase.auth.getUser()
+      const currentUser = data.user
 
-    if (currentUser) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('display_name')
-        .eq('id', currentUser.id)
-        .single()
+      // Auth identity is set FIRST and independently of the optional profile
+      // lookup (DEFENSE: a failing/blocked profiles query must never prevent
+      // the authenticated/admin state from rendering).
+      setUser(currentUser)
 
-      setDisplayName(
-        profile?.display_name ||
-          (currentUser.user_metadata as { display_name?: string })?.display_name ||
-          '',
-      )
-    } else {
+      if (currentUser) {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('display_name')
+            .eq('id', currentUser.id)
+            .single()
+
+          setDisplayName(
+            profile?.display_name ||
+              (currentUser.user_metadata as { display_name?: string })?.display_name ||
+              '',
+          )
+        } catch {
+          // Profile display name is optional; fall back to user_metadata only.
+          setDisplayName(
+            (currentUser.user_metadata as { display_name?: string })?.display_name ||
+              '',
+          )
+        }
+      } else {
+        setDisplayName('')
+      }
+    } catch {
+      setUser(null)
       setDisplayName('')
+    } finally {
+      setLoading(false)
     }
-
-    setUser(currentUser)
-    setLoading(false)
   }
 
   // Initial load.
