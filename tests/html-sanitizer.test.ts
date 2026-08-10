@@ -61,10 +61,23 @@ describe('sanitizeHtml — legitimate article content preserved', () => {
 
   it('keeps tables produced by the Tiptap editor', () => {
     const html =
-      '<table><thead><tr><th>سرویس</th></tr></thead><tbody><tr><td>برقکاری</td></tr></tbody></table>'
+      '<table><thead><tr><th scope="col">سرویس</th></tr></thead><tbody><tr><td>برقکاری</td></tr></tbody></table>'
     const out = sanitizeHtml(html)
     expect(out).toContain('<table>')
-    expect(out).toContain('<th>سرویس</th>')
+    expect(out).toContain('<th scope="col">سرویس</th>')
+    expect(out).toContain('<thead>')
+  })
+
+  it('keeps article design-system wrappers (div) and col scopes', () => {
+    // The `.article-*` design system uses <div> as the block wrapper and
+    // `scope="col"` for semantic table headers. Both must survive — this is the
+    // allowlist support added for the single-article pilot.
+    const html =
+      '<div class="article-callout"><p>هشدار</p></div>' +
+      '<table><thead><tr><th scope="col">دسته</th></tr></thead><tbody><tr><td>مقدار</td></tr></tbody></table>'
+    const out = sanitizeHtml(html)
+    expect(out).toContain('<div class="article-callout">')
+    expect(out).toContain('<th scope="col">دسته</th>')
   })
 
   it('keeps code/pre blocks', () => {

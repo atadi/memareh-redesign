@@ -17,7 +17,7 @@ import DOMPurify from 'isomorphic-dompurify'
 // omission from this list — DOMPurify also strips event-handler attributes and
 // javascript:/data: URL schemes by default.
 const ALLOWED_TAGS = [
-  'p', 'br', 'hr',
+  'p', 'br', 'hr', 'div',
   'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
   'strong', 'em', 'b', 'i', 'u', 's', 'sub', 'sup', 'mark', 'small',
   'blockquote', 'pre', 'code',
@@ -30,7 +30,7 @@ const ALLOWED_TAGS = [
 // avoid CSS-injection (expression()/url(javascript:)). `target`/`rel` are handled
 // by the hook below.
 const ALLOWED_ATTR = [
-  'href', 'src', 'alt', 'title', 'class',
+  'href', 'src', 'alt', 'title', 'class', 'scope',
   'width', 'height', 'loading', 'target', 'rel',
 ] as const
 
