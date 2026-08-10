@@ -173,3 +173,18 @@ describe('medium-confidence enhancements are opt-in only', () => {
     expect(r.textPreserved).toBe(true)
   })
 })
+
+describe('idempotence is byte-stable including sanitizer whitespace', () => {
+  it('a second pass over the sanitized output reproduces it exactly (no leading-newline drift)', () => {
+    // The sanitizer can prepend surrounding whitespace on raw input; the
+    // optimizer must canonicalize it so bulk/editor re-runs are stable.
+    const raw =
+      '<h1>عنوان</h1><p><a href="https://memareh.com" rel="nofollow">لینک</a></p>' +
+      '<table><tr><th>سرویس</th></tr><tr><td>برق</td></tr></table>'
+    const once = optimizeArticleHtml(raw)
+    const twice = optimizeArticleHtml(once.sanitizedHtml)
+    expect(twice.sanitizedHtml).toBe(once.sanitizedHtml)
+    expect(once.sanitizedHtml).not.toMatch(/^\s/)
+    expect(once.sanitizedHtml).not.toMatch(/\s$/)
+  })
+})

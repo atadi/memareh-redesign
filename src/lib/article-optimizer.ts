@@ -431,7 +431,11 @@ export function optimizeArticleHtml(
   canonicalizeDom(body)
 
   const optimizedHtml = serialize(doc)
-  const sanitizedHtml = sanitizeHtml(optimizedHtml)
+  // Sanitizer (isomorphic-dompurify) can prepend/append surrounding whitespace
+  // on raw input. Canonicalize leading/trailing whitespace so the final output is
+  // byte-stable and the optimizer is genuinely idempotent (a second pass over the
+  // sanitized result must reproduce it exactly). Visible text is unaffected.
+  const sanitizedHtml = sanitizeHtml(optimizedHtml).replace(/^\s+|\s+$/g, '')
   const integrity = compareVisibleText(html, sanitizedHtml)
   const linkOk = checkLinkIntegrity(sanitizedHtml)
 

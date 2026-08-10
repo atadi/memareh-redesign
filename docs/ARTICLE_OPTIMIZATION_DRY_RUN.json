@@ -1,0 +1,1175 @@
+{
+  "generatedAt": "2026-08-10T10:46:25.642Z",
+  "mode": "dry-run-read-only",
+  "productionWrites": 0,
+  "target": {
+    "status": "published",
+    "source": "memareh.articles",
+    "readOnly": true
+  },
+  "summary": {
+    "totalPublished": 25,
+    "safeToOptimize": 17,
+    "reviewRequired": 8,
+    "blocked": 0,
+    "textIntegrityFailures": [],
+    "sanitizerFailures": [],
+    "linkIntegrityFailures": [],
+    "idempotenceFailures": [],
+    "avgScoreBefore": 72,
+    "avgScoreAfter": 99,
+    "avgScoreDelta": 27,
+    "ctaMismatchCount": 1
+  },
+  "aggregate": {
+    "total": 25,
+    "published": 25,
+    "excludedByStatus": 0,
+    "safe": 17,
+    "review": 8,
+    "blocked": 0,
+    "textIntegrityFailures": [],
+    "sanitizerFailures": [],
+    "linkIntegrityFailures": [],
+    "idempotenceFailures": [],
+    "avgScoreBefore": 72,
+    "avgScoreAfter": 99,
+    "scoreMin": 57,
+    "scoreMax": 93,
+    "improving": 24,
+    "unchanged": 1,
+    "bodyH1": 0,
+    "nonWwwLinks": 0,
+    "internalNofollow": 0,
+    "articlesWithInlineStyle": 0,
+    "totalInlineStyles": 0,
+    "tablesNeedingConversion": 0,
+    "faqCandidates": 0,
+    "ctaMismatches": [
+      {
+        "slug": "chra-cheragh-haye-khaneh-cheshmak-mizanand",
+        "text": "ثبت درخواست در سایت معماره",
+        "note": "booking-removed product mismatch"
+      }
+    ],
+    "metadataFindings": 67
+  },
+  "articles": [
+    {
+      "id": "9695988e-7d81-4ad8-b9cc-41c610c55f3a",
+      "slug": "aazam-fvri-brghkarblvar-aboozr-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari",
+      "title": "رفع اتصالی برق و اعزام فوری برقکار - بلوار ابوذر",
+      "scoreBefore": 67,
+      "scoreAfter": 100,
+      "findings": [
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 2,
+      "highConfidenceCount": 2,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 2,
+      "originalHtmlLength": 8534,
+      "optimizedHtmlLength": 7284,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "SAFE_TO_OPTIMIZE",
+      "reasons": [],
+      "originalHash": "f5e809c6f83f4e98d463259f5adf414997a96018af65e41fed4f388734652fef",
+      "optimizedHash": "1798dafb71fc6c3060bee1c8c6d26820e3bd52fe168312164e24c05857f640cd",
+      "updatedAt": "2026-07-07 22:12:46.318358+00"
+    },
+    {
+      "id": "d6282073-8f4d-40e6-8410-ed8fa6f38775",
+      "slug": "aazam-fvri-brghkariamir-abad-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari",
+      "title": "برقکار امیراباد رفع اتصالی برق و اعزام فوری برقکار - امیراباد کارگرشمالی کارگر جنوبی خرابی تلفن امیراباد",
+      "scoreBefore": 67,
+      "scoreAfter": 100,
+      "findings": [
+        {
+          "type": "metadata-meta_title",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 3,
+      "highConfidenceCount": 3,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 3,
+      "originalHtmlLength": 7029,
+      "optimizedHtmlLength": 6102,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "SAFE_TO_OPTIMIZE",
+      "reasons": [],
+      "originalHash": "3c88e6c3bbd0705b2478589b8b005360a6bfbcc3971035a201f38284aee43129",
+      "optimizedHash": "3c7ae8d4a021e98e0c878262e09f53d4d5deaeed2eaa649e80efa94f3df0c067",
+      "updatedAt": "2026-07-07 22:11:27.096817+00"
+    },
+    {
+      "id": "d0b296a8-4088-4f6b-8da6-9fa2d00deb03",
+      "slug": "aazam-fvri-brghkarivsf-abad-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari",
+      "title": "رفع اتصالی برق و اعزام فوری برقکار - یوسف آباد",
+      "scoreBefore": 67,
+      "scoreAfter": 100,
+      "findings": [
+        {
+          "type": "metadata-meta_description",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 3,
+      "highConfidenceCount": 3,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 3,
+      "originalHtmlLength": 7046,
+      "optimizedHtmlLength": 6325,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "SAFE_TO_OPTIMIZE",
+      "reasons": [],
+      "originalHash": "00246063a06abef6004bb6691f4a24cee21eb64d294187656909eff3878cc22e",
+      "optimizedHash": "187be4ce3d0ce410634dc2e7931a471fbf7a8a81c8e95a410e84c4940de01b05",
+      "updatedAt": "2026-07-07 22:11:47.477382+00"
+    },
+    {
+      "id": "badb80c2-bfc9-4633-b3af-e561ef625f39",
+      "slug": "aazam-fvri-brghkarmhlh-bazar-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari",
+      "title": "برقکار بازار رفع اتصالی برق و اعزام فوری برقکار - محله بازار خرابی تلفن بازار",
+      "scoreBefore": 93,
+      "scoreAfter": 100,
+      "findings": [
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 2,
+      "highConfidenceCount": 2,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 2,
+      "originalHtmlLength": 7416,
+      "optimizedHtmlLength": 6602,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "SAFE_TO_OPTIMIZE",
+      "reasons": [],
+      "originalHash": "f12bc0ed3b6e3a4f2ea2ef128b4d34c74aec238d133c94c3c8244a024c852457",
+      "optimizedHash": "de5290c2e8aadf1ac93a6a0c80a2743502912c69ea01946057f1d9f0e88448bb",
+      "updatedAt": "2026-07-07 22:10:46.342568+00"
+    },
+    {
+      "id": "f9328d22-ca0c-4f25-8c44-5906b29f7634",
+      "slug": "alt-pridn-fivz-brgh-chist",
+      "title": "علت پریدن فیوز برق چیست",
+      "scoreBefore": 64,
+      "scoreAfter": 100,
+      "findings": [
+        {
+          "type": "metadata-meta_description",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 3,
+      "highConfidenceCount": 3,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 3,
+      "originalHtmlLength": 12141,
+      "optimizedHtmlLength": 10670,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "SAFE_TO_OPTIMIZE",
+      "reasons": [],
+      "originalHash": "3b563507d73fee7dd4478011fe8d3f2f6e80d7611b58cfc1b24ea07cc05dea31",
+      "optimizedHash": "848f960852a2db4f755ba04b013236f39389b6a15d7aa636a84e961db5ec2f5c",
+      "updatedAt": "2026-07-13 00:20:00.296744+00"
+    },
+    {
+      "id": "8980d851-19d1-4144-9702-f4c84cdbaa58",
+      "slug": "brghkar-aazam-fvri-brghkar-narmk-rfa-atsali-brghkhrabi-tlfn-mhlh-narmknsbiatbrghkarimntghh-narmk",
+      "title": "برقکار نارمک رفع اتصالی برق و اعزام فوری برقکار - نارمک خرابی تلفن نارمک",
+      "scoreBefore": 67,
+      "scoreAfter": 100,
+      "findings": [
+        {
+          "type": "metadata-meta_title",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 3,
+      "highConfidenceCount": 3,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 3,
+      "originalHtmlLength": 5238,
+      "optimizedHtmlLength": 4591,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "SAFE_TO_OPTIMIZE",
+      "reasons": [],
+      "originalHash": "dec3c72eca3f272b0603eabcdf556f94d7e3af8a71341d8a4925b281295881b5",
+      "optimizedHash": "c9f84b54ef06f7266b755e04e93983c8384c6d4598193fd5100e18d51f7ade96",
+      "updatedAt": "2026-07-13 00:21:15.138574+00"
+    },
+    {
+      "id": "99b3f994-8528-4e91-95bd-0a76543d52a7",
+      "slug": "brghkar-aazam-fvri-brghkaraghdsih-rfa-atsali-brghkhrabi-tlfn-mhlh-aghdsihnsbiatbrghkarimntghh-aghdsih",
+      "title": "برقکار اقدسیه رفع اتصالی برق و اعزام فوری برقکار - اقدسیه خرابی تلفن اقدسیه",
+      "scoreBefore": 67,
+      "scoreAfter": 100,
+      "findings": [
+        {
+          "type": "metadata-meta_title",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-meta_description",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 4,
+      "highConfidenceCount": 4,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 4,
+      "originalHtmlLength": 5269,
+      "optimizedHtmlLength": 4622,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "SAFE_TO_OPTIMIZE",
+      "reasons": [],
+      "originalHash": "ab51c7bbd8cc707804f5db3c03129521a39dea0af0e901d332def54af3df84a4",
+      "optimizedHash": "a165f7c12a6e6f5bde3a1a54e981c8322d771b712041b276b2f1c16548927d05",
+      "updatedAt": "2026-07-13 00:21:43.047662+00"
+    },
+    {
+      "id": "a2b73560-8392-4f9a-859a-178254c99f26",
+      "slug": "brghkar-aazam-fvri-brghkarpasdaran-rfa-atsali-brghkhrabi-tlfn-mhlh-pasdarannsbiatbrghkarimntghh-pasdaran",
+      "title": "برقکار پاسداران رفع اتصالی برق و اعزام فوری برقکار - پاسداران خرابی تلفن پاسداران",
+      "scoreBefore": 71,
+      "scoreAfter": 100,
+      "findings": [
+        {
+          "type": "metadata-meta_title",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-meta_description",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 4,
+      "highConfidenceCount": 4,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 4,
+      "originalHtmlLength": 15095,
+      "optimizedHtmlLength": 12482,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "SAFE_TO_OPTIMIZE",
+      "reasons": [],
+      "originalHash": "8913adfa79ef2df175d29ad2186494f1ac8405e4663709b4a5058acf00e5c5ef",
+      "optimizedHash": "f5bd07fede605ce54d0ccae849d1ce60635d69dbb6b2baecc7f39d7fc07aa450",
+      "updatedAt": "2026-07-13 00:22:42.549139+00"
+    },
+    {
+      "id": "15b02d4c-19b8-4b58-92c4-981b9f0f496a",
+      "slug": "brghkar-abasabad-thran-aazam-fvri-zir-dghighh-shbanhrvzi",
+      "title": "برقکار عباس‌آباد تهران | اعزام فوری زیر ۳۰ دقیقه | شبانه‌روزی",
+      "scoreBefore": 64,
+      "scoreAfter": 100,
+      "findings": [
+        {
+          "type": "metadata-meta_description",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 3,
+      "highConfidenceCount": 3,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 3,
+      "originalHtmlLength": 22872,
+      "optimizedHtmlLength": 18697,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "SAFE_TO_OPTIMIZE",
+      "reasons": [],
+      "originalHash": "15ed9869f58b52ad42e4bab30dab7195552e58aea1ae59ec1457ea94ac6f168b",
+      "optimizedHash": "ab45ff7f92c38a9138de61cbb11b8d2f7f0f909c4326c8c27357f9f004511c3e",
+      "updatedAt": "2026-07-13 00:20:17.884198+00"
+    },
+    {
+      "id": "2b1170a4-b063-44aa-86ea-8662ea0d6396",
+      "slug": "brghkar-fvri-shbanh-rvzi-thranpars-aazam-sria-brghkar-mtkhss-grvh-mamarh",
+      "title": "برقکار فوری شبانه روزی تهرانپارس | اعزام سریع برقکار متخصص | گروه معماره",
+      "scoreBefore": 71,
+      "scoreAfter": 97,
+      "findings": [
+        {
+          "type": "heading-jump",
+          "confidence": "medium",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-meta_title",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 3,
+      "highConfidenceCount": 2,
+      "mediumConfidenceCount": 1,
+      "reportOnlyCount": 2,
+      "originalHtmlLength": 15131,
+      "optimizedHtmlLength": 12755,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "REVIEW_REQUIRED",
+      "reasons": [
+        "medium-confidence-finding"
+      ],
+      "originalHash": "70ba279f582be99605518eb3fa072b9ddc36a8b9959d7fd3830cec3ee3916656",
+      "optimizedHash": "75e21e3803094af0732a1d03d43a810ce9b2b5cba8490453e5bf8fc0427d9e4e",
+      "updatedAt": "2026-07-13 00:11:54.313523+00"
+    },
+    {
+      "id": "8a3564b5-afaf-44c1-a005-9429315d9ce5",
+      "slug": "brghkar-mrzdaran-thran-aazam-brghkar-fvri-kmtr-az-dghighh-shbanh-rvzi",
+      "title": "برقکار مرزداران تهران | اعزام برقکار فوری کمتر از ۳۰ دقیقه شبانه روزی",
+      "scoreBefore": 64,
+      "scoreAfter": 100,
+      "findings": [
+        {
+          "type": "metadata-meta_description",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 3,
+      "highConfidenceCount": 3,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 3,
+      "originalHtmlLength": 24976,
+      "optimizedHtmlLength": 20522,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "SAFE_TO_OPTIMIZE",
+      "reasons": [],
+      "originalHash": "cb75c8566bbb97beb354a8f482ce3fab47c71eea93b276b1208113f76d02a752",
+      "optimizedHash": "093fd2c8d5115240eed57dd84a57785fc56a297b6ee5829d0a388f41fce163b8",
+      "updatedAt": "2026-07-13 00:20:44.388471+00"
+    },
+    {
+      "id": "bd69db06-7f91-4c20-a444-a72cd69152ef",
+      "slug": "brghkar-pvnk-thran-aazam-fvri-kmtr-az-dghighh-shbanhrvzi",
+      "title": "برقکار پونک تهران | اعزام فوری کمتر از ۳۰ دقیقه شبانه‌روزی",
+      "scoreBefore": 68,
+      "scoreAfter": 97,
+      "findings": [
+        {
+          "type": "heading-jump",
+          "confidence": "medium",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-meta_description",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 4,
+      "highConfidenceCount": 3,
+      "mediumConfidenceCount": 1,
+      "reportOnlyCount": 3,
+      "originalHtmlLength": 67895,
+      "optimizedHtmlLength": 26931,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "REVIEW_REQUIRED",
+      "reasons": [
+        "medium-confidence-finding"
+      ],
+      "originalHash": "4c76cfba28207c1a120063d2d02b6655eee59feaad1fbfa887a594f156074f09",
+      "optimizedHash": "e0f79cd51bd759aa0395b7b4a4d7ac3deef7a2c6f43e7f5316796db0da1bcc6d",
+      "updatedAt": "2026-08-02 07:47:44.994775+00"
+    },
+    {
+      "id": "3be24ee4-3d38-4b2f-8280-0604278bbf3d",
+      "slug": "brghkar-saadtabad-thran-aazam-brghkar-fvri-dr-kmtr-az-dghighh-shbanh-rvzi",
+      "title": "برقکار سعادت‌آباد تهران | اعزام برقکار فوری در کمتر از ۳۰ دقیقه شبانه روزی",
+      "scoreBefore": 71,
+      "scoreAfter": 97,
+      "findings": [
+        {
+          "type": "heading-jump",
+          "confidence": "medium",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-meta_description",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 4,
+      "highConfidenceCount": 3,
+      "mediumConfidenceCount": 1,
+      "reportOnlyCount": 3,
+      "originalHtmlLength": 50665,
+      "optimizedHtmlLength": 17719,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "REVIEW_REQUIRED",
+      "reasons": [
+        "medium-confidence-finding"
+      ],
+      "originalHash": "ee262ebb3f1e93082d35215d0a0facf8dfa5587431b087e65b1282cb56a1481d",
+      "optimizedHash": "f49a9d94762e18ec2376b00a9bd15ca5f07fe85b619d563f865c9b136c989f62",
+      "updatedAt": "2026-07-10 10:40:08.017655+00"
+    },
+    {
+      "id": "82707d56-9b83-48d2-9138-17d52446163a",
+      "slug": "brghkar-sadghih-thran-aazam-fvri-zir-dghighh-bhsvrt-shbanhrvzi",
+      "title": "برقکار صادقیه تهران | اعزام فوری زیر ۳۰ دقیقه | شبانه‌روزی",
+      "scoreBefore": 64,
+      "scoreAfter": 97,
+      "findings": [
+        {
+          "type": "heading-jump",
+          "confidence": "medium",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-meta_description",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 3,
+      "highConfidenceCount": 2,
+      "mediumConfidenceCount": 1,
+      "reportOnlyCount": 2,
+      "originalHtmlLength": 20496,
+      "optimizedHtmlLength": 16848,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "REVIEW_REQUIRED",
+      "reasons": [
+        "medium-confidence-finding"
+      ],
+      "originalHash": "158c40919a5eca5f2c06e03addcbab139df5521c8deb4cd2a9309b27629c7ead",
+      "optimizedHash": "573234f31a4cf00dd7347a95edd28feb209cfc9c5f97c24eccd609679d635859",
+      "updatedAt": "2026-07-13 00:17:07.399487+00"
+    },
+    {
+      "id": "06f157d0-33fd-4d11-aac8-49daa56536a5",
+      "slug": "brghkar-shbanhruzi-haft-tir-motahri-behshti",
+      "title": "برقکار شبانه‌روزی هفت تیر | مطهری | بهشتی",
+      "scoreBefore": 68,
+      "scoreAfter": 97,
+      "findings": [
+        {
+          "type": "heading-jump",
+          "confidence": "medium",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-meta_description",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 3,
+      "highConfidenceCount": 2,
+      "mediumConfidenceCount": 1,
+      "reportOnlyCount": 2,
+      "originalHtmlLength": 63435,
+      "optimizedHtmlLength": 28162,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "REVIEW_REQUIRED",
+      "reasons": [
+        "medium-confidence-finding"
+      ],
+      "originalHash": "1ee60597da53e7bdc302de9ba6c8b78c801bbe3460af0c721bc28396aac1144f",
+      "optimizedHash": "0e912eaf0c885cfdc8f509cebe800acc80446335293270cae7e485bab1bb5cc8",
+      "updatedAt": "2026-08-09 11:16:04.351458+00"
+    },
+    {
+      "id": "223f9b21-4f8f-4256-b541-e97186d738ac",
+      "slug": "brghkar-starkhan-thran-aazam-fvri-zir-dghighh-bhsvrt-shbanhrvzi",
+      "title": "برقکار ستارخان تهران | اعزام فوری برقکار زیر ۳۰ دقیقه  شبانه‌روزی",
+      "scoreBefore": 71,
+      "scoreAfter": 97,
+      "findings": [
+        {
+          "type": "heading-jump",
+          "confidence": "medium",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-meta_description",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 3,
+      "highConfidenceCount": 2,
+      "mediumConfidenceCount": 1,
+      "reportOnlyCount": 2,
+      "originalHtmlLength": 41511,
+      "optimizedHtmlLength": 18666,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "REVIEW_REQUIRED",
+      "reasons": [
+        "medium-confidence-finding"
+      ],
+      "originalHash": "ec93a5f0965eec06fa40b52d5abf0a9ec96a59f23de8456a19138ca90688f51b",
+      "optimizedHash": "0aa723f97bcfaa15a5f377771c46b43783112665120b7f5a7c28d827558eb0d4",
+      "updatedAt": "2026-07-13 00:16:01.070596+00"
+    },
+    {
+      "id": "8d6f424e-a3f4-404e-9665-3793a5c1678b",
+      "slug": "brghkarbrghkar-mshirih-aazam-fvri-brghkar-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari",
+      "title": "برقکار مشیریه رفع اتصالی برق و اعزام فوری برقکار - مشیریه خرابی تلفن مشیریه",
+      "scoreBefore": 74,
+      "scoreAfter": 100,
+      "findings": [
+        {
+          "type": "metadata-meta_title",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 3,
+      "highConfidenceCount": 3,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 3,
+      "originalHtmlLength": 2663,
+      "optimizedHtmlLength": 2647,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "SAFE_TO_OPTIMIZE",
+      "reasons": [],
+      "originalHash": "2d3b0bede4bdb60ecfffb08c41038a02108e6c901dd594a2a19f6631468d1528",
+      "optimizedHash": "606a088a22b205ca228ed025462b21a4c86675a6907e1f87fba41b28ea50d8c1",
+      "updatedAt": "2026-07-13 00:23:14.407279+00"
+    },
+    {
+      "id": "faa040e6-5f18-4eee-b3c1-9bb6745a098b",
+      "slug": "chra-cheragh-haye-khaneh-cheshmak-mizanand",
+      "title": "چرا چراغ‌های خانه چشمک می‌زنند؟",
+      "scoreBefore": 93,
+      "scoreAfter": 93,
+      "findings": [
+        {
+          "type": "cta-mismatch",
+          "confidence": "high",
+          "severity": "medium"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 3,
+      "highConfidenceCount": 3,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 2,
+      "originalHtmlLength": 13716,
+      "optimizedHtmlLength": 14456,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": true,
+      "eligible": true,
+      "classification": "REVIEW_REQUIRED",
+      "reasons": [
+        "cta-mismatch"
+      ],
+      "originalHash": "17b9cbe236ada88d2c5d64636f2c3850e1c19969f3d8656044556703d9428450",
+      "optimizedHash": "36ec013304989a64ea0babf36cf00c731171adb9c35a87c8a1f8b1babc68e3e9",
+      "updatedAt": "2026-08-10 07:21:31.282158+00"
+    },
+    {
+      "id": "8175b8f5-248c-451f-8cd3-b81e9ecc32d0",
+      "slug": "chra-dvrbin-mdarbsth-bh-gvshi-vsl-nmishvd",
+      "title": "چرا دوربین مداربسته به گوشی وصل نمی‌شود؟",
+      "scoreBefore": 64,
+      "scoreAfter": 100,
+      "findings": [
+        {
+          "type": "metadata-meta_description",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 3,
+      "highConfidenceCount": 3,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 3,
+      "originalHtmlLength": 24661,
+      "optimizedHtmlLength": 20383,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "SAFE_TO_OPTIMIZE",
+      "reasons": [],
+      "originalHash": "e49733307dde8dcec8ba7670217b660d2726b4550a25084cfb1bcbf24f079df7",
+      "optimizedHash": "f210e3e4dff5fa4142bfdcfeb1a427cfad19829882ba94a6bafa2c6c4b8637bf",
+      "updatedAt": "2026-07-13 00:26:30.512526+00"
+    },
+    {
+      "id": "a97f3bdf-2cdb-4949-854b-2439c9a2e7b2",
+      "slug": "dalile-ghate-va-vasl-shodan-mokrar-bargh",
+      "title": "دلایل قطع و وصل شدن مکرر برق و راه‌حل‌های آن",
+      "scoreBefore": 68,
+      "scoreAfter": 97,
+      "findings": [
+        {
+          "type": "heading-jump",
+          "confidence": "medium",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 2,
+      "highConfidenceCount": 1,
+      "mediumConfidenceCount": 1,
+      "reportOnlyCount": 1,
+      "originalHtmlLength": 41938,
+      "optimizedHtmlLength": 17450,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "REVIEW_REQUIRED",
+      "reasons": [
+        "medium-confidence-finding"
+      ],
+      "originalHash": "efbc0841741f5e511be77f80cb3a3a54bba3bb534a5f70eb82924bdf204f1d6a",
+      "optimizedHash": "8ac122e49c5dd50a959e863fff950dce7fd73e3d415073de08a96cde31399ec0",
+      "updatedAt": "2026-08-06 10:04:06.664413+00"
+    },
+    {
+      "id": "ccb2e74d-6b5e-4efc-aa90-6cc36d9e4141",
+      "slug": "nsb-v-srvis-kvlr-abi-amvzsh-v-khdmat-nghdari-afzaish-khnkknndgi-v-kahsh-msrf-brgh-ba-grvh-mamarh",
+      "title": "نصب و سرویس کولر آبی | آموزش و خدمات نگهداری، افزایش خنک‌کنندگی و کاهش مصرف برق با گروه معماره",
+      "scoreBefore": 88,
+      "scoreAfter": 100,
+      "findings": [
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 2,
+      "highConfidenceCount": 2,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 2,
+      "originalHtmlLength": 4948,
+      "optimizedHtmlLength": 4821,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "SAFE_TO_OPTIMIZE",
+      "reasons": [],
+      "originalHash": "697c97b4ddddf49e0331cd232476db4ecfa3153e2ba543403ff8a36b65538d22",
+      "optimizedHash": "a65a566bbbd68e1f22537f00b25f3e62a4852c5c37473b51008af7c4813979d0",
+      "updatedAt": "2026-07-13 00:12:30.219117+00"
+    },
+    {
+      "id": "b02a7295-d6d2-4967-9f20-0e406a274d31",
+      "slug": "rfa-atsali-brgh-v-aazam-fvri-brghkar-pirvzi",
+      "title": "رفع اتصالی برق - اعزام فوری برقکار - پیروزی ",
+      "scoreBefore": 93,
+      "scoreAfter": 100,
+      "findings": [
+        {
+          "type": "metadata-meta_description",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 3,
+      "highConfidenceCount": 3,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 3,
+      "originalHtmlLength": 3807,
+      "optimizedHtmlLength": 3229,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "SAFE_TO_OPTIMIZE",
+      "reasons": [],
+      "originalHash": "79f356807cab02791441ca90cc20fb9e5e72e7da49793cf917e0ecf92f68d5f0",
+      "optimizedHash": "32b6f453f806b8605a5e689ce2d5bff0e3e4799028c6f20ec3c431891bda2841",
+      "updatedAt": "2026-07-07 22:13:35.431603+00"
+    },
+    {
+      "id": "dd1b47e6-8160-4ee2-88ba-c4f884c48571",
+      "slug": "rfa-atsali-tlfn-v-rvshhai-aibiabi-kht-tlfn-sabt",
+      "title": "رفع اتصالی تلفن و روش‌های عیب‌یابی خط تلفن ثابت",
+      "scoreBefore": 57,
+      "scoreAfter": 100,
+      "findings": [
+        {
+          "type": "metadata-meta_description",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 3,
+      "highConfidenceCount": 3,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 3,
+      "originalHtmlLength": 15731,
+      "optimizedHtmlLength": 12736,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "SAFE_TO_OPTIMIZE",
+      "reasons": [],
+      "originalHash": "90638ba8c816d6cf433b2377af3c5d471aa2222b30ea5aba2b9ad6c834dc8118",
+      "optimizedHash": "20fc80ee37fbdca15fd549ae963c5d33c1b650d125931300050ef5fb44ca3c11",
+      "updatedAt": "2026-07-13 00:25:43.772275+00"
+    },
+    {
+      "id": "9235cf7a-9754-4e05-9e4c-065ae6ae3733",
+      "slug": "rfa-atsali-tlfn-v-rvshhai-aibiabi-kht-tlfn-sabt-kianshhr",
+      "title": "رفع اتصالی برق و اعزام فوری برقکار - کیانشهر",
+      "scoreBefore": 88,
+      "scoreAfter": 100,
+      "findings": [
+        {
+          "type": "metadata-meta_description",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 3,
+      "highConfidenceCount": 3,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 3,
+      "originalHtmlLength": 5088,
+      "optimizedHtmlLength": 4440,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "SAFE_TO_OPTIMIZE",
+      "reasons": [],
+      "originalHash": "28be6bdf324a1462080d3755598dc91a65234ae1f153d30e16547a16b92e08f3",
+      "optimizedHash": "aea1d8410fb8de68a9b39c33e5282fcea599d8f9d199e06f960c2a98bcee8d59",
+      "updatedAt": "2026-07-11 03:37:31.69868+00"
+    },
+    {
+      "id": "fb5ee608-1a64-408c-a169-7d058634c718",
+      "slug": "stablizer-chist",
+      "title": "استابلایزر چیست و چه کاربردی دارد؟",
+      "scoreBefore": 79,
+      "scoreAfter": 100,
+      "findings": [
+        {
+          "type": "metadata-meta_description",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-og_image",
+          "confidence": "high",
+          "severity": "low"
+        },
+        {
+          "type": "metadata-featured_image_alt",
+          "confidence": "high",
+          "severity": "low"
+        }
+      ],
+      "findingsCount": 3,
+      "highConfidenceCount": 3,
+      "mediumConfidenceCount": 0,
+      "reportOnlyCount": 3,
+      "originalHtmlLength": 19430,
+      "optimizedHtmlLength": 15210,
+      "textPreserved": true,
+      "linkIntegrity": true,
+      "sanitizerOk": true,
+      "idempotent": true,
+      "wouldContentChange": true,
+      "wouldMetadataChange": false,
+      "customCssPresent": false,
+      "ctaMismatch": false,
+      "eligible": true,
+      "classification": "SAFE_TO_OPTIMIZE",
+      "reasons": [],
+      "originalHash": "a7802a59e4b07212a6e57ffd6f167dc0403113ba2f73225e73ccced14196d27a",
+      "optimizedHash": "1e32a92ca75aded2badcc64c90f8f0d6b6e6245c343bdaec8f170cb86fb45ed3",
+      "updatedAt": "2026-07-13 00:27:12.750055+00"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": false,
+    "outDir": "./.article-optimizer-dist",
+    "module": "commonjs",
+    "target": "es2020",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"] }
+  },
+  "include": [
+    "src/lib/article-optimizer.ts",
+    "src/lib/article-optimize-report.ts",
+    "src/lib/html-sanitizer.ts",
+    "src/lib/article-text-integrity.ts"
+  ]
+}

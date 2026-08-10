@@ -57,3 +57,6 @@ memareh_*.sql
 
 # supabase CLI local link cache (generated, env-specific — not source)
 supabase/.temp/
+
+# bulk dry-run compiled optimizer (generated at runtime)
+.article-optimizer-dist/
