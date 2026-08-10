@@ -1,18 +1,43 @@
 'use client'
 
-import { useState } from 'react'
+// Login is session-dependent; opt out of static prerendering so auth state and
+// the `next` return-url (useSearchParams) resolve at request time.
+export const dynamic = 'force-dynamic'
+
+import { useState, useEffect, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { LogIn, Mail, Lock } from 'lucide-react'
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
+
+  // If user is already signed in, send them to the right place (no login form).
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const user = data.user
+      if (!user) return
+      if (user.app_metadata?.role === 'admin') {
+        router.replace('/admin')
+      } else {
+        router.replace('/')
+      }
+    })
+  }, [router, supabase])
+
+  const destinationFor = (role: unknown, next: string | null): string => {
+    if (role === 'admin') return '/admin'
+    // Safe internal return URL only; reject external redirects.
+    if (next && next.startsWith('/') && !next.startsWith('//')) return next
+    return '/'
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,7 +59,9 @@ export default function LoginPage() {
       }
 
       toast.success('با موفقیت وارد شدید')
-      router.push('/')
+      const { data: me } = await supabase.auth.getUser()
+      const next = searchParams.get('next')
+      router.push(destinationFor(me.user?.app_metadata?.role, next))
       router.refresh()
     } catch {
       toast.error('خطای غیرمنتظره')
@@ -64,6 +91,7 @@ export default function LoginPage() {
               <input
                 id="email"
                 type="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -83,6 +111,7 @@ export default function LoginPage() {
               <input
                 id="password"
                 type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -112,5 +141,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100" />}>
+      <LoginForm />
+    </Suspense>
   )
 }

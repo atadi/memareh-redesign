@@ -1,11 +1,27 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, BookOpen, User, LogOut, Sun, Moon } from 'lucide-react'
+import { BookOpen, User, LogOut, Sun, Moon } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
+import { isAdminUser } from '@/lib/auth-role'
+
+/**
+ * Pure derivation of the menu's auth display state from the resolved Supabase
+ * user + profile row. Kept side-effect free so it is independently testable
+ * without a DOM / Supabase client.
+ */
+export function deriveAuthState(
+  user: { app_metadata?: { role?: unknown } | null } | null,
+  displayName: string,
+): { isAdmin: boolean; displayName: string } {
+  return {
+    isAdmin: isAdminUser(user),
+    displayName: displayName || 'کاربر',
+  }
+}
 
 export function Menu() {
   const [user, setUser] = useState<any>(null)
@@ -16,36 +32,73 @@ export function Menu() {
   const supabase = createClient()
   const { resolvedTheme, setTheme } = useTheme()
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
+  const refreshAuth = async () => {
+    try {
+      const { data } = await supabase.auth.getUser()
       const currentUser = data.user
+
+      // Auth identity is set FIRST and independently of the optional profile
+      // lookup (DEFENSE: a failing/blocked profiles query must never prevent
+      // the authenticated/admin state from rendering).
       setUser(currentUser)
 
       if (currentUser) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('display_name')
-          .eq('id', currentUser.id)
-          .single()
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('display_name')
+            .eq('id', currentUser.id)
+            .single()
 
-        setDisplayName(
-          profile?.display_name ||
-            currentUser.user_metadata?.display_name ||
-            'کاربر'
-        )
+          setDisplayName(
+            profile?.display_name ||
+              (currentUser.user_metadata as { display_name?: string })?.display_name ||
+              '',
+          )
+        } catch {
+          // Profile display name is optional; fall back to user_metadata only.
+          setDisplayName(
+            (currentUser.user_metadata as { display_name?: string })?.display_name ||
+              '',
+          )
+        }
+      } else {
+        setDisplayName('')
       }
-
+    } catch {
+      setUser(null)
+      setDisplayName('')
+    } finally {
       setLoading(false)
-    })
+    }
+  }
+
+  // Initial load.
+  useEffect(() => {
+    setMounted(true)
+    refreshAuth()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Keep the menu in sync with auth state changes (login / logout / session
+  // refresh) without requiring a full page reload. This is the fix for the
+  // stale-nav defect: the Menu lives in the persistent layout and does not
+  // remount on client navigation, so a one-time getUser() left it showing the
+  // pre-login state until a manual refresh.
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange(() => {
+      refreshAuth()
+    })
+    return () => sub.subscription.unsubscribe()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const { isAdmin } = deriveAuthState(user, displayName)
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
     setUser(null)
+    setDisplayName('')
     router.refresh()
   }
 
@@ -86,14 +139,8 @@ export function Menu() {
           مقالات
         </Link>
 
-        <Link
-          href="/search"
-          className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/10"
-          aria-label="جستجو"
-        >
-          <Search className="w-4 h-4" />
-          جستجو
-        </Link>
+        {/* Search is intentionally NOT in the global nav (the /search route 404s).
+            Article search lives on /articles via ArticleFilters. */}
 
         <button
           onClick={toggleTheme}
@@ -111,6 +158,14 @@ export function Menu() {
           <>
             {user ? (
               <div className="flex items-center gap-3">
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-2 text-sm bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition"
+                  >
+                    پنل مدیریت
+                  </Link>
+                )}
                 <Link
                   href="/profile"
                   className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
@@ -121,6 +176,7 @@ export function Menu() {
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-1 text-sm text-red-500 hover:text-red-700 transition"
+                  aria-label="خروج"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
@@ -161,9 +217,16 @@ export function Menu() {
           )}
         </button>
         {user && (
-          <Link href="/profile" className="p-2 bg-gray-100 rounded-lg">
-            <User className="w-5 h-5 text-gray-600" />
-          </Link>
+          <>
+            {isAdmin && (
+              <Link href="/admin" className="p-2 bg-blue-100 rounded-lg" aria-label="پنل مدیریت">
+                <User className="w-5 h-5 text-blue-600" />
+              </Link>
+            )}
+            <Link href="/profile" className="p-2 bg-gray-100 rounded-lg">
+              <User className="w-5 h-5 text-gray-600" />
+            </Link>
+          </>
         )}
         {!user && !loading && (
           <Link href="/login" className="p-2 bg-blue-100 rounded-lg">

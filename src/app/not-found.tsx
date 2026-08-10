@@ -1,4 +1,12 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
+
+// 404 responses must stay out of the index. Without this, the root layout's
+// `robots: { index: true, follow: true }` metadata is inherited by the
+// not-found page, emitting a conflicting `index, follow` directive on a 404.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 export default function NotFound() {
   return (

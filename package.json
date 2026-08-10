@@ -5,7 +5,13 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:rls": "vitest run tests/rls",
+    "test:rls:storage": "SUPABASE_RLS_TEST_MODE=1 vitest run tests/rls/storage-api.test.ts",
+    "supabase:test:reset": "supabase db reset && pnpm test:rls",
+    "check:articles-soak": "node scripts/check-public-articles-soak.cjs"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
@@ -40,6 +46,7 @@
     "date-fns-jalali": "^4.1.0-0",
     "dompurify": "^3.3.1",
     "framer-motion": "^12.23.22",
+    "isomorphic-dompurify": "^3.22.0",
     "jimp": "^1.6.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.544.0",
@@ -71,6 +78,7 @@
     "dotenv": "^17.2.3",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.13",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }

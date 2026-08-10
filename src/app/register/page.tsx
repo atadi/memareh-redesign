@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -16,6 +16,19 @@ export default function RegisterPage() {
   const [registered, setRegistered] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+
+  // Already authenticated users should not see the registration form.
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const user = data.user
+      if (!user) return
+      if (user.app_metadata?.role === 'admin') {
+        router.replace('/admin')
+      } else {
+        router.replace('/')
+      }
+    })
+  }, [router, supabase])
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -121,6 +134,7 @@ export default function RegisterPage() {
               <input
                 id="email"
                 type="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -140,6 +154,7 @@ export default function RegisterPage() {
               <input
                 id="password"
                 type="password"
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -160,6 +175,7 @@ export default function RegisterPage() {
               <input
                 id="confirmPassword"
                 type="password"
+                autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required

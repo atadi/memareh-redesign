@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { getSiteUrl } from '@/lib/config'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -7,6 +8,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/admin', '/api', '/login'],
     },
-    sitemap: 'https://memareh.com/sitemap.xml',
+    sitemap: `${getSiteUrl()}/sitemap.xml`,
   }
 }

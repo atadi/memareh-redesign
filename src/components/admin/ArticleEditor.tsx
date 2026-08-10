@@ -26,7 +26,7 @@ import {
   Loader2,
   FileImage,
 } from 'lucide-react'
-import DOMPurify from 'dompurify'
+import { sanitizeHtml } from '@/lib/html-sanitizer'
 import toast from 'react-hot-toast'
 import { RichTextEditor } from './RichTextEditor'
 import type { ArticleTag } from '@/types/database.types'
@@ -496,7 +496,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
         slug: data.slug,
         excerpt: data.excerpt,
         category: data.category,
-        content: DOMPurify.sanitize(content),
+        content: sanitizeHtml(content),
         featured_image: featuredImageUrl,
         featured_image_alt: data.featured_image_alt,
         og_image: ogImageUrl,
@@ -971,7 +971,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
               </div>
               {preview ? (
                 <div className="prose prose-lg max-w-none p-4 border rounded-lg min-h-[400px]">
-                  <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }} />
+                  <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }} />
                 </div>
               ) : showHtmlCode ? (
                 <div className="relative">
