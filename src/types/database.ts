@@ -24,6 +24,11 @@ export interface Article {
   meta_keywords: string[] | null
   canonical_url: string | null
   og_image: string | null
+  /**
+   * Optional per-article CSS (Feature B). Stored raw; always passed through
+   * `sanitizeArticleCss`/`scopeArticleCss` before it reaches the DOM.
+   */
+  custom_css: string | null
   reading_time: number | null
   view_count: number
   is_featured: boolean

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { createClient } from '@/lib/supabase/client'
 import { revalidateArticle } from '@/actions/revalidate'
@@ -27,8 +27,10 @@ import {
   FileImage,
 } from 'lucide-react'
 import { sanitizeHtml } from '@/lib/html-sanitizer'
+import { sanitizeArticleCss } from '@/lib/article-css'
 import toast from 'react-hot-toast'
 import { RichTextEditor } from './RichTextEditor'
+import { ArticleContent } from '@/components/articles/ArticleContent'
 import type { ArticleTag } from '@/types/database.types'
 
 const CATEGORIES = [
@@ -90,6 +92,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
   })
 
   const [content, setContent] = useState('')
+  const [customCss, setCustomCss] = useState('')
   const [preview, setPreview] = useState(false)
   const [showHtmlCode, setShowHtmlCode] = useState(false)
   const [editorKey, setEditorKey] = useState(0)
@@ -257,6 +260,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     setValue('video_url', article.video_url || '')
     setValue('scheduled_at', article.scheduled_at || '')
     setContent(article.content || '')
+    setCustomCss(article.custom_css || '')
     setFeaturedImagePreview(article.featured_image || '')
     setOgImagePreview(article.og_image || '')
     setVideoPreview(article.video_url || '')
@@ -407,6 +411,17 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     if (!data.slug?.trim()) { toast.error('slug مقاله الزامی است'); return }
     if (slugExists) { toast.error('این slug قبلاً استفاده شده است'); return }
 
+    // Local CSS is validated independently of the article HTML. Dangerous CSS
+    // is never persisted: the save is aborted and the admin is told why.
+    if (customCss.trim()) {
+      const cssCheck = sanitizeArticleCss(customCss, article?.id || 'preview')
+      if (!cssCheck.ok) {
+        setActiveTab('advanced')
+        toast.error(`این CSS شامل دستورات غیرمجاز است — ${cssCheck.issues[0]?.message ?? ''}`)
+        return
+      }
+    }
+
     setSaving(true)
     setIsUploading(true)
 
@@ -497,6 +512,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
         excerpt: data.excerpt,
         category: data.category,
         content: sanitizeHtml(content),
+        custom_css: customCss.trim() ? customCss : null,
         featured_image: featuredImageUrl,
         featured_image_alt: data.featured_image_alt,
         og_image: ogImageUrl,
@@ -576,6 +592,13 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
       setIsUploading(false)
     }
   }
+
+  // Live validation feedback for the Local CSS editor. Uses the same validator
+  // the save path and the render path use, so what the admin sees is authoritative.
+  const customCssIssues = useMemo(() => {
+    if (!customCss.trim()) return []
+    return sanitizeArticleCss(customCss, article?.id || 'preview').issues
+  }, [customCss, article?.id])
 
   const seoPreviewUrl = `/articles/${slugValue || 'your-slug'}`
   const seoPreviewTitle = metaTitleValue || titleValue || 'عنوان مقاله'
@@ -970,8 +993,15 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
                 </div>
               </div>
               {preview ? (
-                <div className="prose prose-lg max-w-none p-4 border rounded-lg min-h-[400px]">
-                  <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }} />
+                /* Preview reuses the published rendering boundary so global
+                   article CSS + unsaved local CSS behave exactly as they will
+                   on the live page. No second renderer. */
+                <div className="max-w-none p-4 border rounded-lg min-h-[400px]">
+                  <ArticleContent
+                    content={content}
+                    articleId={article?.id || 'preview'}
+                    customCss={customCss}
+                  />
                 </div>
               ) : showHtmlCode ? (
                 <div className="relative">
@@ -1156,6 +1186,66 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
       {activeTab === 'advanced' && (
         <div className="max-w-2xl space-y-6">
           <h3 className="font-bold">تنظیمات پیشرفته</h3>
+
+          {/* --- Local (per-article) CSS ------------------------------------ */}
+          <div className="border rounded-lg p-4 space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <label htmlFor="article-custom-css" className={labelClasses}>
+                CSS اختصاصی مقاله
+              </label>
+              {customCss.trim() !== '' && (
+                <button
+                  type="button"
+                  onClick={() => setCustomCss('')}
+                  className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded text-gray-700"
+                >
+                  پاک کردن
+                </button>
+              )}
+            </div>
+
+            <p className="text-xs text-gray-500 leading-6">
+              این استایل فقط روی همین مقاله اعمال می‌شود. از کلاس‌های طراحی مقاله
+              (مانند <code className="font-mono">.article-callout</code> یا{' '}
+              <code className="font-mono">.article-step</code>) استفاده کنید.
+              دستورهایی مثل <code className="font-mono">@import</code>،{' '}
+              <code className="font-mono">url()</code>،{' '}
+              <code className="font-mono">position: fixed</code> و انتخابگرهای
+              سراسری (<code className="font-mono">body</code>،{' '}
+              <code className="font-mono">html</code>،{' '}
+              <code className="font-mono">:root</code>) مجاز نیستند.
+            </p>
+
+            <textarea
+              id="article-custom-css"
+              dir="ltr"
+              spellCheck={false}
+              value={customCss}
+              onChange={(e) => setCustomCss(e.target.value)}
+              className="w-full px-4 py-3 border rounded-lg font-mono text-sm min-h-[220px] bg-gray-50 text-left"
+              placeholder={'.article-callout {\n  border-inline-start-color: #059669;\n}'}
+            />
+
+            {customCssIssues.length > 0 ? (
+              <div
+                role="alert"
+                className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+              >
+                <p className="font-bold mb-1">این CSS شامل دستورات غیرمجاز است.</p>
+                <ul className="list-disc pr-5 space-y-1">
+                  {customCssIssues.slice(0, 6).map((issue, i) => (
+                    <li key={i}>
+                      خط {issue.line}: {issue.message}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              customCss.trim() !== '' && (
+                <p className="text-sm text-green-700">✓ این CSS معتبر است و فقط روی همین مقاله اعمال می‌شود.</p>
+              )
+            )}
+          </div>
 
           <div className="grid grid-cols-2 gap-6">
             <div>

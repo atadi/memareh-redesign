@@ -34,6 +34,8 @@ export interface ArticleRow {
   meta_keywords: string[] | null
   canonical_url: string | null
   og_image: string | null
+  /** Optional per-article CSS. Validated + scoped before render. */
+  custom_css: string | null
   reading_time: number | null
   view_count: number | null
   is_featured: boolean | null
@@ -68,6 +70,7 @@ export interface Database {
           meta_keywords?: string[] | null
           canonical_url?: string | null
           og_image?: string | null
+          custom_css?: string | null
           reading_time?: number | null
           view_count?: number | null
           is_featured?: boolean | null
@@ -95,6 +98,7 @@ export interface Database {
           meta_keywords?: string[] | null
           canonical_url?: string | null
           og_image?: string | null
+          custom_css?: string | null
           reading_time?: number | null
           view_count?: number | null
           is_featured?: boolean | null
