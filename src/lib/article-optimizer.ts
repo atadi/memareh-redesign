@@ -123,8 +123,13 @@ const isInternalMemareh = (href: string): boolean => {
 const canonicalizeMemareh = (href: string): string => {
   const h = href.trim()
   if (!isInternalMemareh(h)) return h
+  // Canonicalize the ORIGIN only (scheme + www host) and preserve the path
+  // byte-for-byte. Adding or trimming a trailing slash here would rewrite
+  // already-canonical links on every run, breaking byte-level idempotence, and
+  // the site (Next.js default `trailingSlash: false`) 308-redirects the slashed
+  // form — so the stored path is authoritative and must be left alone.
   const path = h.replace(/^https?:\/\/(www\.)?memareh\.com/i, '')
-  return MEMAREH_WWW + (path || '/')
+  return MEMAREH_WWW + path
 }
 
 function buildDom(html: string): Document {
@@ -471,10 +476,29 @@ function checkLinkIntegrity(html: string): boolean {
 
 function canonicalizeDom(root: HTMLElement) {
   root.querySelectorAll('*').forEach((el) => {
+    // Drop meaningless empty attributes rather than re-emitting them. A present
+    // -but-empty `class=""`/`rel=""` (which the editor and earlier transforms can
+    // leave behind) is not equivalent to no attribute at the byte level, so
+    // re-serializing it makes an already-optimized article look changed.
+    for (const attr of ['class', 'rel']) {
+      const v = el.getAttribute(attr)
+      if (v !== null && v.trim() === '') el.removeAttribute(attr)
+    }
     const cls = el.getAttribute('class')
     if (cls) {
-      const sorted = Array.from(new Set(cls.split(/\s+/).filter(Boolean))).sort()
-      el.setAttribute('class', sorted.join(' '))
+      // Dedupe while PRESERVING the authored order. Sorting alphabetically is
+      // also idempotent, but it rewrites the class list of every already-clean
+      // article on first run, which makes a no-op optimization look like a real
+      // content change and defeats byte-level drift detection.
+      const seen = new Set<string>()
+      const kept: string[] = []
+      for (const c of cls.split(/\s+/)) {
+        if (!c || seen.has(c)) continue
+        seen.add(c)
+        kept.push(c)
+      }
+      if (kept.length) el.setAttribute('class', kept.join(' '))
+      else el.removeAttribute('class')
     }
   })
 }

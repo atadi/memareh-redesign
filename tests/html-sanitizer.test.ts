@@ -93,10 +93,20 @@ describe('sanitizeHtml — legitimate article content preserved', () => {
     expect(out).toContain('۴۵٪')
   })
 
-  it('keeps safe https links and adds rel=noopener noreferrer', () => {
+  // Policy (reviewed): rel="noopener noreferrer" is only required when a link
+  // opens a new browsing context. Stamping it on ordinary same-tab links added
+  // no security value, stripped the referrer from internal navigation, and
+  // rewrote clean markup on every sanitize pass. See tests/article-link-policy.
+  it('keeps safe https links and does not add rel to same-tab links', () => {
     const out = sanitizeHtml('<a href="https://memareh.com">سایت</a>')
     expect(out).toContain('href="https://memareh.com"')
-    expect(out).toContain('rel="noopener noreferrer"')
+    expect(out).not.toContain('rel=')
+  })
+
+  it('adds rel=noopener noreferrer to links opening a new tab', () => {
+    const out = sanitizeHtml('<a href="https://memareh.com" target="_blank">سایت</a>')
+    expect(out).toContain('noopener')
+    expect(out).toContain('noreferrer')
   })
 
   it('keeps legitimate images (Supabase Storage URLs)', () => {

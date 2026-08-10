@@ -1,0 +1,147 @@
+{
+  "generatedAt": "2026-08-10T21:55:00.600Z",
+  "phase": "manual-review-8-review-required",
+  "note": "Additive review decisions. Original dry-run hashes/classifications are preserved in ARTICLE_OPTIMIZATION_DRY_RUN.json and are NOT rewritten.",
+  "productionArticleWrites": 0,
+  "driftCheck": {
+    "checked": 8,
+    "fresh": 8,
+    "stale": 0
+  },
+  "decisions": [
+    {
+      "slug": "brghkar-fvri-shbanh-rvzi-thranpars-aazam-sria-brghkar-mtkhss-grvh-mamarh",
+      "id": "2b1170a4-b063-44aa-86ea-8662ea0d6396",
+      "dryRunClassification": "REVIEW_REQUIRED",
+      "reviewDecision": "APPROVE_SAFE_DEFAULT",
+      "reason": "heading-jump is report-only; safe rules act on links/H1/inline styles",
+      "scoreBefore": 71,
+      "scoreAfter": 97,
+      "customCss": "NULL",
+      "updatedAt": "2026-07-13 00:11:54.313523+00",
+      "originalHash": "00c5a7062df9bd6f139946cc040555cb9b579326d86f419e3374c1d835b5d493"
+    },
+    {
+      "slug": "brghkar-pvnk-thran-aazam-fvri-kmtr-az-dghighh-shbanhrvzi",
+      "id": "bd69db06-7f91-4c20-a444-a72cd69152ef",
+      "dryRunClassification": "REVIEW_REQUIRED",
+      "reviewDecision": "APPROVE_SAFE_DEFAULT",
+      "reason": "heading jumps deferred; external links are same-tab and untouched",
+      "scoreBefore": 68,
+      "scoreAfter": 97,
+      "customCss": "NULL",
+      "updatedAt": "2026-08-02 07:47:44.994775+00",
+      "originalHash": "4c76cfba28207c1a120063d2d02b6655eee59feaad1fbfa887a594f156074f09"
+    },
+    {
+      "slug": "brghkar-saadtabad-thran-aazam-brghkar-fvri-dr-kmtr-az-dghighh-shbanh-rvzi",
+      "id": "3be24ee4-3d38-4b2f-8280-0604278bbf3d",
+      "dryRunClassification": "REVIEW_REQUIRED",
+      "reviewDecision": "APPROVE_SAFE_DEFAULT",
+      "reason": "H2->H4 is a legitimate expert-card heading",
+      "scoreBefore": 71,
+      "scoreAfter": 97,
+      "customCss": "NULL",
+      "updatedAt": "2026-07-10 10:40:08.017655+00",
+      "originalHash": "413551613b621d06e4c5ba0922508a9c219324cae47a74b584f82a33fddeb666"
+    },
+    {
+      "slug": "brghkar-sadghih-thran-aazam-fvri-zir-dghighh-bhsvrt-shbanhrvzi",
+      "id": "82707d56-9b83-48d2-9138-17d52446163a",
+      "dryRunClassification": "REVIEW_REQUIRED",
+      "reviewDecision": "APPROVE_SAFE_DEFAULT",
+      "reason": "H1 is a descriptive variant of title; body-H1 removal loses no text",
+      "scoreBefore": 64,
+      "scoreAfter": 97,
+      "customCss": "NULL",
+      "updatedAt": "2026-07-13 00:17:07.399487+00",
+      "originalHash": "158c40919a5eca5f2c06e03addcbab139df5521c8deb4cd2a9309b27629c7ead"
+    },
+    {
+      "slug": "brghkar-shbanhruzi-haft-tir-motahri-behshti",
+      "id": "06f157d0-33fd-4d11-aac8-49daa56536a5",
+      "dryRunClassification": "REVIEW_REQUIRED",
+      "reviewDecision": "APPROVE_WITH_RULE_ADJUSTMENT",
+      "reason": "approved only if heading levels are NOT auto-promoted; shared template with dalile-ghate",
+      "scoreBefore": 68,
+      "scoreAfter": 97,
+      "customCss": "NULL",
+      "updatedAt": "2026-08-09 11:16:04.351458+00",
+      "originalHash": "53c1d1eb139e6d9496c85307c81aa090cf3b0bc95e7201492338fa035eabfe80"
+    },
+    {
+      "slug": "brghkar-starkhan-thran-aazam-fvri-zir-dghighh-bhsvrt-shbanhrvzi",
+      "id": "223f9b21-4f8f-4256-b541-e97186d738ac",
+      "dryRunClassification": "REVIEW_REQUIRED",
+      "reviewDecision": "APPROVE_SAFE_DEFAULT",
+      "reason": "emoji-digit headings are real H3s; step rule correctly does not fire",
+      "scoreBefore": 71,
+      "scoreAfter": 97,
+      "customCss": "NULL",
+      "updatedAt": "2026-07-13 00:16:01.070596+00",
+      "originalHash": "c7f8b26af967bbc27b37830afd7fddcd721f1d14041609544c30ffaef06a140c"
+    },
+    {
+      "slug": "chra-cheragh-haye-khaneh-cheshmak-mizanand",
+      "id": "faa040e6-5f18-4eee-b3c1-9bb6745a098b",
+      "dryRunClassification": "REVIEW_REQUIRED",
+      "reviewDecision": "DO_NOT_OPTIMIZE",
+      "reason": "pilot control: optimizer output is byte-identical to stored content; only finding is the CTA content decision",
+      "scoreBefore": 93,
+      "scoreAfter": 93,
+      "customCss": "NULL",
+      "updatedAt": "2026-08-10 07:21:31.282158+00",
+      "originalHash": "95e5acde4388b1566eae82e4c3cf0269e270be11b11844fdb8d24ba09ec3a06a"
+    },
+    {
+      "slug": "dalile-ghate-va-vasl-shodan-mokrar-bargh",
+      "id": "a97f3bdf-2cdb-4949-854b-2439c9a2e7b2",
+      "dryRunClassification": "REVIEW_REQUIRED",
+      "reviewDecision": "APPROVE_WITH_RULE_ADJUSTMENT",
+      "reason": "no auto heading promotion; body cloned from haft-tir, flag for editorial de-duplication",
+      "scoreBefore": 68,
+      "scoreAfter": 97,
+      "customCss": "NULL",
+      "updatedAt": "2026-08-06 10:04:06.664413+00",
+      "originalHash": "efbc0841741f5e511be77f80cb3a3a54bba3bb534a5f70eb82924bdf204f1d6a"
+    }
+  ],
+  "ctaMismatches": [
+    {
+      "slug": "chra-cheragh-haye-khaneh-cheshmak-mizanand",
+      "cta": "ثبت درخواست در سایت معماره",
+      "href": "https://www.memareh.com",
+      "intent": "submit service request"
+    },
+    {
+      "slug": "brghkar-saadtabad-thran-aazam-brghkar-fvri-dr-kmtr-az-dghighh-shbanh-rvzi",
+      "cta": "📝 ثبت درخواست آنلاین",
+      "href": "https://www.memareh.com",
+      "intent": "submit service request"
+    }
+  ],
+  "ctaDecisionRequired": [
+    "A keep text -> homepage",
+    "B change CTA text (content phase)",
+    "C point to /contact-us (exists, used by 26 other CTAs)",
+    "D remove CTA"
+  ],
+  "optimizerPolicyChanges": [
+    "rel noopener/noreferrer only for target=_blank",
+    "origin-only canonicalization, trailing slash preserved",
+    "drop empty class/rel, preserve authored class order"
+  ],
+  "tables": {
+    "pilot": "SAFE_SEMANTIC_CONVERSION",
+    "corpusComplex": "MANUAL_TABLE_REVIEW (2, deferred, not in review set)"
+  },
+  "summary": {
+    "reviewed": 8,
+    "approveSafeDefault": 5,
+    "approveWithRuleAdjustment": 2,
+    "manualTransformationRequired": 0,
+    "doNotOptimize": 1,
+    "stale": 0,
+    "customCssConflicts": 0
+  }
+}

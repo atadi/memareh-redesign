@@ -25,9 +25,16 @@ if (!fs.existsSync(optimizerJs) || !fs.existsSync(reportJs) || !fs.existsSync(au
   if (fs.existsSync(buildInfo)) fs.rmSync(buildInfo)
   fs.mkdirSync(distDir, { recursive: true })
   execSync('npx tsc -p tsconfig.dryrun.json', { stdio: 'inherit', cwd: path.resolve(__dirname, '..') })
-  let src = fs.readFileSync(optimizerJs, 'utf8')
-  src = src.replace(/require\("@\/lib\//g, 'require("./')
-  fs.writeFileSync(optimizerJs, src)
+}
+// Rewrite the `@/lib/*` path alias in EVERY emitted module, unconditionally.
+// tsc preserves the alias verbatim and plain Node cannot resolve it. Doing this
+// only on a cold build (and only for the optimizer) meant any out-of-band
+// `tsc -p tsconfig.dryrun.json` left un-rewritten output that crashed at require.
+for (const file of fs.readdirSync(distDir).filter((f) => f.endsWith('.js'))) {
+  const p = path.join(distDir, file)
+  const src = fs.readFileSync(p, 'utf8')
+  const fixed = src.replace(/require\("@\/lib\//g, 'require("./')
+  if (fixed !== src) fs.writeFileSync(p, fixed)
 }
 const { optimizeArticleHtml, analyzeArticleHtml, DEFAULT_OPTIMIZER_OPTIONS } = require(optimizerJs)
 const { classifyArticle, buildAggregate, buildAuditTotals, hashContentSync, detectCtaMismatch, CTA_TEXT, decodeUtf8Chunks } = require(reportJs)

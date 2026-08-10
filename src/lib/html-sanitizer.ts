@@ -34,22 +34,41 @@ const ALLOWED_ATTR = [
   'width', 'height', 'loading', 'target', 'rel',
 ] as const
 
-// Force safe link behavior: any anchor that opens in a new tab (or has no rel)
-// gets rel="noopener noreferrer". This neutralizes reverse-tabnabbing even if
-// the editor stored a target=_blank without a safe rel.
+// Force safe link behavior WITHOUT adding noise to ordinary same-tab links.
+//
+// Reverse-tabnabbing is only reachable when a link opens a new browsing context,
+// so `rel="noopener noreferrer"` is required for `target="_blank"` and pointless
+// everywhere else. The previous rule added it to EVERY anchor, which polluted
+// internal same-tab links (the site's own articles), stripped the referrer from
+// legitimate internal navigation, and rewrote already-clean markup on every
+// sanitize pass — defeating byte-level idempotence for the optimizer.
+//
+// tel:/mailto: links are left untouched.
+const OPENS_NEW_CONTEXT = /^_blank$/i
+
 DOMPurify.addHook('afterSanitizeAttributes', (node) => {
-  if (node.tagName === 'A' && node.hasAttribute('href')) {
-    const href = node.getAttribute('href') ?? ''
-    // Block script/data: navigation regardless of what the editor stored.
-    if (/^(javascript:|data:)/i.test(href)) {
-      node.removeAttribute('href')
-      return
-    }
-    const rel = node.getAttribute('rel') ?? ''
-    if (!/\bnoreferrer\b/.test(rel)) {
-      node.setAttribute('rel', (rel ? rel + ' ' : '') + 'noopener noreferrer')
-    }
+  if (node.tagName !== 'A' || !node.hasAttribute('href')) return
+  const href = node.getAttribute('href') ?? ''
+  // Block script/data: navigation regardless of what the editor stored.
+  if (/^(javascript:|data:|vbscript:)/i.test(href)) {
+    node.removeAttribute('href')
+    return
   }
+  const target = node.getAttribute('target') ?? ''
+  if (!OPENS_NEW_CONTEXT.test(target)) {
+    // Same-tab link: never inject rel. Drop an empty rel left by the editor so
+    // repeated sanitization is byte-stable.
+    if (node.hasAttribute('rel') && (node.getAttribute('rel') ?? '').trim() === '') {
+      node.removeAttribute('rel')
+    }
+    return
+  }
+  const rel = (node.getAttribute('rel') ?? '').trim()
+  const tokens = rel ? rel.split(/\s+/) : []
+  for (const required of ['noopener', 'noreferrer']) {
+    if (!tokens.some((t) => t.toLowerCase() === required)) tokens.push(required)
+  }
+  node.setAttribute('rel', tokens.join(' '))
 })
 
 export function sanitizeHtml(dirty: string | null | undefined): string {

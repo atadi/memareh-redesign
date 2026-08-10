@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-10T21:09:54.154Z",
+  "generatedAt": "2026-08-10T21:57:32.328Z",
   "mode": "dry-run-read-only",
   "productionWrites": 0,
   "target": {
@@ -130,7 +130,7 @@
       "mediumConfidenceCount": 0,
       "reportOnlyCount": 2,
       "originalHtmlLength": 8533,
-      "optimizedHtmlLength": 7283,
+      "optimizedHtmlLength": 7191,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -186,7 +186,7 @@
       "classification": "SAFE_TO_OPTIMIZE",
       "reasons": [],
       "originalHash": "1dc1beb0814696d1b961009187e8f7d784247501b9994cfc8d000edec7ac9946",
-      "optimizedHash": "e2ab5c6231b0ec5c7a9fff6c859232512c0c8900cc20479deb5f4cc68f9ae208",
+      "optimizedHash": "0962f31a10a7c255ea3df1e6eba89eb857a33de9a3fbbf357f6b12fe310355e1",
       "updatedAt": "2026-07-07 22:12:46.318358+00"
     },
     {
@@ -217,7 +217,7 @@
       "mediumConfidenceCount": 0,
       "reportOnlyCount": 3,
       "originalHtmlLength": 7025,
-      "optimizedHtmlLength": 6098,
+      "optimizedHtmlLength": 6006,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -274,7 +274,7 @@
       "classification": "SAFE_TO_OPTIMIZE",
       "reasons": [],
       "originalHash": "0ac53e4d197cea479226fad85ceb93d78040d23a8ec33692ae6c2af879d81771",
-      "optimizedHash": "b1bfb58cf895b77d9f5878e0b0dd2a00877ba7f9c4e424ab824b4aeaa85da7c0",
+      "optimizedHash": "68b23ce2693d99b89e7fac8f9da833faaa1164c28af442df37f4373582ea41de",
       "updatedAt": "2026-07-07 22:11:27.096817+00"
     },
     {
@@ -305,7 +305,7 @@
       "mediumConfidenceCount": 0,
       "reportOnlyCount": 3,
       "originalHtmlLength": 7045,
-      "optimizedHtmlLength": 6324,
+      "optimizedHtmlLength": 6269,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -362,7 +362,7 @@
       "classification": "SAFE_TO_OPTIMIZE",
       "reasons": [],
       "originalHash": "c889ceb5dcff578b8dade9efd81630e9d7e65264fb2339dc08a70fd8d950bd06",
-      "optimizedHash": "f4c69ebfae6d2be1e3dc6d43b3be0cb42bdfd109e5dfd64b327db724e01a2048",
+      "optimizedHash": "2d03faa0a23cf683037914e3c77e7b7ea15d987d7cc10f02cbe332f377a5c48a",
       "updatedAt": "2026-07-07 22:11:47.477382+00"
     },
     {
@@ -388,7 +388,7 @@
       "mediumConfidenceCount": 0,
       "reportOnlyCount": 2,
       "originalHtmlLength": 7414,
-      "optimizedHtmlLength": 6600,
+      "optimizedHtmlLength": 6528,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -444,7 +444,7 @@
       "classification": "SAFE_TO_OPTIMIZE",
       "reasons": [],
       "originalHash": "d3ca6eeef6e0e6a748f8435d18a29495861a44ce437f9e2948147f0bba4e8d13",
-      "optimizedHash": "42b2faee8ae1ba4a7b650955369035adeb7f153ad5aa170afad72aad83fbb260",
+      "optimizedHash": "c737519f5fa25500670df642733a334829c6db14226f789d128cd822140f3eeb",
       "updatedAt": "2026-07-07 22:10:46.342568+00"
     },
     {
@@ -475,7 +475,7 @@
       "mediumConfidenceCount": 0,
       "reportOnlyCount": 3,
       "originalHtmlLength": 12140,
-      "optimizedHtmlLength": 10669,
+      "optimizedHtmlLength": 10557,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -532,7 +532,7 @@
       "classification": "SAFE_TO_OPTIMIZE",
       "reasons": [],
       "originalHash": "84def266206746c65e4e9eff0fa424d2499c75d37fd9facfaca2612382149686",
-      "optimizedHash": "39fa5c94d6ea323fb1c888f148c8adf2c069b2f932bbec2436c6875855666946",
+      "optimizedHash": "1041b86d4f932a1b156d8e084116da52f4754088afe7d3713cbdb3ff7ce7e00e",
       "updatedAt": "2026-07-13 00:20:00.296744+00"
     },
     {
@@ -563,7 +563,7 @@
       "mediumConfidenceCount": 0,
       "reportOnlyCount": 3,
       "originalHtmlLength": 5238,
-      "optimizedHtmlLength": 4591,
+      "optimizedHtmlLength": 4582,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -620,7 +620,7 @@
       "classification": "SAFE_TO_OPTIMIZE",
       "reasons": [],
       "originalHash": "dec3c72eca3f272b0603eabcdf556f94d7e3af8a71341d8a4925b281295881b5",
-      "optimizedHash": "c9f84b54ef06f7266b755e04e93983c8384c6d4598193fd5100e18d51f7ade96",
+      "optimizedHash": "3366eccfe24a53a55a1a1559f0ca43953e21e00dd3d13fa2dc08b63374b80d26",
       "updatedAt": "2026-07-13 00:21:15.138574+00"
     },
     {
@@ -656,7 +656,7 @@
       "mediumConfidenceCount": 0,
       "reportOnlyCount": 4,
       "originalHtmlLength": 5268,
-      "optimizedHtmlLength": 4621,
+      "optimizedHtmlLength": 4612,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -714,7 +714,7 @@
       "classification": "SAFE_TO_OPTIMIZE",
       "reasons": [],
       "originalHash": "f60dabd8431146dd4d49671637e20a07a390748b74950c837724f30d65f51d50",
-      "optimizedHash": "cf4d48fb09edaf8a63c1834b3f1e10892009351b4c2f637ae982759a82855eed",
+      "optimizedHash": "89f4c6795975510fe250331688d4ebea157e61f4fc9711b6a48b96b306694514",
       "updatedAt": "2026-07-13 00:21:43.047662+00"
     },
     {
@@ -750,7 +750,7 @@
       "mediumConfidenceCount": 0,
       "reportOnlyCount": 4,
       "originalHtmlLength": 15094,
-      "optimizedHtmlLength": 12481,
+      "optimizedHtmlLength": 12399,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -808,7 +808,7 @@
       "classification": "SAFE_TO_OPTIMIZE",
       "reasons": [],
       "originalHash": "4099e3ce709e43650edf17fb865d12551800b5a05967b4b3f5165dfaa6573c7b",
-      "optimizedHash": "295e011f96f65499a1fb756bb647dc0183eae88bf3c260ec3f515fb6fee0de7b",
+      "optimizedHash": "9f13798da790cc3d6e8a75e764fed368fd3c377f6049504be8b7e2aa97e3397a",
       "updatedAt": "2026-07-13 00:22:42.549139+00"
     },
     {
@@ -839,7 +839,7 @@
       "mediumConfidenceCount": 0,
       "reportOnlyCount": 3,
       "originalHtmlLength": 22870,
-      "optimizedHtmlLength": 18695,
+      "optimizedHtmlLength": 18615,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -896,7 +896,7 @@
       "classification": "SAFE_TO_OPTIMIZE",
       "reasons": [],
       "originalHash": "cfefd41f6bc5a724ea8e42ac3b7bc0e8e2b72f8d5fab089c5a4246e7bb6e18b4",
-      "optimizedHash": "7c4a8a5d8608046e188c0ce27da4bd29393d7a240eefffd28b462f67b58d5842",
+      "optimizedHash": "91c51f0042d47ea253ff9d01554e68f264aecb1be5cd042f5c61a157a024443e",
       "updatedAt": "2026-07-13 00:20:17.884198+00"
     },
     {
@@ -927,7 +927,7 @@
       "mediumConfidenceCount": 1,
       "reportOnlyCount": 2,
       "originalHtmlLength": 15130,
-      "optimizedHtmlLength": 12754,
+      "optimizedHtmlLength": 12670,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -985,7 +985,7 @@
         "medium-confidence-finding"
       ],
       "originalHash": "00c5a7062df9bd6f139946cc040555cb9b579326d86f419e3374c1d835b5d493",
-      "optimizedHash": "2815b2e696151169a8b64ade3094d49b52d92c11b070c497ba5054f488077a51",
+      "optimizedHash": "9431cee24913b7d25b2000453ff2a52bd8ad5e3b93b0d9fb47eee64803d80857",
       "updatedAt": "2026-07-13 00:11:54.313523+00"
     },
     {
@@ -1016,7 +1016,7 @@
       "mediumConfidenceCount": 0,
       "reportOnlyCount": 3,
       "originalHtmlLength": 24976,
-      "optimizedHtmlLength": 20522,
+      "optimizedHtmlLength": 20366,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -1073,7 +1073,7 @@
       "classification": "SAFE_TO_OPTIMIZE",
       "reasons": [],
       "originalHash": "cb75c8566bbb97beb354a8f482ce3fab47c71eea93b276b1208113f76d02a752",
-      "optimizedHash": "093fd2c8d5115240eed57dd84a57785fc56a297b6ee5829d0a388f41fce163b8",
+      "optimizedHash": "38c64e4af04cd783fbe3a22807867302176f6d5dbeffdee314d011eef1023fa6",
       "updatedAt": "2026-07-13 00:20:44.388471+00"
     },
     {
@@ -1109,7 +1109,7 @@
       "mediumConfidenceCount": 1,
       "reportOnlyCount": 3,
       "originalHtmlLength": 67895,
-      "optimizedHtmlLength": 26931,
+      "optimizedHtmlLength": 23832,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -1168,7 +1168,7 @@
         "medium-confidence-finding"
       ],
       "originalHash": "4c76cfba28207c1a120063d2d02b6655eee59feaad1fbfa887a594f156074f09",
-      "optimizedHash": "e0f79cd51bd759aa0395b7b4a4d7ac3deef7a2c6f43e7f5316796db0da1bcc6d",
+      "optimizedHash": "16125c046e582c8d19dc98dbd7512d369be9d1c56430c038b8a24884e1347765",
       "updatedAt": "2026-08-02 07:47:44.994775+00"
     },
     {
@@ -1204,7 +1204,7 @@
       "mediumConfidenceCount": 1,
       "reportOnlyCount": 3,
       "originalHtmlLength": 50664,
-      "optimizedHtmlLength": 17718,
+      "optimizedHtmlLength": 16030,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -1263,7 +1263,7 @@
         "medium-confidence-finding"
       ],
       "originalHash": "413551613b621d06e4c5ba0922508a9c219324cae47a74b584f82a33fddeb666",
-      "optimizedHash": "d4a9e1261b994cd03db99183eb66f9192a4cd0f7a71a4446764273debafd76df",
+      "optimizedHash": "4ca0be62ba495e7a4e82ad640a9f7226d840716cf377b933d95c67f071b0353c",
       "updatedAt": "2026-07-10 10:40:08.017655+00"
     },
     {
@@ -1294,7 +1294,7 @@
       "mediumConfidenceCount": 1,
       "reportOnlyCount": 2,
       "originalHtmlLength": 20496,
-      "optimizedHtmlLength": 16848,
+      "optimizedHtmlLength": 16611,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -1352,7 +1352,7 @@
         "medium-confidence-finding"
       ],
       "originalHash": "158c40919a5eca5f2c06e03addcbab139df5521c8deb4cd2a9309b27629c7ead",
-      "optimizedHash": "573234f31a4cf00dd7347a95edd28feb209cfc9c5f97c24eccd609679d635859",
+      "optimizedHash": "0d0dda9b0334d8a83c453c26b9d482163083e11c54a5b7fbf1fbf7b789f9fa67",
       "updatedAt": "2026-07-13 00:17:07.399487+00"
     },
     {
@@ -1383,7 +1383,7 @@
       "mediumConfidenceCount": 1,
       "reportOnlyCount": 2,
       "originalHtmlLength": 63434,
-      "optimizedHtmlLength": 28161,
+      "optimizedHtmlLength": 26072,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -1441,7 +1441,7 @@
         "medium-confidence-finding"
       ],
       "originalHash": "53c1d1eb139e6d9496c85307c81aa090cf3b0bc95e7201492338fa035eabfe80",
-      "optimizedHash": "5f11d7e3eb4c5a7b007fdfc97e82b4e21fba8fa5553f1b0d640cef81224aa030",
+      "optimizedHash": "295f243394869d9e80e905ac49cb6c612c349c2b388d99447d29cddf8a0e94de",
       "updatedAt": "2026-08-09 11:16:04.351458+00"
     },
     {
@@ -1472,7 +1472,7 @@
       "mediumConfidenceCount": 1,
       "reportOnlyCount": 2,
       "originalHtmlLength": 41510,
-      "optimizedHtmlLength": 18665,
+      "optimizedHtmlLength": 16701,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -1530,7 +1530,7 @@
         "medium-confidence-finding"
       ],
       "originalHash": "c7f8b26af967bbc27b37830afd7fddcd721f1d14041609544c30ffaef06a140c",
-      "optimizedHash": "ace2480aa4f73592f4f3cde65439fe5a92e037156e8dffb092802373eb8b68b3",
+      "optimizedHash": "864428ff1b42107cc2d70f8871906eac7511e39eeb3d2b63133af101fdb4bf62",
       "updatedAt": "2026-07-13 00:16:01.070596+00"
     },
     {
@@ -1561,7 +1561,7 @@
       "mediumConfidenceCount": 0,
       "reportOnlyCount": 3,
       "originalHtmlLength": 2663,
-      "optimizedHtmlLength": 2647,
+      "optimizedHtmlLength": 2646,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -1618,7 +1618,7 @@
       "classification": "SAFE_TO_OPTIMIZE",
       "reasons": [],
       "originalHash": "2d3b0bede4bdb60ecfffb08c41038a02108e6c901dd594a2a19f6631468d1528",
-      "optimizedHash": "606a088a22b205ca228ed025462b21a4c86675a6907e1f87fba41b28ea50d8c1",
+      "optimizedHash": "e8c4ef6e65c9163a7f3c908a395149796a744c121d91c83eaf9c1fe8929b0ceb",
       "updatedAt": "2026-07-13 00:23:14.407279+00"
     },
     {
@@ -1649,12 +1649,12 @@
       "mediumConfidenceCount": 0,
       "reportOnlyCount": 2,
       "originalHtmlLength": 13715,
-      "optimizedHtmlLength": 14455,
+      "optimizedHtmlLength": 13715,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
       "idempotent": true,
-      "wouldContentChange": true,
+      "wouldContentChange": false,
       "wouldMetadataChange": false,
       "customCssPresent": false,
       "ctaMismatch": true,
@@ -1707,7 +1707,7 @@
         "cta-mismatch"
       ],
       "originalHash": "95e5acde4388b1566eae82e4c3cf0269e270be11b11844fdb8d24ba09ec3a06a",
-      "optimizedHash": "c78c460676f260d07fa431fd4db4c68b54c1b85a8314e654f059c1a06abea607",
+      "optimizedHash": "95e5acde4388b1566eae82e4c3cf0269e270be11b11844fdb8d24ba09ec3a06a",
       "updatedAt": "2026-08-10 07:21:31.282158+00"
     },
     {
@@ -1738,7 +1738,7 @@
       "mediumConfidenceCount": 0,
       "reportOnlyCount": 3,
       "originalHtmlLength": 24661,
-      "optimizedHtmlLength": 20383,
+      "optimizedHtmlLength": 20150,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -1795,7 +1795,7 @@
       "classification": "SAFE_TO_OPTIMIZE",
       "reasons": [],
       "originalHash": "e49733307dde8dcec8ba7670217b660d2726b4550a25084cfb1bcbf24f079df7",
-      "optimizedHash": "f210e3e4dff5fa4142bfdcfeb1a427cfad19829882ba94a6bafa2c6c4b8637bf",
+      "optimizedHash": "a097d57e4ecc174a6f30cb68f0e5f6d92e5da3acdb8b66b71cd8950d4bc8f61e",
       "updatedAt": "2026-07-13 00:26:30.512526+00"
     },
     {
@@ -1821,7 +1821,7 @@
       "mediumConfidenceCount": 1,
       "reportOnlyCount": 1,
       "originalHtmlLength": 41938,
-      "optimizedHtmlLength": 17450,
+      "optimizedHtmlLength": 15677,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -1878,7 +1878,7 @@
         "medium-confidence-finding"
       ],
       "originalHash": "efbc0841741f5e511be77f80cb3a3a54bba3bb534a5f70eb82924bdf204f1d6a",
-      "optimizedHash": "8ac122e49c5dd50a959e863fff950dce7fd73e3d415073de08a96cde31399ec0",
+      "optimizedHash": "d51f0b552886d7176d0a028acd587f63910fe68b81a5f9b1e00cb3d75c34567c",
       "updatedAt": "2026-08-06 10:04:06.664413+00"
     },
     {
@@ -2048,7 +2048,7 @@
       "classification": "SAFE_TO_OPTIMIZE",
       "reasons": [],
       "originalHash": "79f356807cab02791441ca90cc20fb9e5e72e7da49793cf917e0ecf92f68d5f0",
-      "optimizedHash": "32b6f453f806b8605a5e689ce2d5bff0e3e4799028c6f20ec3c431891bda2841",
+      "optimizedHash": "76254dfeece84805079737657c3c8a48a1e083a5bdd05f919f7cabc2f8119548",
       "updatedAt": "2026-07-07 22:13:35.431603+00"
     },
     {
@@ -2079,7 +2079,7 @@
       "mediumConfidenceCount": 0,
       "reportOnlyCount": 3,
       "originalHtmlLength": 15731,
-      "optimizedHtmlLength": 12736,
+      "optimizedHtmlLength": 12705,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -2136,7 +2136,7 @@
       "classification": "SAFE_TO_OPTIMIZE",
       "reasons": [],
       "originalHash": "90638ba8c816d6cf433b2377af3c5d471aa2222b30ea5aba2b9ad6c834dc8118",
-      "optimizedHash": "20fc80ee37fbdca15fd549ae963c5d33c1b650d125931300050ef5fb44ca3c11",
+      "optimizedHash": "d874f1a86b63734c2281101884ca1e417dc954d2d819e6415320deb2755dc7f3",
       "updatedAt": "2026-07-13 00:25:43.772275+00"
     },
     {
@@ -2224,7 +2224,7 @@
       "classification": "SAFE_TO_OPTIMIZE",
       "reasons": [],
       "originalHash": "678329cd3becc785ac67df61db0dd68d4845f3e21ba5fcff143b636667118242",
-      "optimizedHash": "fcc8acd709f2cb78a182779f4c8155a4cd9f0490a3394e80b1d5e7a906c9dab3",
+      "optimizedHash": "ce658007d50269db52dcd5c9d3fc764d31ea2d612acad36733082cf5249adb6b",
       "updatedAt": "2026-07-11 03:37:31.69868+00"
     },
     {
@@ -2255,7 +2255,7 @@
       "mediumConfidenceCount": 0,
       "reportOnlyCount": 3,
       "originalHtmlLength": 19430,
-      "optimizedHtmlLength": 15210,
+      "optimizedHtmlLength": 15194,
       "textPreserved": true,
       "linkIntegrity": true,
       "sanitizerOk": true,
@@ -2312,7 +2312,7 @@
       "classification": "SAFE_TO_OPTIMIZE",
       "reasons": [],
       "originalHash": "a7802a59e4b07212a6e57ffd6f167dc0403113ba2f73225e73ccced14196d27a",
-      "optimizedHash": "1e32a92ca75aded2badcc64c90f8f0d6b6e6245c343bdaec8f170cb86fb45ed3",
+      "optimizedHash": "b0416c182606ae0a900980fedc331910904734a070e76ec4b666b8c1cfe7dc34",
       "updatedAt": "2026-07-13 00:27:12.750055+00"
     }
   ]
