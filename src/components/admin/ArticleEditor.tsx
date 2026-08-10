@@ -28,6 +28,14 @@ import {
 } from 'lucide-react'
 import { sanitizeHtml } from '@/lib/html-sanitizer'
 import { sanitizeArticleCss } from '@/lib/article-css'
+import {
+  analyzeArticleHtml,
+  optimizeArticleHtml,
+  assertSafeToApply,
+  type ArticleOptimizationResult,
+  type OptimizerOptions,
+  DEFAULT_OPTIMIZER_OPTIONS,
+} from '@/lib/article-optimizer'
 import toast from 'react-hot-toast'
 import { RichTextEditor } from './RichTextEditor'
 import { ArticleContent } from '@/components/articles/ArticleContent'
@@ -118,6 +126,14 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
   const [showTagDropdown, setShowTagDropdown] = useState(false)
   const [slugExists, setSlugExists] = useState(false)
   const [checkingSlug, setCheckingSlug] = useState(false)
+
+  // Optimizer (بهینه‌سازی سئو) workflow state.
+  const [optimizerOpen, setOptimizerOpen] = useState(false)
+  const [optimizerAnalyzing, setOptimizerAnalyzing] = useState(false)
+  const [optimizerResult, setOptimizerResult] = useState<ArticleOptimizationResult | null>(null)
+  const [optimizerOptions, setOptimizerOptions] = useState<OptimizerOptions>(DEFAULT_OPTIMIZER_OPTIONS)
+  const [optimizerPreHtml, setOptimizerPreHtml] = useState<string>('') // for Undo
+  const [optimizerApplyError, setOptimizerApplyError] = useState<string | null>(null)
   const [showGallery, setShowGallery] = useState(false)
   const [galleryImages, setGalleryImages] = useState<string[]>([])
   const [loadingGallery, setLoadingGallery] = useState(false)
@@ -600,6 +616,56 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     return sanitizeArticleCss(customCss, article?.id || 'preview').issues
   }, [customCss, article?.id])
 
+  // ---- Optimizer (بهینه‌سازی سئو) ----
+  // Stage 1: Analyze — purely read-only over current content + SEO metadata.
+  const runOptimizeAnalyze = useCallback(() => {
+    setOptimizerAnalyzing(true)
+    setOptimizerApplyError(null)
+    // Defer so the UI can show the "در حال بررسی" state before the sync work.
+    setTimeout(() => {
+      try {
+        const result = optimizeArticleHtml(content, optimizerOptions, {
+          meta_title: watch('meta_title'),
+          meta_description: watch('meta_description'),
+          meta_keywords: watch('meta_keywords'),
+          canonical_url: watch('canonical_url'),
+          og_image: article?.og_image ?? null,
+          featured_image_alt: watch('featured_image_alt'),
+        })
+        setOptimizerResult(result)
+        setOptimizerOpen(true)
+      } catch (e: any) {
+        toast.error('خطا در تحلیل مقاله')
+      } finally {
+        setOptimizerAnalyzing(false)
+      }
+    }, 10)
+  }, [content, optimizerOptions, watch, article?.og_image])
+
+  // Stage 2 handled by preview; Stage 3: Apply — update ONLY the unsaved buffer.
+  const applyOptimization = useCallback(() => {
+    if (!optimizerResult) return
+    setOptimizerApplyError(null)
+    try {
+      assertSafeToApply(optimizerResult)
+      setOptimizerPreHtml(content) // snapshot for Undo
+      setContent(optimizerResult.sanitizedHtml)
+      toast.success('بهینه‌سازی اعمال شد (هنوز ذخیره نشده است — دکمهٔ ذخیره را بزنید)')
+      setOptimizerOpen(false)
+      setOptimizerResult(null)
+    } catch (e: any) {
+      setOptimizerApplyError(e?.message ?? 'بهینه‌سازی متوقف شد.')
+    }
+  }, [optimizerResult, content])
+
+  const undoOptimization = useCallback(() => {
+    if (optimizerPreHtml) {
+      setContent(optimizerPreHtml)
+      setOptimizerPreHtml('')
+      toast('بازگردانی به نسخهٔ قبل از بهینه‌سازی')
+    }
+  }, [optimizerPreHtml])
+
   const seoPreviewUrl = `/articles/${slugValue || 'your-slug'}`
   const seoPreviewTitle = metaTitleValue || titleValue || 'عنوان مقاله'
   const seoPreviewDesc = metaDescValue || excerptValue || ''
@@ -638,6 +704,12 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
           <button type="button" onClick={() => setPreview(!preview)} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 flex items-center gap-2">
             <Eye className="w-4 h-4" />
             {preview ? 'ویرایش' : 'پیش‌نمایش'}
+          </button>
+          <button type="button" onClick={runOptimizeAnalyze} disabled={optimizerAnalyzing || saving || isUploading}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            title="تحلیل و پیشنهاد بهینه‌سازی ساختاری و سئو بدون تغییر متن">
+            <Sparkles className="w-4 h-4" />
+            {optimizerAnalyzing ? 'در حال بررسی...' : 'بهینه‌سازی سئو'}
           </button>
           <button type="button" onClick={() => handleSaveWithStatus('draft')} disabled={saving || isUploading}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
@@ -680,6 +752,108 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
           )
         })}
       </div>
+
+      {/* ================ OPTIMIZER (بهینه‌سازی سئو) ================ */}
+      {optimizerOpen && optimizerResult && (
+        <div className="mb-6 p-4 border border-indigo-200 bg-indigo-50 rounded-lg space-y-4" dir="rtl">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-indigo-900 flex items-center gap-2">
+              <Sparkles className="w-4 h-4" /> بررسی بهینه‌سازی سئو
+            </h3>
+            <span className="text-sm text-indigo-700">
+              امتیاز داخلی بهینه‌سازی: {optimizerResult.structuralScore}/100
+              {optimizerResult.meta.findings.length > 0 && ` · متاداده: ${optimizerResult.meta.score}/100`}
+            </span>
+          </div>
+
+          {optimizerApplyError && (
+            <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded p-2">
+              {optimizerApplyError}
+            </div>
+          )}
+
+          {/* Options — high-confidence toggles default on; medium opt-in. */}
+          <div className="flex flex-wrap gap-3 text-sm">
+            {([
+              ['fixStructure', 'رفع ساختار عنوان‌ها', true],
+              ['fixLinks', 'یکسان‌سازی لینک‌های داخلی', true],
+              ['fixInlineStyles', 'حذف استایل‌های inline', true],
+              ['fixTables', 'جدول معنایی', true],
+              ['fixStrayMarkup', 'حذف نشانه‌های اضافی', true],
+              ['enhanceStructure', 'بهبود ساختار یافته (متوسط اطمینان)', false],
+            ] as const).map(([key, label]) => (
+              <label key={key} className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={(optimizerOptions as any)[key]}
+                  onChange={(e) => setOptimizerOptions((o) => ({ ...o, [key]: e.target.checked }))}
+                  className="rounded"
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+
+          <button type="button" onClick={runOptimizeAnalyze} disabled={optimizerAnalyzing}
+            className="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 disabled:opacity-50">
+            {optimizerAnalyzing ? 'در حال بررسی...' : 'بازتحلیل با تنظیمات جدید'}
+          </button>
+
+          {/* Findings */}
+          {optimizerResult.findings.length === 0 && optimizerResult.meta.findings.length === 0 ? (
+            <p className="text-sm text-green-700">مشکلی ساختاری یافت نشد — مقاله از نظر الگوی طراحی مقاله بهینه است.</p>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-sm font-medium">مشکلات پیدا شده:</p>
+              {optimizerResult.findings.map((f, i) => (
+                <div key={`f${i}`} className="text-sm bg-white border border-indigo-100 rounded p-2">
+                  <span className={`inline-block px-1.5 py-0.5 rounded text-xs ml-2 ${(f.severity === 'high' ? 'bg-red-100 text-red-700' : f.severity === 'medium' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600')}`}>
+                    {f.confidence === 'high' ? 'بالا' : f.confidence === 'medium' ? 'متوسط' : 'پایین'}
+                  </span>
+                  {f.message}
+                </div>
+              ))}
+              {optimizerResult.meta.findings.length > 0 && (
+                <div className="text-sm bg-white border border-indigo-100 rounded p-2 space-y-1">
+                  <p className="font-medium">تحلیل متاداده (فقط پیشنهاد، تغییر خودکار نمی‌یابد):</p>
+                  {optimizerResult.meta.findings.map((f, i) => (
+                    <div key={`m${i}`}>{f.message}</div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Before / After preview using the shared ArticleContent renderer. */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs font-medium mb-1 text-gray-600">پیش‌نمایش فعلی</p>
+              <ArticleContent content={optimizerResult.originalHtml} />
+            </div>
+            <div>
+              <p className="text-xs font-medium mb-1 text-gray-600">پیش‌نمایش بهینه‌شده</p>
+              <ArticleContent content={optimizerResult.sanitizedHtml} />
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <button type="button" onClick={applyOptimization}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2">
+              <Check className="w-4 h-4" /> اعمال بهینه‌سازی
+            </button>
+            <button type="button" onClick={() => { setOptimizerOpen(false); setOptimizerResult(null) }}
+              className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">
+              لغو
+            </button>
+          </div>
+          <p className="text-xs text-indigo-700">
+            اعمال فقط بافر ذخیره‌نشدهٔ محتوا را تغییر می‌دهد. برای ثبت در پایگاه داده، دکمهٔ «ذخیره» را بزنید.
+            {optimizerPreHtml && (
+              <button type="button" onClick={undoOptimization} className="mr-3 underline">بازگردانی به نسخهٔ قبل</button>
+            )}
+          </p>
+        </div>
+      )}
 
       {/* ================ TAB: CONTENT ================ */}
       {activeTab === 'content' && (
