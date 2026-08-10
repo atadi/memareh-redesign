@@ -15,6 +15,7 @@
   "include": [
     "src/lib/article-optimizer.ts",
     "src/lib/article-optimize-report.ts",
+    "src/lib/article-audit.ts",
     "src/lib/html-sanitizer.ts",
     "src/lib/article-text-integrity.ts"
   ]

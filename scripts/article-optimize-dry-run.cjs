@@ -17,15 +17,25 @@ try {
 const distDir = path.resolve('.article-optimizer-dist')
 const optimizerJs = path.join(distDir, 'article-optimizer.js')
 const reportJs = path.join(distDir, 'article-optimize-report.js')
-if (!fs.existsSync(optimizerJs) || !fs.existsSync(reportJs)) {
+const auditJs = path.join(distDir, 'article-audit.js')
+if (!fs.existsSync(optimizerJs) || !fs.existsSync(reportJs) || !fs.existsSync(auditJs)) {
+  // Drop the incremental buildinfo first: with a partially-populated outDir tsc
+  // would consider the project up to date and emit nothing.
+  const buildInfo = path.join(distDir, 'tsconfig.dryrun.tsbuildinfo')
+  if (fs.existsSync(buildInfo)) fs.rmSync(buildInfo)
   fs.mkdirSync(distDir, { recursive: true })
   execSync('npx tsc -p tsconfig.dryrun.json', { stdio: 'inherit', cwd: path.resolve(__dirname, '..') })
   let src = fs.readFileSync(optimizerJs, 'utf8')
   src = src.replace(/require\("@\/lib\//g, 'require("./')
   fs.writeFileSync(optimizerJs, src)
 }
-const { optimizeArticleHtml, analyzeArticleHtml } = require(optimizerJs)
-const { classifyArticle, buildAggregate, hashContentSync, detectCtaMismatch, CTA_TEXT } = require(reportJs)
+const { optimizeArticleHtml, analyzeArticleHtml, DEFAULT_OPTIMIZER_OPTIONS } = require(optimizerJs)
+const { classifyArticle, buildAggregate, buildAuditTotals, hashContentSync, detectCtaMismatch, CTA_TEXT, decodeUtf8Chunks } = require(reportJs)
+const { auditArticleStructure } = require(auditJs)
+
+// Mode B: medium-confidence structural SUGGESTIONS. Analysed only — never
+// treated as approved changes and never used to classify an article as safe.
+const SUGGEST_OPTIONS = Object.assign({}, DEFAULT_OPTIMIZER_OPTIONS, { enhanceStructure: true })
 
 function env(name, fallback) {
   if (process.env[name]) return process.env[name]
@@ -44,9 +54,10 @@ function mgmtQuery(sql) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify({ query: sql })
     const req = https.request(ENDPOINT, { method: 'POST', headers: { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json', Accept: 'application/json' } }, (res) => {
-      let data = ''
-      res.on('data', (c) => (data += c))
+      let chunks = []
+      res.on('data', (c) => chunks.push(c))
       res.on('end', () => {
+        const data = decodeUtf8Chunks(chunks)
         if (res.statusCode < 200 || res.statusCode >= 300) return reject(new Error(`Mgmt query HTTP ${res.statusCode}: ${data.slice(0, 300)}`))
         try { resolve(JSON.parse(data)) } catch (e) { reject(e) }
       })
@@ -92,6 +103,23 @@ async function analyzeArticle(a) {
   const scoreAfter = r1.structuralScore
   const optimizedHash = hashContentSync(r1.sanitizedHtml)
   const findings = (r1.findings || []).concat((r1.meta && r1.meta.findings) || [])
+
+  // Mode B (suggestions only) — run separately so medium-confidence structural
+  // recognition never influences the safe-default result or the classification.
+  let suggested = { findingsCount: 0, wouldContentChange: false, textPreserved: true }
+  try {
+    const rs = optimizeArticleHtml(raw, SUGGEST_OPTIONS, meta)
+    suggested = {
+      findingsCount: (rs.findings || []).length,
+      wouldContentChange: rs.sanitizedHtml.trim() !== r1.sanitizedHtml.trim(),
+      textPreserved: rs.textPreserved,
+    }
+  } catch (e) {
+    suggested.error = String(e && e.message ? e.message : e)
+  }
+
+  const audit = auditArticleStructure(raw)
+  const metaFindings = (r1.meta && r1.meta.findings) || []
   const { classification, reasons } = classifyArticle(raw, r1, {
     idempotent, sanitizerOk, textPreserved, linkIntegrity,
     wouldContentChange, wouldMetadataChange: false, ctaMismatch, scoreBefore,
@@ -108,6 +136,11 @@ async function analyzeArticle(a) {
     textPreserved, linkIntegrity, sanitizerOk, idempotent,
     wouldContentChange, wouldMetadataChange: false,
     customCssPresent, ctaMismatch,
+    ctaHref: audit.ctaMismatchHref,
+    audit,
+    suggested,
+    suggestedFindingsCount: suggested.findingsCount,
+    metadataFindingTypes: metaFindings.map((f) => f.type),
     eligible: classification !== 'BLOCKED', classification, reasons,
     originalHash, optimizedHash, updatedAt: a.updated_at,
   }
@@ -123,6 +156,9 @@ async function main() {
   for (const a of rows) articles.push(await analyzeArticle(a))
 
   const aggregate = buildAggregate(articles)
+  const auditTotals = buildAuditTotals(articles)
+  const metaTypes = {}
+  for (const a of articles) for (const t of a.metadataFindingTypes || []) metaTypes[t] = (metaTypes[t] || 0) + 1
   const report = {
     generatedAt: new Date().toISOString(),
     mode: 'dry-run-read-only',
@@ -139,7 +175,7 @@ async function main() {
       avgScoreDelta: aggregate.avgScoreAfter - aggregate.avgScoreBefore,
       ctaMismatchCount: aggregate.ctaMismatches.length,
     },
-    aggregate, articles,
+    aggregate, auditTotals, metadataFindingTypes: metaTypes, articles,
   }
 
   fs.mkdirSync('docs', { recursive: true })
@@ -181,8 +217,67 @@ function writeMarkdown(report) {
     L.push('')
     L.push('## CTA mismatches (booking-removed product mismatch)')
     L.push('')
-    for (const c of a.ctaMismatches) L.push(`- ${c.slug}: "${c.text}" — ${c.note} (not rewritten)`)
+    for (const c of a.ctaMismatches) {
+      const art = report.articles.find((x) => x.slug === c.slug)
+      const href = art && art.ctaHref !== null && art.ctaHref !== undefined ? (art.ctaHref || '(no href — plain text)') : '(unknown)'
+      L.push(`- ${c.slug}: "${c.text}" → href: ${href} — ${c.note} (not rewritten)`)
+    }
   }
+  const t = report.auditTotals
+  L.push('')
+  L.push('## Link audit')
+  L.push('')
+  L.push('| Metric | Count |')
+  L.push('| --- | ---: |')
+  for (const [k, v] of Object.entries(t.links)) L.push(`| ${k} | ${v} |`)
+  L.push('')
+  L.push('## Heading audit')
+  L.push('')
+  L.push('| Metric | Count |')
+  L.push('| --- | ---: |')
+  for (const [k, v] of Object.entries(t.headings)) L.push(`| ${k} | ${v} |`)
+  L.push('')
+  L.push('## Inline-style audit')
+  L.push('')
+  L.push('| Metric | Count |')
+  L.push('| --- | ---: |')
+  for (const [k, v] of Object.entries(t.inlineStyles)) L.push(`| ${k} | ${v} |`)
+  L.push('')
+  L.push('## Table audit')
+  L.push('')
+  L.push('| Metric | Count |')
+  L.push('| --- | ---: |')
+  for (const [k, v] of Object.entries(t.tables)) L.push(`| ${k} | ${v} |`)
+  L.push('')
+  L.push('## FAQ audit')
+  L.push('')
+  L.push('| Metric | Count |')
+  L.push('| --- | ---: |')
+  for (const [k, v] of Object.entries(t.faq)) L.push(`| ${k} | ${v} |`)
+  L.push('')
+  L.push('## Callout / step / expert / CTA patterns')
+  L.push('')
+  L.push('| Pattern | Count |')
+  L.push('| --- | ---: |')
+  for (const [k, v] of Object.entries(t.patterns)) L.push(`| ${k} | ${v} |`)
+  L.push('')
+  L.push('## Metadata analysis (read-only)')
+  L.push('')
+  L.push('| Finding | Articles |')
+  L.push('| --- | ---: |')
+  for (const [k, v] of Object.entries(report.metadataFindingTypes)) L.push(`| ${k} | ${v} |`)
+  L.push('')
+  L.push('## امتیاز داخلی بهینه‌سازی (internal optimizer score — NOT a Google score)')
+  L.push('')
+  L.push(`- Average before: ${a.avgScoreBefore}`)
+  L.push(`- Average proposed after: ${a.avgScoreAfter}`)
+  L.push(`- Min before: ${a.scoreMin} / Max before: ${a.scoreMax}`)
+  L.push(`- Improving: ${a.improving} / Unchanged: ${a.unchanged}`)
+  L.push('')
+  L.push('## Suggestion mode (B) — medium-confidence, NOT approved changes')
+  L.push('')
+  L.push(`- Additional structural suggestions across corpus: ${t.suggestedModeFindings}`)
+  L.push(`- Articles where suggestion mode would differ from safe-default output: ${report.articles.filter((x) => x.suggested && x.suggested.wouldContentChange).length}`)
   L.push('')
   L.push('## Safe to optimize')
   L.push('')

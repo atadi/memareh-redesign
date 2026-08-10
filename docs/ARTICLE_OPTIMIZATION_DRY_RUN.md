@@ -1,6 +1,6 @@
 # Article Optimization — Bulk Dry-Run Report
 
-Generated: 2026-08-10T10:46:25.642Z
+Generated: 2026-08-10T21:09:54.154Z
 Mode: **read-only dry-run** — ZERO production article writes.
 
 ## Summary
@@ -51,7 +51,89 @@ Mode: **read-only dry-run** — ZERO production article writes.
 
 ## CTA mismatches (booking-removed product mismatch)
 
-- chra-cheragh-haye-khaneh-cheshmak-mizanand: "ثبت درخواست در سایت معماره" — booking-removed product mismatch (not rewritten)
+- chra-cheragh-haye-khaneh-cheshmak-mizanand: "ثبت درخواست در سایت معماره" → href: https://www.memareh.com — booking-removed product mismatch (not rewritten)
+
+## Link audit
+
+| Metric | Count |
+| --- | ---: |
+| total | 1042 |
+| internal | 852 |
+| external | 21 |
+| nonWwwInternal | 186 |
+| internalNofollow | 459 |
+| tel | 169 |
+| malformedHref | 0 |
+| unsafeHref | 0 |
+
+## Heading audit
+
+| Metric | Count |
+| --- | ---: |
+| bodyH1 | 21 |
+| articlesWithMultipleH1 | 0 |
+| h2 | 156 |
+| h3 | 153 |
+| headingJumps | 21 |
+| headinglessLongArticles | 0 |
+
+## Inline-style audit
+
+| Metric | Count |
+| --- | ---: |
+| articlesWithInlineStyle | 19 |
+| totalInlineStyleAttrs | 520 |
+| safelyRemovable | 520 |
+| possiblyMeaningful | 0 |
+
+## Table audit
+
+| Metric | Count |
+| --- | ---: |
+| total | 3 |
+| missingThead | 2 |
+| missingThScope | 2 |
+| inlineWidths | 2 |
+| complexNeedingReview | 2 |
+
+## FAQ audit
+
+| Metric | Count |
+| --- | ---: |
+| articlesWithFaq | 6 |
+| questionsDetected | 53 |
+| alreadyStructured | 1 |
+
+## Callout / step / expert / CTA patterns
+
+| Pattern | Count |
+| --- | ---: |
+| numberedSteps | 8 |
+| warningCallouts | 3 |
+| expertCards | 1 |
+| serviceCta | 0 |
+| conclusionBlocks | 4 |
+
+## Metadata analysis (read-only)
+
+| Finding | Articles |
+| --- | ---: |
+| metadata-og_image | 24 |
+| metadata-featured_image_alt | 21 |
+| metadata-meta_title | 6 |
+| metadata-meta_description | 16 |
+
+## امتیاز داخلی بهینه‌سازی (internal optimizer score — NOT a Google score)
+
+- Average before: 72
+- Average proposed after: 99
+- Min before: 57 / Max before: 93
+- Improving: 24 / Unchanged: 1
+
+## Suggestion mode (B) — medium-confidence, NOT approved changes
+
+- Additional structural suggestions across corpus: 8
+- Articles where suggestion mode would differ from safe-default output: 15
 
 ## Safe to optimize
 

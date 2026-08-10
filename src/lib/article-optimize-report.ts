@@ -68,6 +68,18 @@ export function detectCtaMismatch(content: string): boolean {
   return content.includes(CTA_TEXT)
 }
 
+/**
+ * Decode an HTTP response body received as a sequence of byte chunks.
+ *
+ * Concatenating chunks with `data += chunk` corrupts multi-byte UTF-8
+ * characters (e.g. Persian text) whenever a character straddles a chunk
+ * boundary, which produces non-deterministic content hashes between runs.
+ * Buffering the bytes and decoding once is the only safe form.
+ */
+export function decodeUtf8Chunks(chunks: Uint8Array[]): string {
+  return Buffer.concat(chunks.map((c) => Buffer.from(c))).toString('utf8')
+}
+
 export function classifyArticle(
   raw: string,
   result: OptimizerResult,
@@ -154,7 +166,59 @@ export type Aggregate = {
 export type AggregateInput = Pick<
   PerArticleResult,
   'slug' | 'scoreBefore' | 'scoreAfter' | 'textPreserved' | 'sanitizerOk' | 'linkIntegrity' | 'idempotent' | 'classification' | 'ctaMismatch' | 'findings'
->
+> & { audit?: Partial<Record<string, number | boolean | string | null>>; suggestedFindingsCount?: number }
+
+/** Roll per-article audits into the corpus-level audit sections (§12–§17). */
+export function buildAuditTotals(articles: AggregateInput[]) {
+  const sum = (k: string) => articles.reduce((s, a) => s + (Number(a.audit?.[k]) || 0), 0)
+  const count = (pred: (a: AggregateInput) => boolean) => articles.filter(pred).length
+  return {
+    links: {
+      total: sum('totalLinks'),
+      internal: sum('internalLinks'),
+      external: sum('externalLinks'),
+      nonWwwInternal: sum('nonWwwInternal'),
+      internalNofollow: sum('internalNofollow'),
+      tel: sum('telLinks'),
+      malformedHref: sum('malformedHref'),
+      unsafeHref: sum('unsafeHref'),
+    },
+    headings: {
+      bodyH1: sum('bodyH1'),
+      articlesWithMultipleH1: count((a) => a.audit?.multipleH1 === true),
+      h2: sum('h2'),
+      h3: sum('h3'),
+      headingJumps: sum('headingJumps'),
+      headinglessLongArticles: count((a) => a.audit?.headinglessLongArticle === true),
+    },
+    inlineStyles: {
+      articlesWithInlineStyle: count((a) => (Number(a.audit?.inlineStyleAttrs) || 0) > 0),
+      totalInlineStyleAttrs: sum('inlineStyleAttrs'),
+      safelyRemovable: sum('inlineStyleAttrs') - sum('meaningfulInlineStyles'),
+      possiblyMeaningful: sum('meaningfulInlineStyles'),
+    },
+    tables: {
+      total: sum('tables'),
+      missingThead: sum('tablesMissingThead'),
+      missingThScope: sum('tablesMissingThScope'),
+      inlineWidths: sum('tablesWithInlineWidth'),
+      complexNeedingReview: sum('complexTables'),
+    },
+    faq: {
+      articlesWithFaq: count((a) => a.audit?.hasFaq === true),
+      questionsDetected: sum('faqQuestions'),
+      alreadyStructured: count((a) => a.audit?.faqAlreadyStructured === true),
+    },
+    patterns: {
+      numberedSteps: sum('numberedSteps'),
+      warningCallouts: sum('warningCallouts'),
+      expertCards: sum('expertCards'),
+      serviceCta: sum('serviceCta'),
+      conclusionBlocks: sum('conclusionBlocks'),
+    },
+    suggestedModeFindings: articles.reduce((s, a) => s + (a.suggestedFindingsCount || 0), 0),
+  }
+}
 
 export function buildAggregate(articles: AggregateInput[]): Aggregate {
   const n = articles.length || 1
@@ -209,6 +273,19 @@ export function buildAggregate(articles: AggregateInput[]): Aggregate {
     }
     if (a.findings.some((f) => f.type === 'inline-style')) agg.articlesWithInlineStyle++
     if (a.ctaMismatch) agg.ctaMismatches.push({ slug: a.slug, text: CTA_TEXT, note: 'booking-removed product mismatch' })
+  }
+  // Structural counters come from the read-only DOM audit when available: the
+  // optimizer only emits a finding per *article* (and only for issues it fixes),
+  // so finding types alone under-count corpus-wide structure.
+  const auditTotals = buildAuditTotals(articles)
+  if (articles.some((a) => a.audit)) {
+    agg.bodyH1 = auditTotals.headings.bodyH1
+    agg.nonWwwLinks = auditTotals.links.nonWwwInternal
+    agg.internalNofollow = auditTotals.links.internalNofollow
+    agg.articlesWithInlineStyle = auditTotals.inlineStyles.articlesWithInlineStyle
+    agg.totalInlineStyles = auditTotals.inlineStyles.totalInlineStyleAttrs
+    agg.tablesNeedingConversion = auditTotals.tables.missingThead + auditTotals.tables.missingThScope
+    agg.faqCandidates = auditTotals.faq.articlesWithFaq
   }
   return agg
 }
