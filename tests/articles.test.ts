@@ -12,8 +12,8 @@ import { getPublishedArticleSlugs, getPublishedArticlesForSitemap } from '../src
 
 beforeEach(() => {
   vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://xyz.supabase.co')
-  vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'public-anon-key')
-  vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', '')
+  vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'public-publishable-key')
+  vi.stubEnv('SUPABASE_SECRET_KEY', '')
   createClientMock.mockReset()
 })
 
@@ -33,19 +33,19 @@ function makeChain(result: { data: any; error: any }) {
 }
 
 describe('articles: build-time public access (no service role)', () => {
-  it('uses the public/anon client, not the service-role key', async () => {
+  it('uses the public/publishable client, not the service-role key', async () => {
     makeChain({ data: [{ slug: 'a' }, { slug: 'b' }], error: null })
     const slugs = await getPublishedArticleSlugs()
     expect(slugs).toEqual([{ slug: 'a' }, { slug: 'b' }])
-    // The client was created with the anon key, never the service role.
+    // The client was created with the publishable key, never the secret key.
     expect(createClientMock).toHaveBeenCalledWith(
       'https://xyz.supabase.co',
-      'public-anon-key',
+      'public-publishable-key',
       expect.any(Object),
     )
     expect(createClientMock).not.toHaveBeenCalledWith(
       expect.any(String),
-      'service-role-secret',
+      'secret-key',
       expect.any(Object),
     )
   })

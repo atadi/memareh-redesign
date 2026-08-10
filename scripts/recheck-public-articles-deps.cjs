@@ -4,7 +4,7 @@ const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 function loadEnv(file){const t=fs.readFileSync(file,'utf8');const e={};for(const l of t.split('\n')){const m=l.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);if(!m)continue;let v=m[2].trim();if((v[0]==='"'&&v[v.length-1]==='"')||(v[0]==="'"&&v[v.length-1]==="'"))v=v.slice(1,-1);e[m[1]]=v;}return e;}
 const env = loadEnv(path.join(__dirname,'..','.env.local'));
-const sb = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, { auth:{persistSession:false,autoRefreshToken:false} });
+const sb = createClient(env.SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SECRET_KEY, { auth:{persistSession:false,autoRefreshToken:false} });
 
 (async () => {
   // 1) confirm public.articles still intact & row count

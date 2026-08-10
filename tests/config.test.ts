@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { getSiteUrl, getSupabaseUrl, getSupabaseAnonKey } from '../src/lib/config'
+import { getSiteUrl, getSupabaseUrl, getSupabasePublishableKey } from '../src/lib/config'
 
 afterEach(() => {
   vi.unstubAllEnvs()
@@ -35,16 +35,16 @@ describe('config: public Supabase', () => {
     expect(() => getSupabaseUrl()).toThrow(/NEXT_PUBLIC_SUPABASE_URL/)
   })
 
-  it('fails fast when anon key missing', () => {
-    vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', '')
-    expect(() => getSupabaseAnonKey()).toThrow(/NEXT_PUBLIC_SUPABASE_ANON_KEY/)
+  it('fails fast when publishable key missing', () => {
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', '')
+    expect(() => getSupabasePublishableKey()).toThrow(/NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY/)
   })
 
-  it('does NOT require the service-role key for public config', () => {
+  it('does NOT require the secret key for public config', () => {
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://xyz.supabase.co')
-    vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'public-anon-key')
-    vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', '')
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'public-publishable-key')
+    vi.stubEnv('SUPABASE_SECRET_KEY', '')
     expect(getSupabaseUrl()).toBe('https://xyz.supabase.co')
-    expect(getSupabaseAnonKey()).toBe('public-anon-key')
+    expect(getSupabasePublishableKey()).toBe('public-publishable-key')
   })
 })

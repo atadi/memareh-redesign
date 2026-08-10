@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { getSupabaseUrl, getSupabaseAnonKey } from '@/lib/config'
+import { getSupabaseUrl, getSupabasePublishableKey } from '@/lib/config'
 
 // Public server client — no cookies, no session.
 // Use for public pages that only read published data (articles, comments).
@@ -7,7 +7,7 @@ import { getSupabaseUrl, getSupabaseAnonKey } from '@/lib/config'
 //
 // Validation is centralized in src/lib/config.ts (fail-fast on missing config).
 export function createPublicClient() {
-  return createClient(getSupabaseUrl(), getSupabaseAnonKey(), {
+  return createClient(getSupabaseUrl(), getSupabasePublishableKey(), {
     db: { schema: 'memareh' },
   })
 }

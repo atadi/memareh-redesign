@@ -75,6 +75,41 @@ live in Vercel and verified:
 No JWT signing secret was rotated, so existing auth sessions are unaffected. The
 modern publishable/secret keys are decoupled from the legacy JWT secret.
 
+## Repository migration to integration-native variable names (2026-08-11)
+
+The repository now consumes only the Vercel/Supabase integration's modern
+variable names directly. The legacy manual names are deprecated and no longer
+referenced by runtime code.
+
+Canonical contract:
+
+- **Browser / public**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- **Privileged server**: `SUPABASE_URL`, `SUPABASE_SECRET_KEY`
+
+What changed:
+
+- `src/lib/config.ts`: removed `getSupabaseAnonKey()`; added
+  `getSupabasePublishableKey()`, `getSupabaseServerUrl()`, `getSupabaseSecretKey()`.
+  All getters fail fast on the modern names; no silent legacy fallback.
+- `client.ts`, `server.ts`, `server-public.ts`, `middleware.ts`, `auth/callback`,
+  `admin/guard.ts`: use the publishable key for public/auth (RLS-scoped) access.
+- `admin.ts` (server-only): uses `SUPABASE_SECRET_KEY` via `SUPABASE_URL`.
+- Scripts (`make-admin.mjs`, `audit-public-articles.cjs`, `recheck-*.cjs`,
+  `prod-backup/storage-backup.cjs`, `test-supabase.ps1`, `check-public-articles-soak.cjs`):
+  privileged ops now read `SUPABASE_SECRET_KEY` / `SUPABASE_URL`; the soak/read-only
+  scripts use the publishable key.
+- Tests + `.env.example` + `tests/rls/README.md`: updated to modern names.
+- A new test (`tests/env-contract.test.ts`) locks the contract: public config
+  requires `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, admin requires `SUPABASE_SECRET_KEY`,
+  legacy-only names alone fail, and the public build succeeds without the secret.
+
+Integration authority: the Vercel Supabase integration provides these variables
+for Production. Preview must also receive them via the integration or explicit
+Preview env (operator action). The legacy manual Vercel variables
+(`NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) are left in place
+until the new deployment is verified, then removed by the operator. The legacy
+`service_role` JWT stays active until then (deactivation pending operator).
+
 ## Other dependent callers reviewed
 
 - `src/lib/supabase/admin.ts` (server-only) → uses `SUPABASE_SERVICE_ROLE_KEY`;

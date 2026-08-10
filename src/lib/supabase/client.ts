@@ -1,4 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr'
+import { getSupabaseUrl, getSupabasePublishableKey } from '@/lib/config'
 
 export function createClient() {
   // Debug: print runtime URL in development to help detect env mismatches
@@ -7,13 +8,9 @@ export function createClient() {
     console.debug('Supabase client URL (runtime):', process.env.NEXT_PUBLIC_SUPABASE_URL)
   }
 
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      db: {
-        schema: 'memareh'
-      }
-    }
-  )
+  return createBrowserClient(getSupabaseUrl(), getSupabasePublishableKey(), {
+    db: {
+      schema: 'memareh',
+    },
+  })
 }

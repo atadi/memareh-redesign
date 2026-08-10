@@ -54,7 +54,7 @@ async function createAndSignIn(
   // Sign in to obtain a real access token.
   const userClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
   )
   const { error: signInErr } = await userClient.auth.signInWithPassword({ email, password })
   if (signInErr) throw new Error('signIn failed for ' + email + ': ' + signInErr.message)
@@ -69,8 +69,8 @@ const createdObjectPaths: string[] = []
 describe('article-images Storage API authorization', () => {
   beforeAll(async () => {
     admin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SECRET_KEY!,
     )
     // Guard: refuse to run against anything but a flagged local/CI stack.
     assertLocalOrTestMode(admin)

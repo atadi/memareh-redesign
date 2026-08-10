@@ -33,8 +33,9 @@ Copy `.env.local` and set:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321      # local Supabase API
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<local anon key>
-SUPABASE_SERVICE_ROLE_KEY=<local service-role key>
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<local publishable key>
+SUPABASE_URL=http://127.0.0.1:54321                 # local Supabase API (server)
+SUPABASE_SECRET_KEY=<local secret key>
 # REQUIRED before any fixture/destructive test:
 SUPABASE_RLS_TEST_MODE=1
 # optional: explicit local override checked by the guard

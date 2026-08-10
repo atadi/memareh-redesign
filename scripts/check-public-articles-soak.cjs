@@ -1,7 +1,7 @@
 // READ-ONLY production soak-health checker for the public.articles archive.
 // NO writes: only SELECTs against Supabase Management API + read-only HTTP GETs.
 // Credentials come from env (.env.local not committed): SUPABASE_ACCESS_TOKEN +
-// NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY + optionally site URL.
+// NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY + optionally site URL.
 // Exit code 0 = all observed checks consistent with archive state; non-zero = anomaly.
 const fs = require('fs');
 const https = require('https');
@@ -13,7 +13,7 @@ const env = loadEnv(require('path').join(__dirname,'..','.env.local'));
 const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL;
 const REF = SUPABASE_URL.match(/https:\/\/([^.]+)\.supabase\.co/)[1];
 const TOK = process.env.SUPABASE_ACCESS_TOKEN;
-const ANON = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const ANON = env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 const SITE = (env.NEXT_PUBLIC_SITE_URL || 'https://memareh.com').replace(/\/$/,'');
 
 function mgmt(query){return new Promise((res,rej)=>{

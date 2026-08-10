@@ -18,8 +18,8 @@ function loadEnv(file) {
 }
 
 const env = loadEnv(path.join(__dirname, '..', '.env.local'));
-const url = env.NEXT_PUBLIC_SUPABASE_URL;
-const key = env.SUPABASE_SERVICE_ROLE_KEY;
+const url = env.SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL;
+const key = env.SUPABASE_SECRET_KEY;
 if (!url || !key) { console.error('MISSING_ENV'); process.exit(2); }
 
 const supabase = createClient(url, key, {

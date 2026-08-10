@@ -3,16 +3,16 @@ dotenv.config({ path: ".env.local" }); // 👈 THIS IS THE FIX
 
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const secretKey = process.env.SUPABASE_SECRET_KEY;
 
 console.log("SUPABASE_URL loaded:", Boolean(supabaseUrl));
-console.log("SERVICE_ROLE loaded:", Boolean(serviceKey));
+console.log("SECRET_KEY loaded:", Boolean(secretKey));
 
-if (!supabaseUrl) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL");
-if (!serviceKey) throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY");
+if (!supabaseUrl) throw new Error("Missing SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL)");
+if (!secretKey) throw new Error("Missing SUPABASE_SECRET_KEY");
 
-const supabaseAdmin = createClient(supabaseUrl, serviceKey);
+const supabaseAdmin = createClient(supabaseUrl, secretKey);
 
 const userId = "3bd2aeb1-4973-43dc-b18e-aae9e00e95f6";
 

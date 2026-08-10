@@ -7,9 +7,9 @@ const https = require('https');
 
 function loadEnv(f){const t=fs.readFileSync(f,'utf8').replace(/^﻿/,'');const e={};for(const raw of t.split('\n')){if(!raw.includes('='))continue;const i=raw.indexOf('=');e[raw.slice(0,i).trim()]=raw.slice(i+1).trim();}return e;}
 
-const env = loadEnv(path.join(__dirname,'..','..','.env.local'));
-const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL;
-const KEY = env.SUPABASE_SERVICE_ROLE_KEY; // read-only GET usage only
+const env = loadEnv(path.join(__dirname, '..', '..', '.env.local'));
+const SUPABASE_URL = env.SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL;
+const KEY = env.SUPABASE_SECRET_KEY; // read-only GET usage only
 const BUCKET = 'article-images';
 const HOST = new URL(SUPABASE_URL).host;
 const OUT = 'C:/backups/memareh-prod/storage/article-images';
