@@ -9,13 +9,20 @@ const SUPABASE_HOST = "uakvurskrcyvksxfvhho.supabase.co";
 // nonce-based architecture change (out of scope). High-risk directives
 // (object/iframe/frame-ancestors/base/form) are fully locked. DOM XSS is handled
 // separately at the content-render boundary (SEC-01).
+//
+// GA4 CSP scope (Google's official guidance): basic measurement needs the
+// google-analytics.com and analytics.google.com collect endpoints plus the
+// googletagmanager bootstrap. Advertising-feature destinations (e.g.
+// google.<cc>/ads/ga-audiences, doubleclick) are intentionally NOT allowed;
+// instead GA's google signals are disabled in the tag config (see layout.tsx),
+// which suppresses those requests entirely rather than widening CSP.
 export const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://va.vercel-scripts.com`,
+  `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com`,
   `style-src 'self' 'unsafe-inline'`,
-  `img-src 'self' data: https://${SUPABASE_HOST} https://api.dicebear.com https://www.google-analytics.com`,
+  `img-src 'self' data: https://${SUPABASE_HOST} https://api.dicebear.com https://www.google-analytics.com https://*.google-analytics.com`,
   `font-src 'self' data:`,
-  `connect-src 'self' https://${SUPABASE_HOST} https://www.google-analytics.com https://region1.google-analytics.com https://va.vercel-scripts.com`,
+  `connect-src 'self' https://${SUPABASE_HOST} https://*.google-analytics.com https://*.analytics.google.com https://va.vercel-scripts.com`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

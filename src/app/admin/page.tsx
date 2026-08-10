@@ -59,10 +59,12 @@ export default function AdminDashboard() {
       .select("*", { count: "exact", head: true })
       .eq("status", "draft");
 
-    const { data: viewsData } = await supabase.from("articles").select("views");
+    const { data: viewsData } = await supabase
+      .from("articles")
+      .select("view_count");
 
     const totalViews =
-      viewsData?.reduce((sum, a) => sum + (a.views ?? 0), 0) ?? 0;
+      viewsData?.reduce((sum, a) => sum + (a.view_count ?? 0), 0) ?? 0;
 
     setStats({
       totalArticles: totalArticles ?? 0,

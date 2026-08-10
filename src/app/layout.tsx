@@ -102,6 +102,10 @@ export default function RootLayout({
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
+                // Disable advertising features (Google Signals) so no
+                // google.<cc>/ads/ga-audiences requests are emitted; basic
+                // measurement is retained.
+                gtag('set', 'allow_google_signals', false);
                 gtag('config', 'G-EVR583NXGN');
               `}
             </Script>
