@@ -1,6 +1,10 @@
 /* Tailwind CSS v4 imports */
 @import "tailwindcss";
 
+/* Article design system. Every rule inside is scoped under `.article-content`,
+   so registering it globally cannot affect navigation, admin, or the footer. */
+@import "../styles/article-content.css";
+
 /* Make Tailwind dark: variant respond to the .dark class set by next-themes */
 @custom-variant dark (&:where(.dark, .dark *));
 

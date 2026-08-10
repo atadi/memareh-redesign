@@ -150,7 +150,11 @@ export default async function ArticlePage({
             />
           )}
 
-          <ArticleContent content={article.content} />
+          <ArticleContent
+            content={article.content}
+            articleId={article.id}
+            customCss={article.custom_css}
+          />
         </main>
 
         <section className="max-w-4xl mx-auto px-6 py-10">

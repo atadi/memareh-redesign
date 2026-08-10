@@ -1,0 +1,668 @@
+/* ==========================================================================
+   Article design system (Feature A — Global Article CSS)
+   ==========================================================================
+
+   EVERY rule in this file MUST be nested beneath `.article-content`.
+   Never add bare element selectors (`h2 {}`, `table {}`, `a {}`) here: this
+   stylesheet is registered globally via `globals.css`, so an unscoped rule
+   would leak into navigation, the admin panel and the footer.
+
+   Design constraints:
+   - Persian (`fa`) first: RTL is the default writing direction, line-height is
+     tuned for Persian glyphs, and spacing uses logical properties
+     (`margin-inline-start`, `border-inline-start`, ...) so no left/right is
+     hardcoded.
+   - Light AND dark mode: colours come from CSS custom properties re-declared
+     under `.dark`. Never hardcode `#fff` text without a guaranteed dark
+     backdrop (this is what broke the old step-number treatment).
+   - Presentation only. Article HTML carries semantic `.article-*` class names;
+     it must never carry inline `style` attributes (the sanitizer strips them).
+   ========================================================================== */
+
+.article-content {
+  /* Surfaces */
+  --article-surface: #ffffff;
+  --article-surface-muted: #f8fafc;
+  --article-border: #e2e8f0;
+
+  /* Text */
+  --article-text: #1e293b;
+  --article-text-muted: #64748b;
+  --article-heading: #0f172a;
+
+  /* Accents */
+  --article-accent: #1d4ed8;
+  --article-accent-contrast: #ffffff;
+  --article-accent-soft: #eff6ff;
+
+  --article-info: #0369a1;
+  --article-info-soft: #f0f9ff;
+
+  --article-warning: #b45309;
+  --article-warning-soft: #fffbeb;
+
+  --article-danger: #b91c1c;
+  --article-danger-soft: #fef2f2;
+
+  --article-success: #15803d;
+  --article-success-soft: #f0fdf4;
+
+  /* Rhythm */
+  --article-radius: 0.75rem;
+  --article-gap: 1rem;
+  --article-block-space: 2rem;
+
+  direction: rtl;
+  text-align: start;
+  color: var(--article-text);
+  line-height: 2;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.dark .article-content {
+  --article-surface: #0f172a;
+  --article-surface-muted: #1e293b;
+  --article-border: #334155;
+
+  --article-text: #e2e8f0;
+  --article-text-muted: #94a3b8;
+  --article-heading: #f8fafc;
+
+  --article-accent: #60a5fa;
+  --article-accent-contrast: #0b1220;
+  --article-accent-soft: #172554;
+
+  --article-info: #7dd3fc;
+  --article-info-soft: #0c2b3d;
+
+  --article-warning: #fbbf24;
+  --article-warning-soft: #3a2a08;
+
+  --article-danger: #fca5a5;
+  --article-danger-soft: #3f1414;
+
+  --article-success: #86efac;
+  --article-success-soft: #0d2b18;
+}
+
+/* --------------------------------------------------------------------------
+   Base typography
+   -------------------------------------------------------------------------- */
+
+.article-content p {
+  margin-block: 0.85em;
+  line-height: 2;
+}
+
+.article-content a {
+  color: var(--article-accent);
+  text-decoration: none;
+  border-block-end: 1px solid transparent;
+  transition: border-color 0.15s ease;
+}
+
+.article-content a:hover,
+.article-content a:focus-visible {
+  border-block-end-color: currentColor;
+}
+
+.article-content :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--article-heading);
+  font-weight: 700;
+  line-height: 1.6;
+  margin-block: 1.8em 0.7em;
+}
+
+.article-content h1 { font-size: clamp(1.7rem, 1.2rem + 2vw, 2.25rem); }
+.article-content h2 { font-size: clamp(1.4rem, 1.1rem + 1.4vw, 1.8rem); }
+.article-content h3 { font-size: clamp(1.2rem, 1rem + 0.9vw, 1.45rem); }
+.article-content h4 { font-size: 1.15rem; }
+
+.article-content :is(ul, ol) {
+  margin-block: 1em;
+  padding-inline-start: 1.5rem;
+}
+
+.article-content li { margin-block: 0.35em; }
+
+.article-content blockquote {
+  margin-block: 1.5em;
+  margin-inline: 0;
+  padding: 1rem 1.25rem;
+  border-inline-start: 4px solid var(--article-accent);
+  background: var(--article-surface-muted);
+  border-radius: var(--article-radius);
+  color: var(--article-text-muted);
+}
+
+.article-content :is(img, figure) {
+  max-width: 100%;
+  height: auto;
+}
+
+.article-content img {
+  border-radius: var(--article-radius);
+}
+
+.article-content figcaption {
+  margin-block-start: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--article-text-muted);
+  text-align: center;
+}
+
+.article-content :is(code, pre) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
+.article-content code {
+  background: var(--article-surface-muted);
+  padding: 0.15em 0.4em;
+  border-radius: 0.35rem;
+  font-size: 0.9em;
+}
+
+.article-content pre {
+  background: var(--article-surface-muted);
+  border: 1px solid var(--article-border);
+  border-radius: var(--article-radius);
+  padding: 1rem;
+  overflow-x: auto;
+  text-align: left;
+}
+
+/* Preserve intentional blank paragraphs coming out of the editor. */
+.article-content p:empty {
+  display: block;
+  min-height: 1em;
+}
+
+/* --------------------------------------------------------------------------
+   Breadcrumb
+   -------------------------------------------------------------------------- */
+
+.article-content .article-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block-end: var(--article-gap);
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+  color: var(--article-text-muted);
+}
+
+.article-content .article-breadcrumb > * + *::before {
+  content: "/";
+  margin-inline-end: 0.5rem;
+  color: var(--article-border);
+}
+
+/* --------------------------------------------------------------------------
+   Title block, badge, lead, meta
+   -------------------------------------------------------------------------- */
+
+.article-content .article-body-title {
+  font-size: clamp(1.6rem, 1.1rem + 2.2vw, 2.4rem);
+  font-weight: 800;
+  line-height: 1.5;
+  color: var(--article-heading);
+  margin-block: 0.4em 0.5em;
+}
+
+.article-content .article-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--article-accent-soft);
+  color: var(--article-accent);
+  border: 1px solid color-mix(in srgb, var(--article-accent) 25%, transparent);
+}
+
+.article-content .article-lead {
+  font-size: 1.125rem;
+  line-height: 2.1;
+  color: var(--article-text-muted);
+  margin-block: 1em 1.5em;
+  padding-inline-start: 1rem;
+  border-inline-start: 3px solid var(--article-accent);
+}
+
+.article-content .article-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  color: var(--article-text-muted);
+  margin-block-end: var(--article-block-space);
+}
+
+/* --------------------------------------------------------------------------
+   Actions / CTA buttons
+   -------------------------------------------------------------------------- */
+
+.article-content .article-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-block: 1.5rem;
+}
+
+.article-content .article-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--article-radius);
+  border: 1px solid var(--article-border);
+  background: var(--article-surface-muted);
+  color: var(--article-text);
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.12s ease, background-color 0.15s ease;
+}
+
+.article-content .article-action:hover {
+  transform: translateY(-1px);
+}
+
+.article-content .article-action--primary {
+  background: var(--article-accent);
+  border-color: var(--article-accent);
+  color: var(--article-accent-contrast);
+}
+
+.article-content .article-action:focus-visible {
+  outline: 2px solid var(--article-accent);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Callouts (info / warning / safety / danger)
+   -------------------------------------------------------------------------- */
+
+.article-content .article-callout {
+  display: flow-root;
+  margin-block: var(--article-block-space);
+  padding: 1rem 1.15rem;
+  border-radius: var(--article-radius);
+  border: 1px solid var(--article-border);
+  border-inline-start: 4px solid var(--article-info);
+  background: var(--article-info-soft);
+  color: var(--article-text);
+}
+
+.article-content .article-callout > :first-child { margin-block-start: 0; }
+.article-content .article-callout > :last-child { margin-block-end: 0; }
+
+.article-content .article-callout-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  margin-block-end: 0.4rem;
+  color: var(--article-info);
+}
+
+.article-content .article-callout--warning {
+  border-inline-start-color: var(--article-warning);
+  background: var(--article-warning-soft);
+}
+.article-content .article-callout--warning .article-callout-title { color: var(--article-warning); }
+
+.article-content .article-callout--safety {
+  border-inline-start-color: var(--article-success);
+  background: var(--article-success-soft);
+}
+.article-content .article-callout--safety .article-callout-title { color: var(--article-success); }
+
+.article-content .article-callout--danger {
+  border-inline-start-color: var(--article-danger);
+  background: var(--article-danger-soft);
+}
+.article-content .article-callout--danger .article-callout-title { color: var(--article-danger); }
+
+/* --------------------------------------------------------------------------
+   Section headings inside the body
+   -------------------------------------------------------------------------- */
+
+.article-content .article-heading {
+  font-size: clamp(1.35rem, 1.05rem + 1.4vw, 1.75rem);
+  font-weight: 800;
+  color: var(--article-heading);
+  margin-block: 2em 0.75em;
+  padding-inline-start: 0.75rem;
+  border-inline-start: 4px solid var(--article-accent);
+}
+
+.article-content .article-subheading {
+  font-size: clamp(1.1rem, 1rem + 0.6vw, 1.3rem);
+  font-weight: 700;
+  color: var(--article-heading);
+  margin-block: 1.6em 0.6em;
+}
+
+/* --------------------------------------------------------------------------
+   Feature list + status notes
+   -------------------------------------------------------------------------- */
+
+.article-content .article-feature-list {
+  list-style: none;
+  margin-block: 1.25rem;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.article-content .article-feature-list > li {
+  position: relative;
+  padding-inline-start: 1.75rem;
+  margin: 0;
+}
+
+.article-content .article-feature-list > li::before {
+  content: "✓";
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 0.15em;
+  color: var(--article-success);
+  font-weight: 700;
+}
+
+.article-content .article-note {
+  display: block;
+  margin-block: 1rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.925rem;
+  color: var(--article-text-muted);
+  background: var(--article-surface-muted);
+  border: 1px dashed var(--article-border);
+  border-radius: var(--article-radius);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive tables
+   -------------------------------------------------------------------------- */
+
+/* Wrapper: `<div class="article-table">` around a `<table>`, OR the class may
+   be placed directly on the table. Both shapes are supported so existing
+   editor output does not have to change. */
+.article-content .article-table {
+  margin-block: var(--article-block-space);
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--article-border);
+  border-radius: var(--article-radius);
+}
+
+.article-content .article-table > table,
+.article-content table.article-table,
+.article-content table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  text-align: start;
+}
+
+/* A bare table (no wrapper) must still never blow out the viewport. */
+.article-content > table,
+.article-content p > table {
+  display: block;
+  overflow-x: auto;
+}
+
+.article-content :is(th, td) {
+  padding: 0.7rem 0.9rem;
+  border-block-end: 1px solid var(--article-border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.article-content th {
+  background: var(--article-surface-muted);
+  color: var(--article-heading);
+  font-weight: 700;
+  white-space: nowrap;
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+}
+
+.article-content tbody tr:last-child :is(th, td) {
+  border-block-end: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Step-by-step cards
+   -------------------------------------------------------------------------- */
+
+.article-content .article-step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.9rem;
+  align-items: start;
+  margin-block: 1rem;
+  padding: 1rem 1.15rem;
+  background: var(--article-surface-muted);
+  border: 1px solid var(--article-border);
+  border-radius: var(--article-radius);
+}
+
+.article-content .article-step > :first-child { margin-block-start: 0; }
+.article-content .article-step > :last-child { margin-block-end: 0; }
+
+/* The step number sits on the accent colour, so it uses the paired contrast
+   token rather than a hardcoded white that vanishes in dark mode. */
+.article-content .article-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  border-radius: 999px;
+  background: var(--article-accent);
+  color: var(--article-accent-contrast);
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex: none;
+}
+
+.article-content .article-step-title {
+  font-weight: 700;
+  color: var(--article-heading);
+  margin-block-end: 0.25rem;
+}
+
+/* --------------------------------------------------------------------------
+   Expert quote card
+   -------------------------------------------------------------------------- */
+
+.article-content .article-expert {
+  display: flow-root;
+  margin-block: var(--article-block-space);
+  padding: 1.25rem;
+  border-radius: var(--article-radius);
+  background: var(--article-accent-soft);
+  border: 1px solid color-mix(in srgb, var(--article-accent) 22%, transparent);
+}
+
+.article-content .article-expert > :first-child { margin-block-start: 0; }
+.article-content .article-expert > :last-child { margin-block-end: 0; }
+
+.article-content .article-expert-name {
+  display: block;
+  margin-block-start: 0.75rem;
+  font-weight: 700;
+  color: var(--article-accent);
+}
+
+.article-content .article-expert-role {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--article-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Danger list
+   -------------------------------------------------------------------------- */
+
+.article-content .article-danger-list {
+  list-style: none;
+  margin-block: 1.25rem;
+  padding: 1rem 1.15rem;
+  display: grid;
+  gap: 0.6rem;
+  background: var(--article-danger-soft);
+  border: 1px solid color-mix(in srgb, var(--article-danger) 28%, transparent);
+  border-inline-start: 4px solid var(--article-danger);
+  border-radius: var(--article-radius);
+}
+
+.article-content .article-danger-list > li {
+  position: relative;
+  padding-inline-start: 1.75rem;
+  margin: 0;
+}
+
+.article-content .article-danger-list > li::before {
+  content: "!";
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 0.1em;
+  inline-size: 1.15rem;
+  block-size: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--article-danger);
+  color: var(--article-surface);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+/* --------------------------------------------------------------------------
+   Service CTA
+   -------------------------------------------------------------------------- */
+
+.article-content .article-service-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--article-gap);
+  margin-block: var(--article-block-space);
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--article-radius);
+  background: var(--article-accent);
+  color: var(--article-accent-contrast);
+}
+
+.article-content .article-service-cta :is(h2, h3, h4, p, strong) {
+  color: inherit;
+  margin-block: 0.25rem;
+}
+
+.article-content .article-service-cta .article-action {
+  background: var(--article-surface);
+  color: var(--article-accent);
+  border-color: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   FAQ
+   -------------------------------------------------------------------------- */
+
+.article-content .article-faq-question {
+  font-weight: 700;
+  color: var(--article-heading);
+  margin-block: 1.5rem 0.35rem;
+  padding-inline-start: 1.6rem;
+  position: relative;
+}
+
+.article-content .article-faq-question::before {
+  content: "؟";
+  position: absolute;
+  inset-inline-start: 0;
+  color: var(--article-accent);
+  font-weight: 800;
+}
+
+.article-content .article-faq-answer {
+  margin-block: 0 1.25rem;
+  padding-inline-start: 1.6rem;
+  color: var(--article-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Conclusion card
+   -------------------------------------------------------------------------- */
+
+.article-content .article-conclusion {
+  display: flow-root;
+  margin-block: var(--article-block-space);
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--article-radius);
+  background: var(--article-surface-muted);
+  border: 1px solid var(--article-border);
+  border-inline-start: 4px solid var(--article-success);
+}
+
+.article-content .article-conclusion > :first-child { margin-block-start: 0; }
+.article-content .article-conclusion > :last-child { margin-block-end: 0; }
+
+.article-content .article-conclusion .article-callout-title {
+  color: var(--article-success);
+}
+
+/* --------------------------------------------------------------------------
+   Mobile refinements
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 640px) {
+  .article-content {
+    --article-block-space: 1.5rem;
+    line-height: 1.95;
+  }
+
+  .article-content .article-service-cta {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .article-content .article-actions,
+  .article-content .article-service-cta .article-action {
+    inline-size: 100%;
+  }
+
+  .article-content .article-step {
+    grid-template-columns: 1fr;
+  }
+
+  .article-content :is(th, td) {
+    padding: 0.55rem 0.65rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .article-content .article-action {
+    transition: none;
+  }
+  .article-content .article-action:hover {
+    transform: none;
+  }
+}

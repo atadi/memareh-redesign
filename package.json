@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "test": "vitest run",
+    "test:unit": "vitest run --config vitest.unit.config.ts",
     "test:watch": "vitest",
     "test:rls": "vitest run tests/rls",
     "test:rls:storage": "SUPABASE_RLS_TEST_MODE=1 vitest run tests/rls/storage-api.test.ts",

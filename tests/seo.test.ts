@@ -30,6 +30,7 @@ function baseArticle(overrides: Partial<ArticleRow> = {}): ArticleRow {
     meta_keywords: null,
     canonical_url: null,
     og_image: null,
+    custom_css: null,
     reading_time: null,
     view_count: null,
     is_featured: null,
