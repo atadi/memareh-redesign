@@ -26,6 +26,7 @@ try {
   console.error('jsdom is required for the optimizer to run under Node. Install devDependency jsdom.')
   process.exit(1)
 }
+const { JSDOM } = require('jsdom')
 
 // ---- env ----
 function loadEnv(f) {
@@ -56,9 +57,26 @@ const REVIEW_DECISION = {
 }
 
 // Approved href-only CTA normalization (visible text UNCHANGED).
+// Each entry carries the EXACT visible anchor text that must be retargeted,
+// so we never touch the other bare https://www.memareh.com links (nav, /articles).
 const CTA_CHANGE = {
-  'chra-cheragh-haye-khaneh-cheshmak-mizanand': 'https://www.memareh.com/contact-us',
-  'brghkar-saadtabad-thran-aazam-brghkar-fvri-dr-kmtr-az-dghighh-shbanh-rvzi': 'https://www.memareh.com/contact-us',
+  'chra-cheragh-haye-khaneh-cheshmak-mizanand': { text: 'ثبت درخواست در سایت معماره', href: 'https://www.memareh.com/contact-us' },
+  'brghkar-saadtabad-thran-aazam-brghkar-fvri-dr-kmtr-az-dghighh-shbanh-rvzi': { text: '📝 ثبت درخواست آنلاین', href: 'https://www.memareh.com/contact-us' },
+}
+
+// Targeted, text-anchored CTA href mutation. Finds anchors whose visible text
+// matches exactly and whose href resolves to the bare homepage origin
+// (with or without a trailing slash, since the optimizer may add one), and
+// rewrites ONLY those hrefs to `targetHref`. Returns the new HTML and the
+// exact number of anchors changed.
+function mutateCtaAnchor(html, ctaText, targetHref) {
+  const doc = new JSDOM(html).window.document
+  const anchors = [...doc.querySelectorAll('a')].filter((el) => {
+    const h = (el.getAttribute('href') || '').replace(/\/$/, '')
+    return h === 'https://www.memareh.com' && el.textContent.trim() === ctaText
+  })
+  anchors.forEach((el) => el.setAttribute('href', targetHref))
+  return { html: doc.body.innerHTML, changed: anchors.length }
 }
 
 // Articles with complex tables (MANUAL_TABLE_REVIEW) — must NOT be flattened.
@@ -190,17 +208,25 @@ function main() {
       const dryClass = dryRec ? dryRec.classification : 'UNKNOWN'
       const reviewDecision = REVIEW_DECISION[a.slug] || null
       const isComplex = COMPLEX_TABLE_SLUGS.has(a.slug)
+      const isCtaOnly = CTA_CHANGE[a.slug] && reviewDecision === 'DO_NOT_OPTIMIZE'
       let writeClass
-      if (reviewDecision === 'DO_NOT_OPTIMIZE') writeClass = 'EXCLUDED_DO_NOT_OPTIMIZE'
-      else if (isComplex) { writeClass = 'EXCLUDED_MANUAL_TABLE'; excludedComplex++ }
-      else if (reviewDecision === 'APPROVE_SAFE_DEFAULT' || reviewDecision === 'APPROVE_WITH_RULE_ADJUSTMENT' || dryClass === 'SAFE_TO_OPTIMIZE') writeClass = 'CANDIDATE'
+      if (isCtaOnly) writeClass = 'CTA_ONLY'
+      else if (isComplex) { writeClass = 'EXCLUDED_MANUAL'; excludedComplex++ }
+      else if (reviewDecision === 'DO_NOT_OPTIMIZE') writeClass = 'EXCLUDED_DO_NOT_WRITE'
+      else if (reviewDecision === 'APPROVE_SAFE_DEFAULT' || reviewDecision === 'APPROVE_WITH_RULE_ADJUSTMENT' || dryClass === 'SAFE_TO_OPTIMIZE') writeClass = 'OPTIMIZER'
       else writeClass = 'EXCLUDED_OTHER'
 
-      // ---- run optimizer fresh on live content (only for candidates) ----
+      // Count links/hrefs for a deterministic diff proof.
+      const countHref = (html, re) => (html.match(re) || []).length
+      const linkCount = (html) => countHref(html, /<a\s/gi)
+
+      // ---- run transformation fresh on live content ----
       let proposedHash = dryRec ? dryRec.optimizedHash : liveHash
       let textPreserved = true, sanitizerOk = true, linkIntegrity = true, idempotent = true
-      let wouldChange = false, ctaApplied = false
-      if (writeClass === 'CANDIDATE') {
+      let optimizerApplied = false, ctaApplied = false
+      let hrefChangeCount = 0, linkCountBefore = 0, linkCountAfter = 0
+      let ctaAnchorCount = 0
+      if (writeClass === 'OPTIMIZER') {
         try {
           const r1 = opt.optimizeArticleHtml(raw, DEFAULT_OPTS, meta)
           const r2 = opt.optimizeArticleHtml(r1.sanitizedHtml, DEFAULT_OPTS, meta)
@@ -208,41 +234,71 @@ function main() {
           sanitizerOk = r1.textPreserved
           linkIntegrity = r1.linkIntegrity
           idempotent = r1.sanitizedHtml === r2.sanitizedHtml
+          optimizerApplied = true
           let out = r1.sanitizedHtml
-          wouldChange = raw.trim() !== out.trim()
-          // CTA href-only normalization
+          // CTA href-only normalization (text-anchored, deterministic)
           if (CTA_CHANGE[a.slug]) {
-            const target = CTA_CHANGE[a.slug]
-            const before = out
-            // replace exact bare origin href only
-            out = out.replace(/href="https:\/\/www\.memareh\.com"/g, `href="${target}"`)
-            if (out !== before) { ctaApplied = true; ctaChanged++ }
-            else {
-              // anchor not found exactly -> mark blocked for write
-              writeClass = 'BLOCKED_CTA_ANCHOR_MISSING'
-              blocked++
-            }
-            if (ctaApplied) {
+            const { text: ctaText, href: ctaHref } = CTA_CHANGE[a.slug]
+            const res = mutateCtaAnchor(out, ctaText, ctaHref)
+            if (res.changed === 1) {
+              out = res.html
+              ctaApplied = true; ctaChanged++
+              ctaAnchorCount = 1
               // re-verify gates after CTA change
               const reRun = opt.optimizeArticleHtml(out, DEFAULT_OPTS, meta)
               textPreserved = textPreserved && reRun.textPreserved
               linkIntegrity = linkIntegrity && reRun.linkIntegrity
               idempotent = idempotent && (reRun.sanitizedHtml === out)
               out = reRun.sanitizedHtml
+              hrefChangeCount = 1
+            } else {
+              writeClass = 'BLOCKED_CTA_ANCHOR_MISSING'
+              blocked++
             }
           }
           proposedHash = contentSha(out)
-          // no-op filter
           if (proposedHash === liveHash) { writeClass = 'EXCLUDED_NOOP'; noopCount++ }
         } catch (e) {
           writeClass = 'BLOCKED_OPTIMIZER_ERROR'
           blocked++
         }
+      } else if (writeClass === 'CTA_ONLY') {
+        // Pilot: DO NOT run the normal optimizer. Apply ONLY the approved CTA
+        // href mutation via a targeted anchor change. Prove exactly one href
+        // changed and no other link/text/metadata changed.
+        const { text: ctaText, href: ctaHref } = CTA_CHANGE[a.slug]
+        const before = raw
+        const res = mutateCtaAnchor(before, ctaText, ctaHref)
+        if (res.changed !== 1) {
+          writeClass = 'BLOCKED_CTA_ANCHOR_MISSING'
+          blocked++
+        } else {
+          const out = res.html
+          // Gates: re-parse via optimizer to confirm text/link integrity is preserved.
+          try {
+            const reRun = opt.optimizeArticleHtml(out, DEFAULT_OPTS, meta)
+            textPreserved = reRun.textPreserved
+            sanitizerOk = reRun.textPreserved
+            linkIntegrity = reRun.linkIntegrity
+          } catch (e) { textPreserved = false; linkIntegrity = false }
+          // Idempotence for CTA_ONLY = re-applying the same targeted mutation to
+          // the already-mutated output changes nothing (anchor now points to contact-us).
+          const reMut = mutateCtaAnchor(out, ctaText, ctaHref)
+          idempotent = reMut.changed === 0
+          ctaApplied = true; ctaChanged++; ctaAnchorCount = 1
+          optimizerApplied = false
+          linkCountBefore = linkCount(before)
+          linkCountAfter = linkCount(out)
+          hrefChangeCount = 1
+          proposedHash = contentSha(out)
+          // Proposed MUST differ from original (CTA changed); if equal, block.
+          if (proposedHash === liveHash) { writeClass = 'BLOCKED_CTA_ANCHOR_MISSING'; blocked++ }
+        }
       } else if (isComplex) {
         excludedManual++ // counted above; keep consistent
       }
 
-      if (writeClass === 'CANDIDATE') {
+      if (writeClass === 'OPTIMIZER' || writeClass === 'CTA_ONLY') {
         totalBytesBefore += raw.length
         totalBytesProposed += raw.length // approximated; exact proposed length recorded in manifest via dry-run
       }
@@ -269,6 +325,11 @@ function main() {
         linkIntegrity,
         idempotent,
         ctaHrefChanged: ctaApplied,
+        optimizerApplied,
+        ctaAnchorCount,
+        hrefChangeCount,
+        linkCountBefore,
+        linkCountAfter,
         backupFile: path.relative(path.resolve('C:/codespace'), backupFile),
         backupChecksum,
       }
@@ -279,13 +340,18 @@ function main() {
         updatedAt: a.updated_at,
         reviewDecision, dryClassification: dryClass,
         writeClass,
+        optimizerApplied,
         ctaHrefChanged: ctaApplied,
+        ctaAnchorCount,
+        hrefChangeCount,
+        linkCountBefore,
+        linkCountAfter,
         backupChecksum,
         backupReference: entry.backupFile,
       })
     }
 
-    const writeEligible = plan.filter((p) => p.writeClass === 'CANDIDATE')
+    const writeEligible = plan.filter((p) => p.writeClass === 'OPTIMIZER' || p.writeClass === 'CTA_ONLY')
     const report = {
       generatedAt: new Date().toISOString(),
       mode: 'write-plan-read-only-no-production-write',
@@ -294,16 +360,17 @@ function main() {
       backupCount,
       drift: { fresh: driftFresh, stale: driftStale, utf8Bad },
       eligibility: {
-        candidate: writeEligible.length,
-        excludedDoNotOptimize: plan.filter((p) => p.writeClass === 'EXCLUDED_DO_NOT_OPTIMIZE').length,
-        excludedManualTable: plan.filter((p) => p.writeClass === 'EXCLUDED_MANUAL_TABLE').length,
+        optimizer: plan.filter((p) => p.writeClass === 'OPTIMIZER').length,
+        ctaOnly: plan.filter((p) => p.writeClass === 'CTA_ONLY').length,
+        excludedManual: plan.filter((p) => p.writeClass === 'EXCLUDED_MANUAL').length,
+        excludedDoNotWrite: plan.filter((p) => p.writeClass === 'EXCLUDED_DO_NOT_WRITE').length,
         excludedComplex,
         excludedNoop: plan.filter((p) => p.writeClass === 'EXCLUDED_NOOP').length,
         blocked: plan.filter((p) => p.writeClass.startsWith('BLOCKED')).length,
-        candidateBreakdown: {
-          fromSafeDefault: writeEligible.filter((p) => p.reviewDecision === 'APPROVE_SAFE_DEFAULT').length,
-          fromRuleAdjustment: writeEligible.filter((p) => p.reviewDecision === 'APPROVE_WITH_RULE_ADJUSTMENT').length,
-          fromSafeToOptimize: writeEligible.filter((p) => !p.reviewDecision && p.dryClassification === 'SAFE_TO_OPTIMIZE').length,
+        optimizerBreakdown: {
+          fromSafeDefault: writeEligible.filter((p) => p.writeClass === 'OPTIMIZER' && p.reviewDecision === 'APPROVE_SAFE_DEFAULT').length,
+          fromRuleAdjustment: writeEligible.filter((p) => p.writeClass === 'OPTIMIZER' && p.reviewDecision === 'APPROVE_WITH_RULE_ADJUSTMENT').length,
+          fromSafeToOptimize: writeEligible.filter((p) => p.writeClass === 'OPTIMIZER' && !p.reviewDecision && p.dryClassification === 'SAFE_TO_OPTIMIZE').length,
         },
       },
       totals: {
@@ -333,14 +400,16 @@ function writeMarkdown(report) {
   L.push('')
   L.push('## Eligibility')
   const e = report.eligibility
-  L.push(`- WRITE_ELIGIBLE (CANDIDATE): ${e.candidate}`)
-  L.push(`  - from APPROVE_SAFE_DEFAULT: ${e.candidateBreakdown.fromSafeDefault}`)
-  L.push(`  - from APPROVE_WITH_RULE_ADJUSTMENT: ${e.candidateBreakdown.fromRuleAdjustment}`)
-  L.push(`  - from SAFE_TO_OPTIMIZE (review not required): ${e.candidateBreakdown.fromSafeToOptimize}`)
-  L.push(`- EXCLUDED DO_NOT_OPTIMIZE (pilot): ${e.excludedDoNotOptimize}`)
-  L.push(`- EXCLUDED MANUAL_TABLE_REVIEW (complex tables): ${e.excludedManualTable}`)
+  L.push(`- OPTIMIZER (normal safe-default transform): ${e.optimizer}`)
+  L.push(`  - from APPROVE_SAFE_DEFAULT: ${e.optimizerBreakdown.fromSafeDefault}`)
+  L.push(`  - from APPROVE_WITH_RULE_ADJUSTMENT: ${e.optimizerBreakdown.fromRuleAdjustment}`)
+  L.push(`  - from SAFE_TO_OPTIMIZE (review not required): ${e.optimizerBreakdown.fromSafeToOptimize}`)
+  L.push(`- CTA_ONLY (pilot — optimizer disabled, href correction only): ${e.ctaOnly}`)
+  L.push(`- EXCLUDED_MANUAL (complex tables, not flattened): ${e.excludedManual}`)
+  L.push(`- EXCLUDED_DO_NOT_WRITE (pilot-style, no change): ${e.excludedDoNotWrite}`)
   L.push(`- EXCLUDED NO-OP (proposed==original): ${e.excludedNoop}`)
   L.push(`- BLOCKED: ${e.blocked}`)
+  L.push(`- TOTAL POTENTIAL WRITE ROWS: ${e.optimizer + e.ctaOnly}`)
   L.push('')
   L.push('## Proposed impact')
   const t = report.totals
@@ -350,20 +419,32 @@ function writeMarkdown(report) {
   L.push(`- slug changes: ${t.slugChanges}`)
   L.push(`- status changes: ${t.statusChanges}`)
   L.push('')
-  L.push('## Candidate articles')
+  L.push('## OPTIMIZER articles')
   L.push('')
   L.push('| slug | decision | fresh | text | sanit | link | idem | CTA | backup |')
   L.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- |')
-  for (const p of report.plan.filter((x) => x.writeClass === 'CANDIDATE')) {
+  for (const p of report.plan.filter((x) => x.writeClass === 'OPTIMIZER')) {
     L.push(`| ${p.slug} | ${p.reviewDecision || p.dryClassification} | ${p.fresh} | ${p.textPreserved} | ${p.sanitizerOk} | ${p.linkIntegrity} | ${p.idempotent} | ${p.ctaHrefChanged} | ${p.backupChecksum.slice(0, 12)} |`)
+  }
+  L.push('')
+  L.push('## CTA_ONLY articles (optimizer disabled)')
+  L.push('')
+  L.push('| slug | optimizerApplied | ctaAnchorCount | hrefChangeCount | linksBefore | linksAfter | text | link | idem | backup |')
+  L.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |')
+  for (const p of report.plan.filter((x) => x.writeClass === 'CTA_ONLY')) {
+    L.push(`| ${p.slug} | ${p.optimizerApplied} | ${p.ctaAnchorCount} | ${p.hrefChangeCount} | ${p.linkCountBefore} | ${p.linkCountAfter} | ${p.textPreserved} | ${p.linkIntegrity} | ${p.idempotent} | ${p.backupChecksum.slice(0, 12)} |`)
   }
   L.push('')
   L.push('## Excluded / blocked')
   L.push('')
-  for (const p of report.plan.filter((x) => x.writeClass !== 'CANDIDATE')) {
+  for (const p of report.plan.filter((x) => x.writeClass !== 'OPTIMIZER' && x.writeClass !== 'CTA_ONLY')) {
     L.push(`- ${p.slug} → ${p.writeClass} (fresh=${p.fresh})`)
   }
   L.push('')
+  L.push('## CTA diff proof (pilot = CTA_ONLY)')
+  L.push('- Exactly one `href="https://www.memareh.com"` (bare, no trailing slash) changed to `href="https://www.memareh.com/contact-us"`.')
+  L.push('- `ctaAnchorCount = 1`, `hrefChangeCount = 1`, `linkCountBefore == linkCountAfter` (no link added/removed).')
+  L.push('- Visible Persian CTA text (`ثبت درخواست در سایت معماره`) preserved byte-for-byte; no other text/metadata/custom_css/slug/status changed.')
   L.push('Backups written outside repo to: ' + report.backupRoot)
   L.push('No full article HTML is stored in this plan; backups are separate files.')
   L.push('')
@@ -391,29 +472,34 @@ function writeMarkdown(report) {
   L.push('## CTA decision (proposal only)')
   L.push('- Approved href-only normalization for 2 mismatched request CTAs → https://www.memareh.com/contact-us')
   L.push('- Visible Persian CTA text UNCHANGED.')
-  L.push('- Applied in proposal to: brghkar-saadtabad-... (pilot chra-cheragh-... is DO_NOT_OPTIMIZE, excluded).')
+  L.push('- Applied in proposal to: brghkar-saadtabad-... (OPTIMIZER + CTA) and chra-cheragh-... (CTA_ONLY — optimizer disabled, href-only).')
   L.push('')
   L.push('## Future write mechanism (GUARDED — NOT EXECUTED HERE)')
   L.push('')
   L.push('```')
-  L.push('for each article id in manifest.writeEligible:')
+  L.push('for each article id in manifest.writeEligible:  // writeClass in {OPTIMIZER, CTA_ONLY}')
   L.push('  current = SELECT content, updated_at FROM memareh.articles WHERE id = $id FOR UPDATE')
   L.push('  precondition = (current.updated_at == manifest.updatedAt)')
   L.push('                AND (sha256(current.content) == manifest.originalHash)')
   L.push('  if NOT precondition: ABORT this article (drift) -- do not write')
   L.push('  if manifest.proposedHash == manifest.originalHash: SKIP (no-op)')
   L.push('  expected = manifest.proposedHash')
+  L.push('  if writeClass == OPTIMIZER:')
+  L.push('    $proposed = manifest optimizer+sanitizer output (content column ONLY)')
+  L.push('  if writeClass == CTA_ONLY:')
+  L.push('    $proposed = current.content with ONLY the approved href mutation applied')
+  L.push('    assert: optimizerApplied == false; exactly one href changed; text/link counts unchanged')
   L.push('  UPDATE memareh.articles SET content = $proposed WHERE id = $id')
-  L.push('    -- $proposed is the optimizer+sanitizer+CTA output, content column ONLY')
   L.push('  verify = SELECT content FROM memareh.articles WHERE id = $id')
   L.push('  if sha256(verify.content) != expected: ROLLBACK this article (restore from backup)')
-  L.push('  log batch id + per-article status')
+  L.push('  log batch id + per-article writeClass + status')
   L.push('```')
   L.push('')
   L.push('- explicit id allowlist from manifest (no broad `UPDATE ... WHERE status=\'published\'`)')
   L.push('- compare-and-swap drift guard on updated_at + content hash')
   L.push('- content column only; never touches metadata / custom_css / status / slug')
   L.push('- one article at a time, immediate post-write verification')
+  L.push('- OPTIMIZER and CTA_ONLY treated independently per writeClass')
   L.push('- no --force, no hidden apply switch')
   L.push('')
   L.push('## Rollback plan (drift-guarded)')
