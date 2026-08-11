@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { createClient } from '@/lib/supabase/client'
-import { revalidateArticle } from '@/actions/revalidate'
+import { invalidateArticlePaths } from '@/actions/revalidate'
 import { uploadFeaturedImage, deleteStorageFile, uploadContentImage, uploadVideoFile } from '@/lib/uploadImage'
 import {
   Save,
@@ -599,8 +599,15 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
       }
 
       toast.success(article?.id ? 'مقاله با موفقیت بروزرسانی شد' : 'مقاله با موفقیت ایجاد شد')
+      // Await cache invalidation BEFORE unmounting the editor (onSave switches tab),
+      // so the Server Action completes. If invalidation fails, tell the admin instead of
+      // pretending the publish fully succeeded.
+      const inv = await invalidateArticlePaths({ slug: data.slug, oldSlug: article?.slug })
       onSave()
-      revalidateArticle(data.slug).catch(() => {})
+      if (!inv.ok) {
+        toast.error('مقاله ذخیره شد، اما تازه‌سازی کش عمومی ناموفق بود.')
+        console.error('[article-invalidation] failed:', inv.error)
+      }
     } catch (err) {
       toast.error('خطای غیرمنتظره')
     } finally {

@@ -18,6 +18,8 @@ import {
   ExternalLink,
   ChevronLeft,
 } from "lucide-react";
+import toast from "react-hot-toast";
+import { invalidateArticlePaths } from "@/actions/revalidate";
 
 const CATEGORY_LABELS: Record<string, string> = {
   safety_tips: "نکات ایمنی",
@@ -112,11 +114,16 @@ export function ArticleModeration({ onBack }: { onBack?: () => void }) {
     });
   };
 
-  const handleDelete = async (articleId: string) => {
+  const handleDelete = async (article: any) => {
     if (confirm("آیا از حذف این مقاله اطمینان دارید؟")) {
-      await supabase.from("articles").delete().eq("id", articleId);
+      await supabase.from("articles").delete().eq("id", article.id);
+      const inv = await invalidateArticlePaths({ slug: article.slug });
       loadArticles();
       loadStats();
+      if (!inv.ok) {
+        toast.error("مقاله حذف شد، اما تازه‌سازی کش عمومی ناموفق بود.");
+        console.error("[article-invalidation] delete failed:", inv.error);
+      }
     }
   };
 
@@ -130,8 +137,13 @@ export function ArticleModeration({ onBack }: { onBack?: () => void }) {
           newStatus === "published" ? new Date().toISOString() : null,
       })
       .eq("id", article.id);
+    const inv = await invalidateArticlePaths({ slug: article.slug });
     loadArticles();
     loadStats();
+    if (!inv.ok) {
+      toast.error("وضعیت تغییر کرد، اما تازه‌سازی کش عمومی ناموفق بود.");
+      console.error("[article-invalidation] toggle failed:", inv.error);
+    }
   };
 
   const filteredArticles = useMemo(() => {
@@ -412,7 +424,7 @@ export function ArticleModeration({ onBack }: { onBack?: () => void }) {
                             <Edit2 className="w-3.5 h-3.5 text-blue-500" />
                           </button>
                           <button
-                            onClick={() => handleDelete(article.id)}
+                            onClick={() => handleDelete(article)}
                             className="p-1.5 hover:bg-gray-100 rounded"
                             title="حذف"
                           >
