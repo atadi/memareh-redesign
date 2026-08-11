@@ -30,16 +30,15 @@ export async function POST(request: NextRequest) {
     const expectedToken = process.env.REVALIDATION_TOKEN
 
     if (!expectedToken || authHeader !== `Bearer ${expectedToken}`) {
-      // TEMP diagnostic: expose only token LENGTHS (never the secret) to pinpoint
-      // the revalidation auth mismatch. Remove after root-cause confirmed.
-      const recv =
-        typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
-          ? authHeader.slice(7)
-          : ''
-      return NextResponse.json(
-        { error: 'Unauthorized', recvLen: recv.length, expLen: (expectedToken || '').length },
-        { status: 401 },
-      )
+      // TEMP diagnostic: expose only SHA-256 HASH prefixes (never the secret) to
+      // pinpoint the revalidation auth mismatch. Remove after root-cause confirmed.
+      const { createHash } = await import('crypto')
+      const recvSha = createHash('sha256').update(authHeader || '').digest('hex').slice(0, 16)
+      const expSha = createHash('sha256')
+        .update(`Bearer ${expectedToken || ''}`)
+        .digest('hex')
+        .slice(0, 16)
+      return NextResponse.json({ error: 'Unauthorized', recvSha, expSha }, { status: 401 })
     }
 
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
