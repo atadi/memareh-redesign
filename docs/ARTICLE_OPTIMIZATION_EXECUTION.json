@@ -1,0 +1,272 @@
+{
+  "batchStart": "2026-08-11T02:52:02.363Z",
+  "manifestCommit": "605da29",
+  "backupRoot": "C:/codespace/_memareh-backups/bulk-article-optimization/2026-08-11T02-21-09-018Z",
+  "executionOrder": [
+    "aazam-fvri-brghkarblvar-aboozr-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari",
+    "aazam-fvri-brghkariamir-abad-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari",
+    "aazam-fvri-brghkarivsf-abad-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari",
+    "aazam-fvri-brghkarmhlh-bazar-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari",
+    "alt-pridn-fivz-brgh-chist",
+    "brghkar-aazam-fvri-brghkar-narmk-rfa-atsali-brghkhrabi-tlfn-mhlh-narmknsbiatbrghkarimntghh-narmk",
+    "brghkar-aazam-fvri-brghkaraghdsih-rfa-atsali-brghkhrabi-tlfn-mhlh-aghdsihnsbiatbrghkarimntghh-aghdsih",
+    "brghkar-aazam-fvri-brghkarpasdaran-rfa-atsali-brghkhrabi-tlfn-mhlh-pasdarannsbiatbrghkarimntghh-pasdaran",
+    "brghkar-abasabad-thran-aazam-fvri-zir-dghighh-shbanhrvzi",
+    "brghkar-fvri-shbanh-rvzi-thranpars-aazam-sria-brghkar-mtkhss-grvh-mamarh",
+    "brghkar-mrzdaran-thran-aazam-brghkar-fvri-kmtr-az-dghighh-shbanh-rvzi",
+    "brghkar-pvnk-thran-aazam-fvri-kmtr-az-dghighh-shbanhrvzi",
+    "brghkar-sadghih-thran-aazam-fvri-zir-dghighh-bhsvrt-shbanhrvzi",
+    "brghkar-shbanhruzi-haft-tir-motahri-behshti",
+    "brghkar-starkhan-thran-aazam-fvri-zir-dghighh-bhsvrt-shbanhrvzi",
+    "brghkarbrghkar-mshirih-aazam-fvri-brghkar-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari",
+    "chra-dvrbin-mdarbsth-bh-gvshi-vsl-nmishvd",
+    "dalile-ghate-va-vasl-shodan-mokrar-bargh",
+    "nsb-v-srvis-kvlr-abi-amvzsh-v-khdmat-nghdari-afzaish-khnkknndgi-v-kahsh-msrf-brgh-ba-grvh-mamarh",
+    "rfa-atsali-tlfn-v-rvshhai-aibiabi-kht-tlfn-sabt",
+    "stablizer-chist",
+    "brghkar-saadtabad-thran-aazam-brghkar-fvri-dr-kmtr-az-dghighh-shbanh-rvzi",
+    "chra-cheragh-haye-khaneh-cheshmak-mizanand"
+  ],
+  "summary": {
+    "manifestOptimizer": 22,
+    "manifestCtaOnly": 1,
+    "manifestExcludedManual": 2,
+    "successCount": 23,
+    "expectedChanged": 23,
+    "excludedUnchanged": 2,
+    "mismatchedHashes": [],
+    "batchStopped": false
+  },
+  "results": [
+    {
+      "slug": "aazam-fvri-brghkarblvar-aboozr-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari",
+      "id": "9695988e-7d81-4ad8-b9cc-41c610c55f3a",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS_ALREADY_APPLIED",
+      "originalHash": "1dc1beb08146",
+      "proposedHash": "0962f31a10a7",
+      "actualPostWriteHash": "0962f31a10a7",
+      "ctaInfo": null
+    },
+    {
+      "slug": "aazam-fvri-brghkariamir-abad-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari",
+      "id": "d6282073-8f4d-40e6-8410-ed8fa6f38775",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS_ALREADY_APPLIED",
+      "originalHash": "0ac53e4d197c",
+      "proposedHash": "68b23ce2693d",
+      "actualPostWriteHash": "68b23ce2693d",
+      "ctaInfo": null
+    },
+    {
+      "slug": "aazam-fvri-brghkarivsf-abad-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari",
+      "id": "d0b296a8-4088-4f6b-8da6-9fa2d00deb03",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "c889ceb5dcff",
+      "proposedHash": "2d03faa0a23c",
+      "actualPostWriteHash": "2d03faa0a23c",
+      "ctaInfo": null
+    },
+    {
+      "slug": "aazam-fvri-brghkarmhlh-bazar-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari",
+      "id": "badb80c2-bfc9-4633-b3af-e561ef625f39",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "d3ca6eeef6e0",
+      "proposedHash": "c737519f5fa2",
+      "actualPostWriteHash": "c737519f5fa2",
+      "ctaInfo": null
+    },
+    {
+      "slug": "alt-pridn-fivz-brgh-chist",
+      "id": "f9328d22-ca0c-4f25-8c44-5906b29f7634",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "84def2662067",
+      "proposedHash": "1041b86d4f93",
+      "actualPostWriteHash": "1041b86d4f93",
+      "ctaInfo": null
+    },
+    {
+      "slug": "brghkar-aazam-fvri-brghkar-narmk-rfa-atsali-brghkhrabi-tlfn-mhlh-narmknsbiatbrghkarimntghh-narmk",
+      "id": "8980d851-19d1-4144-9702-f4c84cdbaa58",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "dec3c72eca3f",
+      "proposedHash": "3366eccfe24a",
+      "actualPostWriteHash": "3366eccfe24a",
+      "ctaInfo": null
+    },
+    {
+      "slug": "brghkar-aazam-fvri-brghkaraghdsih-rfa-atsali-brghkhrabi-tlfn-mhlh-aghdsihnsbiatbrghkarimntghh-aghdsih",
+      "id": "99b3f994-8528-4e91-95bd-0a76543d52a7",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "f60dabd84311",
+      "proposedHash": "89f4c6795975",
+      "actualPostWriteHash": "89f4c6795975",
+      "ctaInfo": null
+    },
+    {
+      "slug": "brghkar-aazam-fvri-brghkarpasdaran-rfa-atsali-brghkhrabi-tlfn-mhlh-pasdarannsbiatbrghkarimntghh-pasdaran",
+      "id": "a2b73560-8392-4f9a-859a-178254c99f26",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "4099e3ce709e",
+      "proposedHash": "9f13798da790",
+      "actualPostWriteHash": "9f13798da790",
+      "ctaInfo": null
+    },
+    {
+      "slug": "brghkar-abasabad-thran-aazam-fvri-zir-dghighh-shbanhrvzi",
+      "id": "15b02d4c-19b8-4b58-92c4-981b9f0f496a",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "cfefd41f6bc5",
+      "proposedHash": "91c51f0042d4",
+      "actualPostWriteHash": "91c51f0042d4",
+      "ctaInfo": null
+    },
+    {
+      "slug": "brghkar-fvri-shbanh-rvzi-thranpars-aazam-sria-brghkar-mtkhss-grvh-mamarh",
+      "id": "2b1170a4-b063-44aa-86ea-8662ea0d6396",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "00c5a7062df9",
+      "proposedHash": "9431cee24913",
+      "actualPostWriteHash": "9431cee24913",
+      "ctaInfo": null
+    },
+    {
+      "slug": "brghkar-mrzdaran-thran-aazam-brghkar-fvri-kmtr-az-dghighh-shbanh-rvzi",
+      "id": "8a3564b5-afaf-44c1-a005-9429315d9ce5",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "cb75c8566bbb",
+      "proposedHash": "38c64e4af04c",
+      "actualPostWriteHash": "38c64e4af04c",
+      "ctaInfo": null
+    },
+    {
+      "slug": "brghkar-pvnk-thran-aazam-fvri-kmtr-az-dghighh-shbanhrvzi",
+      "id": "bd69db06-7f91-4c20-a444-a72cd69152ef",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "4c76cfba2820",
+      "proposedHash": "16125c046e58",
+      "actualPostWriteHash": "16125c046e58",
+      "ctaInfo": null
+    },
+    {
+      "slug": "brghkar-sadghih-thran-aazam-fvri-zir-dghighh-bhsvrt-shbanhrvzi",
+      "id": "82707d56-9b83-48d2-9138-17d52446163a",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "158c40919a5e",
+      "proposedHash": "0d0dda9b0334",
+      "actualPostWriteHash": "0d0dda9b0334",
+      "ctaInfo": null
+    },
+    {
+      "slug": "brghkar-shbanhruzi-haft-tir-motahri-behshti",
+      "id": "06f157d0-33fd-4d11-aac8-49daa56536a5",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "53c1d1eb139e",
+      "proposedHash": "295f24339486",
+      "actualPostWriteHash": "295f24339486",
+      "ctaInfo": null
+    },
+    {
+      "slug": "brghkar-starkhan-thran-aazam-fvri-zir-dghighh-bhsvrt-shbanhrvzi",
+      "id": "223f9b21-4f8f-4256-b541-e97186d738ac",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "c7f8b26af967",
+      "proposedHash": "864428ff1b42",
+      "actualPostWriteHash": "864428ff1b42",
+      "ctaInfo": null
+    },
+    {
+      "slug": "brghkarbrghkar-mshirih-aazam-fvri-brghkar-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari",
+      "id": "8d6f424e-a3f4-404e-9665-3793a5c1678b",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "2d3b0bede4bd",
+      "proposedHash": "e8c4ef6e65c9",
+      "actualPostWriteHash": "e8c4ef6e65c9",
+      "ctaInfo": null
+    },
+    {
+      "slug": "chra-dvrbin-mdarbsth-bh-gvshi-vsl-nmishvd",
+      "id": "8175b8f5-248c-451f-8cd3-b81e9ecc32d0",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "e49733307dde",
+      "proposedHash": "a097d57e4ecc",
+      "actualPostWriteHash": "a097d57e4ecc",
+      "ctaInfo": null
+    },
+    {
+      "slug": "dalile-ghate-va-vasl-shodan-mokrar-bargh",
+      "id": "a97f3bdf-2cdb-4949-854b-2439c9a2e7b2",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "efbc0841741f",
+      "proposedHash": "d51f0b552886",
+      "actualPostWriteHash": "d51f0b552886",
+      "ctaInfo": null
+    },
+    {
+      "slug": "nsb-v-srvis-kvlr-abi-amvzsh-v-khdmat-nghdari-afzaish-khnkknndgi-v-kahsh-msrf-brgh-ba-grvh-mamarh",
+      "id": "ccb2e74d-6b5e-4efc-aa90-6cc36d9e4141",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "697c97b4dddd",
+      "proposedHash": "a65a566bbbd6",
+      "actualPostWriteHash": "a65a566bbbd6",
+      "ctaInfo": null
+    },
+    {
+      "slug": "rfa-atsali-tlfn-v-rvshhai-aibiabi-kht-tlfn-sabt",
+      "id": "dd1b47e6-8160-4ee2-88ba-c4f884c48571",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "90638ba8c816",
+      "proposedHash": "d874f1a86b63",
+      "actualPostWriteHash": "d874f1a86b63",
+      "ctaInfo": null
+    },
+    {
+      "slug": "stablizer-chist",
+      "id": "fb5ee608-1a64-408c-a169-7d058634c718",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "a7802a59e4b0",
+      "proposedHash": "b0416c182606",
+      "actualPostWriteHash": "b0416c182606",
+      "ctaInfo": null
+    },
+    {
+      "slug": "brghkar-saadtabad-thran-aazam-brghkar-fvri-dr-kmtr-az-dghighh-shbanh-rvzi",
+      "id": "3be24ee4-3d38-4b2f-8280-0604278bbf3d",
+      "writeClass": "OPTIMIZER",
+      "result": "SUCCESS",
+      "originalHash": "413551613b62",
+      "proposedHash": "764c330698cd",
+      "actualPostWriteHash": "764c330698cd",
+      "ctaInfo": "1 href -> contact-us"
+    },
+    {
+      "slug": "chra-cheragh-haye-khaneh-cheshmak-mizanand",
+      "id": "faa040e6-5f18-4eee-b3c1-9bb6745a098b",
+      "writeClass": "CTA_ONLY",
+      "result": "SUCCESS",
+      "originalHash": "95e5acde4388",
+      "proposedHash": "7e4f0b76e8f1",
+      "actualPostWriteHash": "7e4f0b76e8f1",
+      "ctaInfo": "optimizer NOT applied; 1 href -> contact-us"
+    }
+  ]
+}

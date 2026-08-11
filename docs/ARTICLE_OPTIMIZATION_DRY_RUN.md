@@ -1,6 +1,6 @@
 # Article Optimization — Bulk Dry-Run Report
 
-Generated: 2026-08-11T01:44:45.942Z
+Generated: 2026-08-11T02:53:43.313Z
 Mode: **read-only dry-run** — ZERO production article writes.
 
 ## Summary
@@ -15,7 +15,7 @@ Mode: **read-only dry-run** — ZERO production article writes.
 | Sanitizer failures | 0 |
 | Link-integrity failures | 0 |
 | Idempotence failures | 0 |
-| Avg score before | 72 |
+| Avg score before | 98 |
 | Avg score after | 99 |
 | CTA mismatches | 1 |
 
@@ -23,35 +23,35 @@ Mode: **read-only dry-run** — ZERO production article writes.
 
 | Article (slug) | Before | After | Findings | Classification |
 | --- | ---: | ---: | ---: | --- |
-| aazam-fvri-brghkarblvar-aboozr-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari | 67 | 100 | 2 | SAFE_TO_OPTIMIZE |
-| aazam-fvri-brghkariamir-abad-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari | 67 | 100 | 3 | SAFE_TO_OPTIMIZE |
-| aazam-fvri-brghkarivsf-abad-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari | 67 | 100 | 3 | SAFE_TO_OPTIMIZE |
-| aazam-fvri-brghkarmhlh-bazar-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari | 93 | 100 | 2 | SAFE_TO_OPTIMIZE |
-| alt-pridn-fivz-brgh-chist | 64 | 100 | 3 | SAFE_TO_OPTIMIZE |
-| brghkar-aazam-fvri-brghkar-narmk-rfa-atsali-brghkhrabi-tlfn-mhlh-narmknsbiatbrghkarimntghh-narmk | 67 | 100 | 3 | SAFE_TO_OPTIMIZE |
-| brghkar-aazam-fvri-brghkaraghdsih-rfa-atsali-brghkhrabi-tlfn-mhlh-aghdsihnsbiatbrghkarimntghh-aghdsih | 67 | 100 | 4 | SAFE_TO_OPTIMIZE |
-| brghkar-aazam-fvri-brghkarpasdaran-rfa-atsali-brghkhrabi-tlfn-mhlh-pasdarannsbiatbrghkarimntghh-pasdaran | 71 | 100 | 4 | SAFE_TO_OPTIMIZE |
-| brghkar-abasabad-thran-aazam-fvri-zir-dghighh-shbanhrvzi | 64 | 100 | 3 | SAFE_TO_OPTIMIZE |
-| brghkar-fvri-shbanh-rvzi-thranpars-aazam-sria-brghkar-mtkhss-grvh-mamarh | 71 | 97 | 3 | REVIEW_REQUIRED |
-| brghkar-mrzdaran-thran-aazam-brghkar-fvri-kmtr-az-dghighh-shbanh-rvzi | 64 | 100 | 3 | SAFE_TO_OPTIMIZE |
-| brghkar-pvnk-thran-aazam-fvri-kmtr-az-dghighh-shbanhrvzi | 68 | 97 | 4 | REVIEW_REQUIRED |
-| brghkar-saadtabad-thran-aazam-brghkar-fvri-dr-kmtr-az-dghighh-shbanh-rvzi | 71 | 97 | 4 | REVIEW_REQUIRED |
-| brghkar-sadghih-thran-aazam-fvri-zir-dghighh-bhsvrt-shbanhrvzi | 64 | 97 | 3 | REVIEW_REQUIRED |
-| brghkar-shbanhruzi-haft-tir-motahri-behshti | 68 | 97 | 3 | REVIEW_REQUIRED |
-| brghkar-starkhan-thran-aazam-fvri-zir-dghighh-bhsvrt-shbanhrvzi | 71 | 97 | 3 | REVIEW_REQUIRED |
-| brghkarbrghkar-mshirih-aazam-fvri-brghkar-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari | 74 | 100 | 3 | SAFE_TO_OPTIMIZE |
+| aazam-fvri-brghkarblvar-aboozr-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari | 100 | 100 | 2 | SAFE_TO_OPTIMIZE |
+| aazam-fvri-brghkariamir-abad-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari | 100 | 100 | 3 | SAFE_TO_OPTIMIZE |
+| aazam-fvri-brghkarivsf-abad-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari | 100 | 100 | 3 | SAFE_TO_OPTIMIZE |
+| aazam-fvri-brghkarmhlh-bazar-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari | 100 | 100 | 2 | SAFE_TO_OPTIMIZE |
+| alt-pridn-fivz-brgh-chist | 100 | 100 | 3 | SAFE_TO_OPTIMIZE |
+| brghkar-aazam-fvri-brghkar-narmk-rfa-atsali-brghkhrabi-tlfn-mhlh-narmknsbiatbrghkarimntghh-narmk | 100 | 100 | 3 | SAFE_TO_OPTIMIZE |
+| brghkar-aazam-fvri-brghkaraghdsih-rfa-atsali-brghkhrabi-tlfn-mhlh-aghdsihnsbiatbrghkarimntghh-aghdsih | 100 | 100 | 4 | SAFE_TO_OPTIMIZE |
+| brghkar-aazam-fvri-brghkarpasdaran-rfa-atsali-brghkhrabi-tlfn-mhlh-pasdarannsbiatbrghkarimntghh-pasdaran | 100 | 100 | 4 | SAFE_TO_OPTIMIZE |
+| brghkar-abasabad-thran-aazam-fvri-zir-dghighh-shbanhrvzi | 100 | 100 | 3 | SAFE_TO_OPTIMIZE |
+| brghkar-fvri-shbanh-rvzi-thranpars-aazam-sria-brghkar-mtkhss-grvh-mamarh | 97 | 97 | 3 | REVIEW_REQUIRED |
+| brghkar-mrzdaran-thran-aazam-brghkar-fvri-kmtr-az-dghighh-shbanh-rvzi | 100 | 100 | 3 | SAFE_TO_OPTIMIZE |
+| brghkar-pvnk-thran-aazam-fvri-kmtr-az-dghighh-shbanhrvzi | 97 | 97 | 4 | REVIEW_REQUIRED |
+| brghkar-saadtabad-thran-aazam-brghkar-fvri-dr-kmtr-az-dghighh-shbanh-rvzi | 97 | 97 | 4 | REVIEW_REQUIRED |
+| brghkar-sadghih-thran-aazam-fvri-zir-dghighh-bhsvrt-shbanhrvzi | 97 | 97 | 3 | REVIEW_REQUIRED |
+| brghkar-shbanhruzi-haft-tir-motahri-behshti | 97 | 97 | 3 | REVIEW_REQUIRED |
+| brghkar-starkhan-thran-aazam-fvri-zir-dghighh-bhsvrt-shbanhrvzi | 97 | 97 | 3 | REVIEW_REQUIRED |
+| brghkarbrghkar-mshirih-aazam-fvri-brghkar-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari | 100 | 100 | 3 | SAFE_TO_OPTIMIZE |
 | chra-cheragh-haye-khaneh-cheshmak-mizanand | 93 | 93 | 3 | REVIEW_REQUIRED |
-| chra-dvrbin-mdarbsth-bh-gvshi-vsl-nmishvd | 64 | 100 | 3 | SAFE_TO_OPTIMIZE |
-| dalile-ghate-va-vasl-shodan-mokrar-bargh | 68 | 97 | 2 | REVIEW_REQUIRED |
-| nsb-v-srvis-kvlr-abi-amvzsh-v-khdmat-nghdari-afzaish-khnkknndgi-v-kahsh-msrf-brgh-ba-grvh-mamarh | 88 | 100 | 2 | SAFE_TO_OPTIMIZE |
+| chra-dvrbin-mdarbsth-bh-gvshi-vsl-nmishvd | 100 | 100 | 3 | SAFE_TO_OPTIMIZE |
+| dalile-ghate-va-vasl-shodan-mokrar-bargh | 97 | 97 | 2 | REVIEW_REQUIRED |
+| nsb-v-srvis-kvlr-abi-amvzsh-v-khdmat-nghdari-afzaish-khnkknndgi-v-kahsh-msrf-brgh-ba-grvh-mamarh | 100 | 100 | 2 | SAFE_TO_OPTIMIZE |
 | rfa-atsali-brgh-v-aazam-fvri-brghkar-pirvzi | 93 | 100 | 3 | SAFE_TO_OPTIMIZE |
-| rfa-atsali-tlfn-v-rvshhai-aibiabi-kht-tlfn-sabt | 57 | 100 | 3 | SAFE_TO_OPTIMIZE |
+| rfa-atsali-tlfn-v-rvshhai-aibiabi-kht-tlfn-sabt | 100 | 100 | 3 | SAFE_TO_OPTIMIZE |
 | rfa-atsali-tlfn-v-rvshhai-aibiabi-kht-tlfn-sabt-kianshhr | 88 | 100 | 3 | SAFE_TO_OPTIMIZE |
-| stablizer-chist | 79 | 100 | 3 | SAFE_TO_OPTIMIZE |
+| stablizer-chist | 100 | 100 | 3 | SAFE_TO_OPTIMIZE |
 
 ## CTA mismatches (booking-removed product mismatch)
 
-- chra-cheragh-haye-khaneh-cheshmak-mizanand: "ثبت درخواست در سایت معماره" → href: https://www.memareh.com — booking-removed product mismatch (not rewritten)
+- chra-cheragh-haye-khaneh-cheshmak-mizanand: "ثبت درخواست در سایت معماره" → href: https://www.memareh.com/contact-us — booking-removed product mismatch (not rewritten)
 
 ## Link audit
 
@@ -60,8 +60,8 @@ Mode: **read-only dry-run** — ZERO production article writes.
 | total | 1042 |
 | internal | 852 |
 | external | 21 |
-| nonWwwInternal | 186 |
-| internalNofollow | 459 |
+| nonWwwInternal | 0 |
+| internalNofollow | 0 |
 | tel | 169 |
 | malformedHref | 0 |
 | unsafeHref | 0 |
@@ -70,20 +70,20 @@ Mode: **read-only dry-run** — ZERO production article writes.
 
 | Metric | Count |
 | --- | ---: |
-| bodyH1 | 21 |
+| bodyH1 | 1 |
 | articlesWithMultipleH1 | 0 |
 | h2 | 156 |
 | h3 | 153 |
-| headingJumps | 21 |
+| headingJumps | 9 |
 | headinglessLongArticles | 0 |
 
 ## Inline-style audit
 
 | Metric | Count |
 | --- | ---: |
-| articlesWithInlineStyle | 19 |
-| totalInlineStyleAttrs | 520 |
-| safelyRemovable | 520 |
+| articlesWithInlineStyle | 1 |
+| totalInlineStyleAttrs | 9 |
+| safelyRemovable | 9 |
 | possiblyMeaningful | 0 |
 
 ## Table audit
@@ -91,10 +91,10 @@ Mode: **read-only dry-run** — ZERO production article writes.
 | Metric | Count |
 | --- | ---: |
 | total | 3 |
-| missingThead | 2 |
-| missingThScope | 2 |
-| inlineWidths | 2 |
-| complexNeedingReview | 2 |
+| missingThead | 0 |
+| missingThScope | 0 |
+| inlineWidths | 0 |
+| complexNeedingReview | 0 |
 
 ## FAQ audit
 
@@ -125,10 +125,10 @@ Mode: **read-only dry-run** — ZERO production article writes.
 
 ## امتیاز داخلی بهینه‌سازی (internal optimizer score — NOT a Google score)
 
-- Average before: 72
+- Average before: 98
 - Average proposed after: 99
-- Min before: 57 / Max before: 93
-- Improving: 24 / Unchanged: 1
+- Min before: 88 / Max before: 100
+- Improving: 2 / Unchanged: 23
 
 ## Suggestion mode (B) — medium-confidence, NOT approved changes
 
