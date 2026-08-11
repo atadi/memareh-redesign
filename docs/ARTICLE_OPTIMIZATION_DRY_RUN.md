@@ -1,6 +1,6 @@
 # Article Optimization — Bulk Dry-Run Report
 
-Generated: 2026-08-10T21:57:32.328Z
+Generated: 2026-08-11T01:44:45.942Z
 Mode: **read-only dry-run** — ZERO production article writes.
 
 ## Summary
