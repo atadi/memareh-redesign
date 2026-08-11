@@ -1,0 +1,21 @@
+# Incident diagnostic artifacts — must never enter a Vercel deployment.
+admin-test-1-body.html
+admin-test-1-headers.txt
+article-body-1.html
+article-body-2.html
+article-body-3.html
+article-headers-1.txt
+article-headers-2.txt
+article-headers-3.txt
+
+# Local optimizer build output
+.article-optimizer-dist/
+
+# Local soak/diagnostic scripts output and dumps
+*.dump
+*.backup
+*.sql.bak
+public_articles_*.csv
+public_articles_*.sql
+memareh_*.dump
+memareh_*.sql
