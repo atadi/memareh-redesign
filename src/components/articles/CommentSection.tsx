@@ -15,6 +15,30 @@ import { faIR } from 'date-fns/locale'
 import toast from 'react-hot-toast'
 import { EmojiPicker } from './EmojiPicker'
 
+/**
+ * Deterministic absolute-date formatter for comment timestamps.
+ *
+ * Used for the pre-hydration (server + first client) render of a comment's
+ * timestamp. It is forced to UTC so the server build and the browser produce
+ * byte-identical Persian text regardless of the visitor's timezone/clock.
+ *
+ * This fixes React #418: the previous code rendered a *relative* time
+ * (`formatDistanceToNow`) during SSR, which is frozen at build time and then
+ * differs from the client's live-clock value at hydration. The relative form is
+ * only shown after mount (see CommentItem's `mounted` gate).
+ *
+ * Determinism contract: given the same `iso`, the output never depends on
+ * `Date.now()`, the host timezone, or the build timestamp.
+ */
+export function formatCommentAbsoluteDate(iso: string): string {
+  return new Intl.DateTimeFormat('fa-IR', {
+    timeZone: 'UTC',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(new Date(iso))
+}
+
 export interface Comment {
   id: string
   content: string
@@ -72,6 +96,21 @@ function CommentItem({
 }: CommentItemProps) {
   const hasReplies = comment.replies && comment.replies.length > 0
   const replyInputRef = useRef<HTMLInputElement>(null)
+  // Mount gate: relative ("x پیش") timestamps are time-relative and differ
+  // between build-time SSR and the client's live clock, which causes a React
+  // #418 hydration text mismatch. We render a deterministic absolute date until
+  // after hydration, then upgrade to the relative form on the client only.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  /**
+   * Deterministic absolute date used for the pre-hydration (server + first
+   * client) render. Forced to UTC so the server (UTC) and the browser produce
+   * byte-identical Persian text regardless of the visitor's timezone.
+   */
+  const absoluteDate = formatCommentAbsoluteDate(comment.created_at)
 
   const insertReplyEmoji = (emoji: string) => {
     const input = replyInputRef.current
@@ -119,10 +158,12 @@ function CommentItem({
                   </span>
                 )}
                 <span className="text-sm text-gray-500">
-                  {formatDistanceToNow(new Date(comment.created_at), {
-                    addSuffix: true,
-                    locale: faIR,
-                  })}
+                  {mounted
+                    ? formatDistanceToNow(new Date(comment.created_at), {
+                        addSuffix: true,
+                        locale: faIR,
+                      })
+                    : absoluteDate}
                 </span>
               </div>
             </div>
