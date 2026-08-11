@@ -11,6 +11,30 @@ import {
   ArrowLeft
 } from 'lucide-react'
 
+/**
+ * Deterministic Persian date formatter for article cards.
+ *
+ * Used during SSR/SSG on /articles, the homepage, and article-detail related
+ * lists. `timeZone: 'UTC'` is forced so the server (UTC) and the browser (local
+ * tz, e.g. Asia/Tehran +3:30) render byte-identical text. This fixes a React
+ * #418 hydration mismatch: without UTC, a timestamp near a UTC midnight
+ * boundary produced a different Persian calendar date on the client.
+ *
+ * Determinism contract: output depends only on `iso`, never on the host
+ * timezone or the current clock.
+ */
+export function formatArticleDate(iso: string): string {
+  const date = new Date(iso)
+  if (isNaN(date.getTime())) return 'تاریخ نامعتبر'
+  const formatter = new Intl.DateTimeFormat('fa-IR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC',
+  })
+  return formatter.format(date)
+}
+
 interface ArticleCardProps {
   article: {
     id: string
@@ -62,23 +86,8 @@ export function ArticleCard({ article }: ArticleCardProps) {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'تاریخ نامشخص'
-    
     try {
-      const date = new Date(dateString)
-      
-      // Check if date is valid
-      if (isNaN(date.getTime())) {
-        return 'تاریخ نامعتبر'
-      }
-      
-      // Use Persian locale for proper formatting
-      const formatter = new Intl.DateTimeFormat('fa-IR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
-      
-      return formatter.format(date)
+      return formatArticleDate(dateString)
     } catch (error) {
       console.error('Date formatting error:', error)
       return 'تاریخ نامشخص'
