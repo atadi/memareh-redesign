@@ -2,27 +2,13 @@ import { revalidatePath } from 'next/cache'
 import { type NextRequest, NextResponse } from 'next/server'
 
 // Authoritative source contract for outside-band (database webhook) invalidation.
-// The Supabase AFTER trigger (memareh.trg_revalidate_articles ->
-// memareh.notify_article_revalidation) posts the rich change payload below.
-// We only act on webhooks from the canonical article source to avoid letting
-// arbitrary webhook payloads drive arbitrary path invalidation.
-const SOURCE_SCHEMA = 'memareh'
-const SOURCE_TABLE = 'articles'
-
-type ChangeOp = 'INSERT' | 'UPDATE' | 'DELETE'
-
-interface DbWebhookPayload {
-  type?: string
-  table?: string
-  schema?: string
-  record?: { slug?: string } | null
-  old_record?: { slug?: string } | null
-}
-
-interface ManualPayload {
-  type?: string
-  slug?: string
-}
+// The Supabase trigger on memareh.articles sends this shape (see
+// memareh.notify_article_revalidation):
+//   { type: 'INSERT'|'UPDATE'|'DELETE', table, schema, record, old_record }
+// We only act on the memareh.articles source; arbitrary webhook payloads are
+// rejected so a caller cannot trigger arbitrary path invalidations.
+const DB_WEBHOOK_SCHEMA = 'memareh'
+const DB_WEBHOOK_TABLE = 'articles'
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,52 +16,65 @@ export async function POST(request: NextRequest) {
     const expectedToken = process.env.REVALIDATION_TOKEN
 
     if (!expectedToken || authHeader !== `Bearer ${expectedToken}`) {
-      // TEMP diagnostic: expose only SHA-256 HASH prefixes (never the secret) to
-      // pinpoint the revalidation auth mismatch. Remove after root-cause confirmed.
-      const { createHash } = await import('crypto')
-      const recvSha = createHash('sha256').update(authHeader || '').digest('hex').slice(0, 16)
-      const expSha = createHash('sha256')
-        .update(`Bearer ${expectedToken || ''}`)
-        .digest('hex')
-        .slice(0, 16)
-      return NextResponse.json({ error: 'Unauthorized', recvSha, expSha }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>
 
-    // Normalize paths, deduplicating identical detail slugs so a slug rename
-    // (old + new) is purged exactly once each. List + home are always purged.
+    // Collect every path that must be invalidated into a Set so duplicate slugs
+    // (e.g. an UPDATE that does not rename the slug) are not revalidated twice.
     const paths = new Set<string>()
     paths.add('/articles')
     paths.add('/')
 
-    // Manual contract: { type: "article", slug }
-    const manual = body as ManualPayload
-    if (manual.type === 'article' && manual.slug) {
-      paths.add(`/articles/${manual.slug}`)
-    }
-
-    // Supabase trigger contract: { type: "INSERT"|"UPDATE"|"DELETE", schema, table, record, old_record }
-    const db = body as DbWebhookPayload
-    const op = (db.type ?? '').toUpperCase()
-    const slug = (db.record?.slug ?? '').trim()
-    const oldSlug = (db.old_record?.slug ?? '').trim()
-
-    // Only trust webhooks that originate from the canonical article source.
-    if (db.schema === SOURCE_SCHEMA && db.table === SOURCE_TABLE && (op === 'INSERT' || op === 'UPDATE' || op === 'DELETE')) {
-      if (op === 'DELETE') {
-        if (oldSlug) paths.add(`/articles/${oldSlug}`)
-      } else {
-        if (slug) paths.add(`/articles/${slug}`)
-        // UPDATE where the slug changed: invalidate BOTH old and new detail paths.
-        if (op === 'UPDATE' && oldSlug && oldSlug !== slug) {
-          paths.add(`/articles/${oldSlug}`)
-        }
+    const addDetail = (slug: unknown) => {
+      if (typeof slug === 'string' && slug.length > 0) {
+        paths.add(`/articles/${slug}`)
       }
     }
 
-    for (const p of paths) {
-      revalidatePath(p)
+    // Manual/admin contract (kept for backward compatibility):
+    //   { type: 'article', slug }
+    if (body.type === 'article' && typeof body.slug === 'string') {
+      addDetail(body.slug)
+    }
+
+    // Supabase database-webhook contract.
+    if (
+      typeof body.schema === 'string' &&
+      typeof body.table === 'string' &&
+      typeof body.type === 'string'
+    ) {
+      // Reject payloads that do not originate from the article source.
+      if (body.schema !== DB_WEBHOOK_SCHEMA || body.table !== DB_WEBHOOK_TABLE) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+
+      const record = body.record as Record<string, unknown> | null
+      const oldRecord = body.old_record as Record<string, unknown> | null
+      const newSlug = record?.slug
+      const oldSlug = oldRecord?.slug
+
+      switch (body.type) {
+        case 'INSERT':
+          addDetail(newSlug)
+          break
+        case 'UPDATE':
+          // Invalidate both when a slug rename occurs.
+          addDetail(oldSlug)
+          addDetail(newSlug)
+          break
+        case 'DELETE':
+          addDetail(oldSlug)
+          break
+        default:
+          // Unknown operation: still purge the list/home, but do not guess a slug.
+          break
+      }
+    }
+
+    for (const path of paths) {
+      revalidatePath(path)
     }
 
     return NextResponse.json({ revalidated: true, paths: [...paths] })

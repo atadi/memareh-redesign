@@ -122,7 +122,7 @@ describe('Supabase DB-trigger contract', () => {
     expect(calledPaths()).toEqual(sortedPaths(['/articles/gone-slug', '/articles', '/']))
   })
 
-  it('unsupported schema/table does NOT permit article invalidation', async () => {
+  it('unsupported schema/table is rejected (no arbitrary invalidation)', async () => {
     const { status } = await call(
       {
         schema: 'other',
@@ -133,10 +133,9 @@ describe('Supabase DB-trigger contract', () => {
       },
       TOKEN,
     )
-    expect(status).toBe(200)
-    // Only the always-purged list + home; the bogus slug is ignored.
-    expect(calledPaths()).toEqual(sortedPaths(['/articles', '/']))
-    expect(calledPaths()).not.toContain('/articles/hack')
+    // Mismatched source must be rejected, so no paths are invalidated.
+    expect(status).toBe(401)
+    expect(mockedRevalidatePath).not.toHaveBeenCalled()
   })
 
   it('malformed JSON body does not crash or purge arbitrary slugs', async () => {
