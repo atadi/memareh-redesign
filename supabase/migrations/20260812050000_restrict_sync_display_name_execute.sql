@@ -1,0 +1,69 @@
+-- Migration: revoke direct/client EXECUTE from the trigger-only function
+--            sync_display_name_from_auth().
+--
+-- Context / problem
+-- -----------------
+-- `memareh.sync_display_name_from_auth()` is a PostgreSQL TRIGGER function
+-- (RETURNS trigger, SECURITY DEFINER, owner = postgres, search_path = '', VOLATILE).
+-- It is invoked exclusively by the live trigger `on_auth_user_updated`
+-- (AFTER UPDATE ON auth.users FOR EACH ROW
+--  WHEN (OLD.raw_user_meta_data IS DISTINCT FROM NEW.raw_user_meta_data)),
+-- which re-syncs the `memareh.profiles.display_name` from auth metadata when a
+-- user's `raw_user_meta_data` changes.
+--
+-- Repository audit (TASK 59) confirmed:
+--   * no browser/server-action/API route/.rpc("sync_display_name_from_auth") caller exists
+--   * no script or migration invokes it directly
+--   * the application display-name flow (src/app/api/admin/users/[id]/route.ts) does a
+--     direct `profiles.upsert(...)` AND an `auth.admin.updateUserById(..., user_metadata:
+--     { display_name })` — the latter UPDATE fires `on_auth_user_updated`; it never calls
+--     the function via RPC.
+--   * PostgreSQL does NOT require the session role to hold EXECUTE on a trigger function
+--     for the trigger to fire — the trigger runs under the function's own SECURITY
+--     DEFINER/owner (postgres) context.
+--
+-- The function currently carries the inherited public default EXECUTE grant, so PUBLIC /
+-- anon / authenticated / service_role all hold EXECUTE on a SECURITY DEFINER postgres-
+-- owned function. That is unnecessary attack surface (mirrors the already-hardened
+-- `handle_new_user()`).
+--
+-- Fix
+-- ---
+-- Remove direct EXECUTE from runtime/client roles. The TRIGGER (`on_auth_user_updated`)
+-- is NOT touched, so trigger-driven profile synchronization continues to work normally.
+-- postgres (owner) keeps EXECUTE intrinsically — no explicit owner grant required.
+--
+-- Scope guardrails (deliberately does NOT):
+--   * NOT invoke the function.
+--   * NOT CREATE OR REPLACE / DROP / ALTER SECURITY DEFINER / ALTER search_path the function.
+--   * NOT DROP / CREATE / ALTER the trigger.
+--   * NOT alter auth.users or memareh.profiles.
+--   * NOT change RLS or any table/function grant (other than this REVOKE).
+--   * NOT touch handle_new_user() / its trigger.
+--   * NOT include any secret literal.
+--
+-- Idempotency: REVOKE of an already-absent privilege is a no-op; safe to re-run and on a
+-- fresh DB reset.
+
+REVOKE EXECUTE
+ON FUNCTION memareh.sync_display_name_from_auth()
+FROM PUBLIC, anon, authenticated, service_role;
+
+-- ============================================================================
+-- READ-ONLY VERIFICATION (run separately in Supabase SQL Editor; NOT executed by
+-- this migration). Confirms the ACL is reduced and the trigger still fires.
+-- ============================================================================
+--
+-- SELECT
+--     has_function_privilege('public',        p.oid, 'EXECUTE') AS public_execute,
+--     has_function_privilege('anon',          p.oid, 'EXECUTE') AS anon_execute,
+--     has_function_privilege('authenticated', p.oid, 'EXECUTE') AS authenticated_execute,
+--     has_function_privilege('service_role',  p.oid, 'EXECUTE') AS service_role_execute,
+--     has_function_privilege('postgres',      p.oid, 'EXECUTE') AS postgres_execute
+-- FROM pg_proc p
+-- JOIN pg_namespace n ON n.oid = p.pronamespace
+-- WHERE n.nspname = 'memareh' AND p.proname = 'sync_display_name_from_auth';
+--
+-- -- Trigger intact (definition must remain unchanged):
+-- SELECT tgname, pg_get_triggerdef(oid) AS def
+-- FROM pg_trigger WHERE tgname = 'on_auth_user_updated' AND NOT tgisinternal;
