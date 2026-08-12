@@ -1,0 +1,57 @@
+-- Migration: revoke runtime/client EXECUTE from the defunct tag-migration function.
+--
+-- Context / problem
+-- -----------------
+-- `memareh.migrate_tags_to_relations()` is a one-time data-migration helper. Its body
+-- reads `SELECT id, tags FROM memareh.articles`, but the `articles.tags` column no longer
+-- exists, so the function is DEFUNCT (an invocation would error). It is VOLATILE, NOT
+-- SECURITY DEFINER, owner = postgres, and currently carries the inherited public default
+-- EXECUTE grant, so PUBLIC / anon / authenticated / service_role all hold EXECUTE.
+--
+-- Repository audit (TASK 41) confirmed zero legitimate callers:
+--   * no browser/client .rpc() call
+--   * no Server Action, API route, maintenance script, or migration invokes it
+--   * no pg_cron job or trigger references it
+--   * no code consumes its text return value
+-- The application writes tags through the normalized `article_tags` / `article_tag_relations`
+-- tables directly (src/components/admin/ArticleEditor.tsx), never via this function.
+--
+-- Fix
+-- ---
+-- Remove all runtime/client EXECUTE access. This is a privileged, callable-but-obsolete
+-- function; no runtime path needs it. postgres (the owner) retains EXECUTE intrinsically
+-- (owner privileges are implicit in PostgreSQL), so no explicit owner grant is required.
+-- The function body is NOT changed and the function is NOT dropped — it remains available
+-- to a DBA via the postgres role for any future manual re-migration.
+--
+-- Scope guardrails (deliberately does NOT):
+--   * NOT invoke the function.
+--   * NOT change the function body / signature / volatility.
+--   * NOT DROP the function.
+--   * NOT change any table privilege or RLS policy.
+--   * NOT touch unrelated SQL.
+--   * NOT include any secret literal.
+--
+-- Idempotency: REVOKE of an already-absent privilege is a no-op; safe to re-run and on a
+-- fresh DB reset.
+
+REVOKE EXECUTE
+ON FUNCTION memareh.migrate_tags_to_relations()
+FROM PUBLIC, anon, authenticated, service_role;
+
+-- ============================================================================
+-- READ-ONLY VERIFICATION (run separately in Supabase SQL Editor; NOT executed by
+-- this migration). Confirms the ACL is reduced and the function is retained.
+-- ============================================================================
+--
+-- SELECT
+--     p.proname,
+--     p.proacl::text AS acl,
+--     has_function_privilege('public',        p.oid, 'EXECUTE') AS public_execute,
+--     has_function_privilege('anon',          p.oid, 'EXECUTE') AS anon_execute,
+--     has_function_privilege('authenticated', p.oid, 'EXECUTE') AS authenticated_execute,
+--     has_function_privilege('service_role',  p.oid, 'EXECUTE') AS service_role_execute,
+--     has_function_privilege('postgres',      p.oid, 'EXECUTE') AS postgres_execute
+-- FROM pg_proc p
+-- JOIN pg_namespace n ON n.oid = p.pronamespace
+-- WHERE n.nspname = 'memareh' AND p.proname = 'migrate_tags_to_relations';
