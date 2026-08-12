@@ -60,3 +60,6 @@ supabase/.temp/
 
 # bulk dry-run compiled optimizer (generated at runtime)
 .article-optimizer-dist/
+
+# graphify knowledge-graph output (generated tooling artifact — ARCH-02)
+graphify-out/
