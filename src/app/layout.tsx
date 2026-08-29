@@ -8,6 +8,7 @@ import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
 import { getSiteUrl } from "@/lib/config";
 import { SiteStructuredData } from "@/components/SiteStructuredData";
+import { buildRootMetadata } from "@/lib/seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,62 +20,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getSiteUrl()),
-  title: "معماره - خدمات برقکاری حرفه‌ای و مطمئن",
-  description:
-    "دسترسی سریع به تکنسین برقکار در تهران. خدمات اضطراری ۲۴ ساعته، نصب، تعمیر و نگهداری تاسیسات برقی با کیفیت و سرعت.",
-  keywords: [
-    "برقکار",
-    "خدمات برقکاری",
-    "تکنسین برق",
-    "نصب برق",
-    "تعمیر برق",
-    "سیم‌کشی",
-    "معماره",
-  ],
-  authors: [{ name: "معماره" }],
-  creator: "معماره",
-  publisher: "معماره",
-  icons: {
-    icon: [
-      { url: "/assets/logo/favicon.svg", type: "image/svg+xml", sizes: "any" },
-      { url: "/assets/logo/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-    ],
-    apple: [{ url: "/assets/logo/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
-    shortcut: "/assets/logo/favicon.svg",
-  },
-  openGraph: {
-    title: "معماره - خدمات برق‌کاری حرفه‌ای",
-    description: "دسترسی سریع به تکنسین برقکار در سراسر تهران",
-    url: getSiteUrl(),
-    siteName: "معماره",
-    images: [
-      {
-        url: "/assets/logo/cover-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "معماره - خدمات برقکاری",
-      },
-    ],
-    locale: "fa_IR",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "معماره - خدمات برقکاری حرفه‌ای",
-    description: "دسترسی سریع به تکنسین برقکار",
-    images: ["/assets/logo/cover-image.jpg"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  verification: {
-    // Add verification codes when available
-    // google: "your-google-verification-code",
-  },
-};
+export const metadata: Metadata = buildRootMetadata(getSiteUrl());
 
 export default function RootLayout({
   children,
@@ -90,7 +36,6 @@ export default function RootLayout({
         <link rel="icon" type="image/svg+xml" sizes="any" href="/assets/logo/favicon.svg" />
         <link rel="apple-touch-icon" sizes="180x180" href="/assets/logo/apple-touch-icon.png" />
 
-        {/* Google Analytics - Only in Production */}
         {isProduction && (
           <>
             <Script
@@ -102,9 +47,6 @@ export default function RootLayout({
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
-                // Disable advertising features (Google Signals) so no
-                // google.<cc>/ads/ga-audiences requests are emitted; basic
-                // measurement is retained.
                 gtag('set', 'allow_google_signals', false);
                 gtag('config', 'G-EVR583NXGN');
               `}

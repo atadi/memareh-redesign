@@ -4,10 +4,21 @@ import {
   buildArticleMetadata,
   buildArticleJsonLd,
   buildBreadcrumbJsonLd,
+  buildSiteStructuredData,
+  buildRootMetadata,
+  buildPrivateMetadata,
+  buildArticlesIndexMetadata,
+  buildContactMetadata,
+  buildRobots,
+  buildPublicSitemap,
+  generatedArticleCanonical,
   resolveCanonicalUrl,
   absoluteImageUrl,
   organizationId,
+  organizationLogoUrl,
+  pickFeaturedImageAlt,
 } from '../src/lib/seo'
+import { SITE_PHONE_E164 } from '../src/lib/site'
 
 const SITE = 'https://www.memareh.com'
 
@@ -199,13 +210,15 @@ describe('seo: structured data', () => {
     expect(ld.inLanguage).toBe('fa-IR')
   })
 
-  it('BreadcrumbList has Home -> Article (no 404 index route)', () => {
+  it('BreadcrumbList has Home -> Articles index -> Article', () => {
     const bc = buildBreadcrumbJsonLd(baseArticle({ title: 'مقاله' }), SITE) as any
     expect(bc['@type']).toBe('BreadcrumbList')
-    expect(bc.itemListElement).toHaveLength(2)
+    expect(bc.itemListElement).toHaveLength(3)
     expect(bc.itemListElement[0].name).toBe('خانه')
     expect(bc.itemListElement[0].item).toBe(SITE)
-    expect(bc.itemListElement[1].name).toBe('مقاله')
+    expect(bc.itemListElement[1].name).toBe('مقالات')
+    expect(bc.itemListElement[1].item).toBe(`${SITE}/articles`)
+    expect(bc.itemListElement[2].name).toBe('مقاله')
   })
 
   it('canonical_url with custom value flows into both Article and Breadcrumb', () => {
@@ -215,6 +228,88 @@ describe('seo: structured data', () => {
     expect(
       (buildBreadcrumbJsonLd(a, SITE) as any).itemListElement[1].item,
     ).toBe(custom)
+  })
+})
+
+describe('seo: generated canonical never uses a browser origin', () => {
+  it('builds www article URL from siteUrl + slug', () => {
+    expect(generatedArticleCanonical(SITE, 'foo')).toBe(
+      'https://www.memareh.com/articles/foo',
+    )
+  })
+})
+
+describe('seo: site graph + listing + private + sitemap', () => {
+  it('site JSON-LD is Electrician with phone, Tehran, and a PNG logo', () => {
+    const data = buildSiteStructuredData(SITE) as any
+    const org = data['@graph'][0]
+    expect(org['@type']).toEqual(['Organization', 'Electrician'])
+    expect(org.telephone).toBe(SITE_PHONE_E164)
+    expect(org.areaServed).toEqual({ '@type': 'City', name: 'تهران' })
+    expect(org.logo.url).toBe(organizationLogoUrl(SITE))
+    expect(org.logo.url).toMatch(/\.png$/)
+  })
+
+  it('root metadata has a canonical and matching OG/Twitter titles', () => {
+    const m = buildRootMetadata(SITE)
+    expect(m.alternates?.canonical).toBe(SITE)
+    expect(m.title).toBe(m.openGraph?.title)
+    expect(m.title).toBe(m.twitter?.title)
+  })
+
+  it('private pages are noindex', () => {
+    const m = buildPrivateMetadata('ورود')
+    expect(m.robots).toEqual({ index: false, follow: false })
+  })
+
+  it('articles index has its own title and canonical; filters are noindex', () => {
+    const plain = buildArticlesIndexMetadata(SITE)
+    expect(plain.title).toBe('مقالات برقکاری')
+    expect(plain.alternates?.canonical).toBe(`${SITE}/articles`)
+    expect(plain.robots).toEqual({ index: true, follow: true })
+
+    const filtered = buildArticlesIndexMetadata(SITE, { category: 'safety_tips' })
+    expect(filtered.alternates?.canonical).toBe(`${SITE}/articles`)
+    expect(filtered.robots).toEqual({ index: false, follow: true })
+  })
+
+  it('contact page is indexable with a stable canonical', () => {
+    const m = buildContactMetadata(SITE)
+    expect(m.alternates?.canonical).toBe(`${SITE}/contact-us`)
+    expect(m.robots).toEqual({ index: true, follow: true })
+  })
+
+  it('robots disallow auth surfaces and point at the sitemap', () => {
+    const r = buildRobots(SITE)
+    expect(r.sitemap).toBe(`${SITE}/sitemap.xml`)
+    expect(r.rules).toEqual(
+      expect.objectContaining({
+        disallow: expect.arrayContaining(['/admin', '/login', '/register', '/profile']),
+      }),
+    )
+  })
+
+  it('sitemap includes home, /articles, /contact-us, and article URLs with stable home lastmod', () => {
+    const entries = buildPublicSitemap(SITE, [
+      { slug: 'a', updated_at: '2026-01-15T00:00:00Z' },
+    ])
+    const urls = entries.map((e) => e.url)
+    expect(urls).toEqual([
+      SITE,
+      `${SITE}/articles`,
+      `${SITE}/contact-us`,
+      `${SITE}/articles/a`,
+    ])
+    expect(entries[0].lastModified).toEqual(new Date('2026-01-15T00:00:00Z'))
+  })
+
+  it('featured image alt prefers featured_image_alt over title', () => {
+    expect(
+      pickFeaturedImageAlt({ featured_image_alt: 'آلت', title: 'عنوان' }),
+    ).toBe('آلت')
+    expect(pickFeaturedImageAlt({ featured_image_alt: '', title: 'عنوان' })).toBe(
+      'عنوان',
+    )
   })
 })
 

@@ -1,13 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { getSiteUrl } from '@/lib/config'
+import { buildRobots } from '@/lib/seo'
 
 export default function robots(): MetadataRoute.Robots {
-  return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-      disallow: ['/admin', '/api', '/login'],
-    },
-    sitemap: `${getSiteUrl()}/sitemap.xml`,
-  }
+  return buildRobots(getSiteUrl())
 }

@@ -6,6 +6,7 @@ import {
   buildArticleMetadata,
   buildArticleJsonLd,
   buildBreadcrumbJsonLd,
+  pickFeaturedImageAlt,
 } from "@/lib/seo";
 import { CommentSection } from "@/components/articles/CommentSection";
 import { RelatedArticles } from "@/components/articles/RelatedArticles";
@@ -122,10 +123,6 @@ export default async function ArticlePage({
     }
   });
 
-  const articleUrl = `${siteUrl}/articles/${slug}`;
-  const image =
-    article.featured_image || `${siteUrl}/assets/logo/cover-image.jpg`;
-
   const jsonLd = [
     buildArticleJsonLd(article, siteUrl),
     buildBreadcrumbJsonLd(article, siteUrl),
@@ -145,10 +142,14 @@ export default async function ArticlePage({
           {article.featured_image && (
             <img
               src={article.featured_image}
-              alt={article.title}
+              alt={pickFeaturedImageAlt(article)}
               className="w-full rounded-xl mb-8"
             />
           )}
+
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+            {article.title}
+          </h1>
 
           <ArticleContent
             content={article.content}

@@ -1,5 +1,6 @@
 import { Hero } from '@/components/home/Hero'
 import { HowItWorks } from '@/components/home/HowItWorks'
+import { ServiceCategories } from '@/components/home/ServiceCategories'
 import { WhyChooseUs } from '@/components/home/WhyChooseUs'
 import { Testimonials } from '@/components/home/Testimonials'
 import { CTASection } from '@/components/home/CTASection'
@@ -26,6 +27,7 @@ export default async function HomePage() {
       slug: a.slug,
       excerpt: a.excerpt || '',
       featured_image: a.featured_image,
+      featured_image_alt: a.featured_image_alt,
       category: a.category || '',
       view_count: a.view_count || 0,
       reading_time: a.reading_time,
@@ -40,6 +42,7 @@ export default async function HomePage() {
     <>
       <Hero />
       <HowItWorks />
+      <ServiceCategories />
       <WhyChooseUs />
       <Testimonials />
 

@@ -1,12 +1,20 @@
+import type { Metadata } from 'next'
 import { createPublicClient } from '@/lib/supabase/server-public'
 import { ArticleCard } from '@/components/articles/ArticleCard'
 import { ArticlesSidebar } from '@/components/articles/ArticlesSidebar'
 import { BookOpen } from 'lucide-react'
+import { getSiteUrl } from '@/lib/config'
+import { buildArticlesIndexMetadata } from '@/lib/seo'
 
 export const revalidate = 300
 
 interface PageProps {
   searchParams: Promise<{ category?: string; sort?: string }>
+}
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const { category, sort } = await searchParams
+  return buildArticlesIndexMetadata(getSiteUrl(), { category, sort })
 }
 
 export default async function ArticlesPage({ searchParams }: PageProps) {
@@ -43,6 +51,7 @@ export default async function ArticlesPage({ searchParams }: PageProps) {
           <ArticlesSidebar />
 
           <main className="lg:w-3/4">
+            <h1 className="text-3xl font-bold text-gray-900 mb-6">مقالات برقکاری</h1>
             {articles && articles.length > 0 ? (
               <div className="grid md:grid-cols-2 gap-6">
                 {articles.map((article) => (
