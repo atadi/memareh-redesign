@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/server-public";
 import { getSiteUrl } from "@/lib/config";
 import { getPublishedArticleSlugs } from "@/lib/articles";
@@ -20,6 +21,32 @@ export async function generateStaticParams() {
 }
 
 const siteUrl = getSiteUrl();
+
+/**
+ * Cached article fetch for ISR.
+ *
+ * Wrapped in `unstable_cache` so that ISR regeneration (every `revalidate`
+ * seconds) reuses the cached Supabase result instead of hitting the database on
+ * every regeneration. Keyed by slug; `revalidate = 300` mirrors the page's
+ * revalidation window, and `tags: ['article', slug]` lets an explicit
+ * `revalidateTag('article')` purge it when content changes.
+ */
+const getCachedArticle = unstable_cache(
+  async (slug: string) => {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from("articles")
+      .select("*")
+      .eq("slug", slug)
+      .eq("status", "published")
+      .single();
+    if (error) return { data: null, error };
+    return { data, error: null };
+  },
+  // keyParts: must be deterministic; slug is the only variable input.
+  ["article-by-slug"],
+  { revalidate: 300, tags: ["article"] },
+);
 
 // -----------------------------
 // Metadata SEO
@@ -65,12 +92,7 @@ export default async function ArticlePage({
   const { slug } = await params;
   const supabase = createPublicClient();
 
-  const { data: article, error } = await supabase
-    .from("articles")
-    .select("*")
-    .eq("slug", slug)
-    .eq("status", "published")
-    .single();
+  const { data: article, error } = await getCachedArticle(slug);
 
   if (error || !article) {
     notFound();
