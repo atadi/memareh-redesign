@@ -1,11 +1,7 @@
 import type { Metadata } from "next/types";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "react-hot-toast";
-import { ClientShell } from "@/components/ClientShell";
-import { ThemeProvider } from "@/components/ThemeProvider";
+import GlobalClient from "@/components/GlobalClient";
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/next";
-import Script from "next/script";
 import { getSiteUrl } from "@/lib/config";
 import { SiteStructuredData } from "@/components/SiteStructuredData";
 import { buildRootMetadata } from "@/lib/seo";
@@ -36,36 +32,14 @@ export default function RootLayout({
         <link rel="icon" type="image/svg+xml" sizes="any" href="/assets/logo/favicon.svg" />
         <link rel="apple-touch-icon" sizes="180x180" href="/assets/logo/apple-touch-icon.png" />
 
-        {isProduction && (
-          <>
-            <Script
-              src="https://www.googletagmanager.com/gtag/js?id=G-EVR583NXGN"
-              strategy="afterInteractive"
-            />
-            <Script id="google-analytics" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('set', 'allow_google_signals', false);
-                gtag('config', 'G-EVR583NXGN');
-              `}
-            </Script>
-          </>
-        )}
+        {/* Analytics and Google Tag Manager are now handled in GlobalClient */}
 
         <SiteStructuredData />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Toaster position="top-center" />
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <ClientShell>
-            {children}
-          </ClientShell>
-        </ThemeProvider>
-        <Analytics />
+        <GlobalClient>{children}</GlobalClient>
       </body>
     </html>
   );
