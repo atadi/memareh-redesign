@@ -27,7 +27,7 @@ export function EmergencyBanner() {
   if (!isVisible) return null
 
   return (
-    <div className="sticky top-0 z-50 bg-red-600 text-white shadow-lg animate-in slide-in-from-top duration-300">
+    <div className="bg-red-600 text-white shadow-lg animate-in slide-in-from-top duration-300">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import Menu from "@/components/ui/Menu";
+import { EmergencyBanner } from "@/components/home/EmergencyBanner";
 
 /**
  * GlobalClient wraps the whole app with components that must run on the client side.
@@ -16,10 +17,13 @@ export default function GlobalClient({ children }: { children: React.ReactNode }
     <> 
       <Toaster position="top-center" />
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-        {/* Sticky top menu – previously rendered via ClientShell */}
-        <div className="container mx-auto px-2 py-2">
-          <Menu />
-        </div>
+        {/* Top bar: EmergencyBanner scrolls away; the Menu stays sticky. */}
+        <EmergencyBanner />
+        <header className="sticky top-0 z-50 bg-white/95 backdrop-blur shadow-sm dark:bg-gray-900/95">
+          <div className="container mx-auto px-2 py-2">
+            <Menu />
+          </div>
+        </header>
         {children}
       </ThemeProvider>
       {isProduction && (

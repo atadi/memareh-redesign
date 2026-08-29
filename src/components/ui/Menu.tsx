@@ -144,7 +144,7 @@ export function Menu() {
 
         <button
           onClick={toggleTheme}
-          aria-label={resolvedTheme === 'dark' ? 'روشن کردن تم' : 'تاریک کردن تم'}
+          aria-label={mounted && resolvedTheme === 'dark' ? 'روشن کردن تم' : 'تاریک کردن تم'}
           className="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition"
         >
           {mounted ? (
@@ -207,7 +207,7 @@ export function Menu() {
         </Link>
         <button
           onClick={toggleTheme}
-          aria-label={resolvedTheme === 'dark' ? 'روشن کردن تم' : 'تاریک کردن تم'}
+          aria-label={mounted && resolvedTheme === 'dark' ? 'روشن کردن تم' : 'تاریک کردن تم'}
           className="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition"
         >
           {mounted ? (
