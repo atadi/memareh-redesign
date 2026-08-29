@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
+import Menu from "@/components/ui/Menu";
 
 /**
  * GlobalClient wraps the whole app with components that must run on the client side.
@@ -12,9 +13,13 @@ import { Analytics } from "@vercel/analytics/next";
 export default function GlobalClient({ children }: { children: React.ReactNode }) {
   const isProduction = process.env.NODE_ENV === "production";
   return (
-    <>
+    <> 
       <Toaster position="top-center" />
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        {/* Sticky top menu – previously rendered via ClientShell */}
+        <div className="container mx-auto px-2 py-2">
+          <Menu />
+        </div>
         {children}
       </ThemeProvider>
       {isProduction && (
