@@ -1,27 +1,27 @@
-import { Hero } from '@/components/home/Hero'
-import { HowItWorks } from '@/components/home/HowItWorks'
-import { ServiceCategories } from '@/components/home/ServiceCategories'
-import { WhyChooseUs } from '@/components/home/WhyChooseUs'
-import { Testimonials } from '@/components/home/Testimonials'
-import { CTASection } from '@/components/home/CTASection'
-import { LatestArticles } from '@/components/home/LatestArticles'
-import { createPublicClient } from '@/lib/supabase/server-public'
+import { Hero } from '@/components/home/Hero';
+import { HowItWorks } from '@/components/home/HowItWorks';
+import { ServiceCategories } from '@/components/home/ServiceCategories';
+import { WhyChooseUs } from '@/components/home/WhyChooseUs';
+import { Testimonials } from '@/components/home/Testimonials';
+import { CTASection } from '@/components/home/CTASection';
+import { LatestArticles } from '@/components/home/LatestArticles';
+import { createPublicClient } from '@/lib/supabase/server-public';
 
-export const revalidate = 300
+export const revalidate = 300;
 
 export default async function HomePage() {
-  const supabase = createPublicClient()
+  const supabase = createPublicClient();
 
   const { data: rawArticles } = await supabase
     .from('articles')
     .select('*')
     .eq('status', 'published')
     .order('published_at', { ascending: false })
-    .limit(3)
+    .limit(3);
 
   const articles = (rawArticles ?? [])
-    .filter(a => a.slug && a.slug !== 'null')
-    .map(a => ({
+    .filter((a) => a.slug && a.slug !== 'null')
+    .map((a) => ({
       id: a.id,
       title: a.title,
       slug: a.slug,
@@ -36,13 +36,13 @@ export default async function HomePage() {
       averageRating: a.average_rating,
       ratingCount: a.rating_count,
       _count: a._count,
-    }))
+    }));
 
   return (
     <>
       <Hero />
-      <HowItWorks />
       <ServiceCategories />
+      <HowItWorks />
       <WhyChooseUs />
       <Testimonials />
 
@@ -54,5 +54,5 @@ export default async function HomePage() {
 
       <CTASection />
     </>
-  )
+  );
 }
