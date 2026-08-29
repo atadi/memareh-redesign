@@ -46,8 +46,7 @@
       "@/hooks/*": [
         "./src/lib/hooks/*"
       ]
-    },
-    "baseUrl": "."
+    }
   },
   "include": [
     "next-env.d.ts",
