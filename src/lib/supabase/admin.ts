@@ -1,18 +1,8 @@
 import 'server-only'
-import { createClient } from '@supabase/supabase-js'
-import { getSupabaseServerUrl, getSupabaseSecretKey } from '@/lib/config'
+import { createAdminSupabase } from '@/lib/supabase/factory.server'
 
+// Privileged admin client (service role). Server-only.
+// Re-exported for backward compatibility with API route importers.
 export function createSupabaseAdmin() {
-  const url = getSupabaseServerUrl()
-  const secretKey = getSupabaseSecretKey()
-
-  return createClient(url, secretKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-    db: {
-      schema: 'memareh',
-    },
-  })
+  return createAdminSupabase()
 }
