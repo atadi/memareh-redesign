@@ -73,7 +73,12 @@ export function ArticleRating({ articleId, currentRating, onRate }: ArticleRatin
 
       <div className="flex flex-col md:flex-row gap-8">
         {/* Rating Summary */}
-        <div className="flex-1">
+        <div
+          className="flex-1"
+          role="status"
+          aria-live="polite"
+          aria-label={`میانگین امتیاز ${stats.average.toFixed(1)} از ۵، بر اساس ${stats.total} رای`}
+        >
           <div className="text-center md:text-right">
             <div className="text-4xl font-bold text-yellow-500">
               {stats.average.toFixed(1)}
@@ -82,6 +87,8 @@ export function ArticleRating({ articleId, currentRating, onRate }: ArticleRatin
               {[1, 2, 3, 4, 5].map(star => (
                 <Star
                   key={star}
+                  role="img"
+                  aria-label={`${star} ستاره`}
                   className={`w-5 h-5 ${
                     star <= Math.round(stats.average)
                       ? 'fill-yellow-500 text-yellow-500'
@@ -136,9 +143,12 @@ export function ArticleRating({ articleId, currentRating, onRate }: ArticleRatin
               {[1, 2, 3, 4, 5].map(star => (
                 <button
                   key={star}
+                  type="button"
                   onClick={() => handleRate(star)}
                   onMouseEnter={() => setHoveredStar(star)}
                   onMouseLeave={() => setHoveredStar(0)}
+                  aria-label={`امتیاز ${star} از ۵`}
+                  aria-pressed={currentRating === star}
                   className="transition-transform hover:scale-110"
                 >
                   <Star
