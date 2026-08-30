@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { unstable_cache } from "next/cache";
+import Image from "next/image";
 import { createPublicClient } from "@/lib/supabase/server-public";
 import { getSiteUrl } from "@/lib/config";
 import { getPublishedArticleSlugs } from "@/lib/articles";
@@ -162,10 +163,13 @@ export default async function ArticlePage({
       <article className="min-h-screen bg-gray-50">
         <main className="max-w-4xl mx-auto px-6 py-10 bg-white">
           {article.featured_image && (
-            <img
+            <Image
               src={article.featured_image}
               alt={pickFeaturedImageAlt(article)}
-              className="w-full rounded-xl mb-8"
+              width={1200}
+              height={675}
+              sizes="(max-width: 896px) 100vw, 896px"
+              className="w-full h-auto rounded-xl mb-8"
             />
           )}
 

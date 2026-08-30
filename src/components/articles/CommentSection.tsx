@@ -14,6 +14,7 @@ import { formatDistanceToNow } from 'date-fns-jalali'
 import { faIR } from 'date-fns/locale'
 import toast from 'react-hot-toast'
 import { EmojiPicker } from './EmojiPicker'
+import Image from 'next/image'
 
 /**
  * Deterministic absolute-date formatter for comment timestamps.
@@ -132,9 +133,12 @@ function CommentItem({
         {/* Avatar */}
         <div className="flex-shrink-0">
           {comment.user.avatar_url ? (
-            <img
+            <Image
               src={comment.user.avatar_url}
               alt={comment.user.full_name}
+              width={40}
+              height={40}
+              unoptimized
               className="w-10 h-10 rounded-full"
             />
           ) : (

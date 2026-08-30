@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { 
   Clock, 
   Eye, 
@@ -100,9 +101,11 @@ export function ArticleCard({ article }: ArticleCardProps) {
         {/* Image Section */}
         <div className="aspect-video relative overflow-hidden bg-gray-100">
           {article.featured_image && article.featured_image.startsWith('http') ? (
-            <img
+            <Image
               src={article.featured_image}
               alt={article.title}
+              fill
+              sizes="(max-width: 768px) 100vw, 384px"
               className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
             />
           ) : (

@@ -145,9 +145,11 @@ export function Hero() {
           >
             <div className="hidden lg:block w-full max-w-3xl h-[520px] md:h-[640px] rounded-xl overflow-hidden relative isolate">
               {/* Local transparent PNG map (converted) */}
-              <img
+              <Image
                 src="/assets/areas/tehran_regions_transparent.png"
                 alt="نقشه تهران"
+                fill
+                unoptimized
                 className="w-full h-full object-contain"
               />
 
