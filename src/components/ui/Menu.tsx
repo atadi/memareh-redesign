@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import { isAdminUser } from '@/lib/auth-role'
+import Button from '@/components/ui/Button'
 
 /**
  * Pure derivation of the menu's auth display state from the resolved Supabase
@@ -142,17 +143,19 @@ export function Menu() {
         {/* Search is intentionally NOT in the global nav (the /search route 404s).
             Article search lives on /articles via ArticleFilters. */}
 
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={toggleTheme}
           aria-label={mounted && resolvedTheme === 'dark' ? 'روشن کردن تم' : 'تاریک کردن تم'}
-          className="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition"
+          className="p-2"
         >
           {mounted ? (
             <ThemeIcon className="w-5 h-5" />
           ) : (
             <span className="block w-5 h-5" />
           )}
-        </button>
+        </Button>
 
         {!loading && (
           <>
@@ -173,13 +176,15 @@ export function Menu() {
                   <User className="w-4 h-4" />
                   {displayName || 'کاربر'}
                 </Link>
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={handleLogout}
-                  className="flex items-center gap-1 text-sm text-red-500 hover:text-red-700 transition"
                   aria-label="خروج"
+                  className="flex items-center gap-1 text-sm text-red-500 hover:text-red-700"
                 >
                   <LogOut className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
@@ -205,17 +210,19 @@ export function Menu() {
         <Link href="/articles" className="p-2 bg-yellow-400 rounded-lg shadow-md">
           <BookOpen className="w-5 h-5 text-white" />
         </Link>
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={toggleTheme}
           aria-label={mounted && resolvedTheme === 'dark' ? 'روشن کردن تم' : 'تاریک کردن تم'}
-          className="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition"
+          className="p-2"
         >
           {mounted ? (
             <ThemeIcon className="w-5 h-5" />
           ) : (
             <span className="block w-5 h-5" />
           )}
-        </button>
+        </Button>
         {user && (
           <>
             {isAdmin && (

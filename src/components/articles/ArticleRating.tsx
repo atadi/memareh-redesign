@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Star } from 'lucide-react'
 import toast from 'react-hot-toast'
+import Button from '@/components/ui/Button'
 
 interface ArticleRatingProps {
   articleId: string
@@ -141,15 +142,16 @@ export function ArticleRating({ articleId, currentRating, onRate }: ArticleRatin
             
             <div className="flex justify-center gap-2">
               {[1, 2, 3, 4, 5].map(star => (
-                <button
+                <Button
                   key={star}
-                  type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => handleRate(star)}
                   onMouseEnter={() => setHoveredStar(star)}
                   onMouseLeave={() => setHoveredStar(0)}
                   aria-label={`امتیاز ${star} از ۵`}
                   aria-pressed={currentRating === star}
-                  className="transition-transform hover:scale-110"
+                  className="transition-transform hover:scale-110 p-1"
                 >
                   <Star
                     className={`w-8 h-8 ${
@@ -158,7 +160,7 @@ export function ArticleRating({ articleId, currentRating, onRate }: ArticleRatin
                         : 'text-gray-300 hover:text-yellow-300'
                     }`}
                   />
-                </button>
+                </Button>
               ))}
             </div>
 
