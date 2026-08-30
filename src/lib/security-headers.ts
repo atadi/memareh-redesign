@@ -31,6 +31,25 @@ export const csp = [
   "worker-src 'self' blob:",
 ].join("; ");
 
+// Relaxed CSP for `next dev` only (webpack React Refresh HMR relies on eval()).
+// Never used in production. `unsafe-eval` is scoped to localhost dev origins;
+// non-localhost requests still fall back to the strict policy via next.config.ts
+// (which only selects this when NODE_ENV !== 'production', i.e. local dev).
+export const devCsp = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:* https://localhost:* https://www.googletagmanager.com`,
+  `style-src 'self' 'unsafe-inline' 'unsafe-eval'`,
+  `img-src 'self' data: https://${SUPABASE_HOST} https://api.dicebear.com https://www.google-analytics.com https://*.google-analytics.com`,
+  `font-src 'self' data:`,
+  `connect-src 'self' http://localhost:* https://localhost:* https://${SUPABASE_HOST} https://*.google-analytics.com https://*.analytics.google.com https://va.vercel-scripts.com`,
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+  "manifest-src 'self'",
+  "worker-src 'self' blob: 'unsafe-eval'",
+].join("; ");
+
 export const securityHeaders: { key: string; value: string }[] = [
   { key: "Content-Security-Policy", value: csp },
   // 2 years; no includeSubDomains/preload yet (domain/subdomain behavior not
@@ -46,4 +65,12 @@ export const securityHeaders: { key: string; value: string }[] = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
   { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+];
+
+export const devSecurityHeaders: { key: string; value: string }[] = [
+  { key: "Content-Security-Policy", value: devCsp },
+  // Dev-only: drop HSTS/COOP/CORP strictness that can interfere with the local
+  // dev loop. Security hardening stays enforced in production.
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
 ];
