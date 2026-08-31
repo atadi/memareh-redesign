@@ -48,7 +48,7 @@ export function absoluteImageUrl(
 ): string {
   if (!isNonEmpty(url)) return `${siteUrl}${DEFAULT_OG_IMAGE}`
   try {
-    // eslint-disable-next-line no-new
+     
     new URL(url)
     return url
   } catch {
