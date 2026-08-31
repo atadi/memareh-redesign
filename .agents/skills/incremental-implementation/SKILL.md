@@ -226,6 +226,52 @@ exact cadence — it is the user's stated preference, not a default:
 This cadence overrides the skill's default "move to the next slice"
 autonomy: here the user drives progression. Report + wait each time.
 
+## Classifying stray work before committing (this project)
+
+When the user asks you to "check the stash / decide gitignore or commit as
+chore" mid-plan, classify each leftover item by intent, not by file type:
+
+1. **Session-local noise** — `nul` device files (0-byte artifacts from a stray
+   `> nul` redirect), `AppData\Local\Temp\next-panic-*.log` copies, one-off
+   repro dumps. → **delete + `.gitignore`**, never commit.
+2. **Generalizable troubleshooting notes** — root-cause write-ups that a future
+   session on the same machine/project would hit again (e.g. the Windows
+   Turbopack symlink-privilege panic, the stale `.next/dev/lock` after a killed
+   dev server). → write under `docs/` or
+   `.agents/skills/<skill>/references/<topic>.md`, then commit as `chore:`.
+3. **Skill captures** — edits to `.agents/skills/<name>/SKILL.md` and
+   `references/*.md` that encode a durable lesson (slice cadence, known bugs,
+   provider quirks). → commit as `chore:` so the next session inherits them.
+   If a skill was loaded this session and turned out wrong or outdated, patch it
+   here rather than leaving it stale.
+4. **Documentation updates** — `README.md`, `CONTRIBUTING.md`, `docs/setup.md`
+   and similar. → commit as `docs:` when the plan explicitly includes a
+   documentation task (e.g. Task 11).
+5. **Real code/test/config additions** that started as exploration and landed as
+   a reusable artifact (feature flags, unit tests, config tweaks). → commit with
+   the conventional type that matches the change (`chore:`, `fix:`, `feat:`,
+   `test:`, `perf:`, `ci:`, `refactor:`, `ui:`, `accessibility:`).
+
+**Rule of thumb:** a `.md` that is only session scratch is not "documentation";
+a small `src/lib/*.ts` that encodes a reusable pattern is code even when tiny.
+When unsure, ask before committing — don't silently commit session-local noise.
+
+### Pitfall — typed flag helpers and `null` in tests
+
+If the flag helper's signature is `isEnabled(feature: string): boolean`, passing
+`null` in a test under `strictNullChecks` is a **type error (TS2345)**, not a
+runtime edge case worth exercising through the typed API. Prefer:
+
+- test the real contract: empty string, whitespace, missing env var, exact
+  `"true"` vs other values;
+- if you want to assert "undefined-like" behavior, either use the untyped escape
+  hatch only where genuinely needed, or widen the signature to `string | undefined`
+  **if that is the actual intended contract** — decide once and keep prod + tests
+  consistent.
+
+Deciding "null is not a valid feature name" and removing the test is usually the
+cleaner path than widening the signature to accept `null`.
+
 ## Increment Checklist
 
 After each increment, verify:
