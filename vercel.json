@@ -1,4 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "ignoreCommand": "node scripts/vercel-ignore-build.cjs"
+  "ignoreCommand": "node scripts/vercel-ignore-build.cjs",
+  "buildCommand": "rm -rf .next && pnpm build"
 }

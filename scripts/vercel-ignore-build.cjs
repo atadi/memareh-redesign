@@ -133,8 +133,14 @@ function getChangedFiles() {
   let range;
   if (base) {
     range = `${base} HEAD`;
+  } else if (process.env.VERCEL) {
+    // Vercel's shallow clone often lacks HEAD^ for the first push of a new
+    // commit and has no VERCEL_GIT_PREVIOUS_SHA for skill-only / doc-only
+    // commits. In that case we cannot reliably compute the diff, so we fall
+    // back to guessing from the shallow clone's reachable range. If that too
+    // fails, we BUILD (fail-safe).
+    range = 'HEAD~10..HEAD';
   } else {
-    // Single-commit fallback. If shallow clone lacks HEAD^, execSync throws and we BUILD.
     range = 'HEAD^ HEAD';
   }
   let out;
