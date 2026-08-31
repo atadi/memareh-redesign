@@ -18,7 +18,7 @@ const SUPABASE_HOST = "uakvurskrcyvksxfvhho.supabase.co";
 // which suppresses those requests entirely rather than widening CSP.
 export const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com`,
+  `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://va.vercel-scripts.com`,
   `style-src 'self' 'unsafe-inline'`,
   `img-src 'self' data: https://${SUPABASE_HOST} https://api.dicebear.com https://www.google-analytics.com https://*.google-analytics.com`,
   `font-src 'self' data:`,
@@ -37,7 +37,7 @@ export const csp = [
 // (which only selects this when NODE_ENV !== 'production', i.e. local dev).
 export const devCsp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:* https://localhost:* https://www.googletagmanager.com`,
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:* https://localhost:* https://www.googletagmanager.com https://va.vercel-scripts.com`,
   `style-src 'self' 'unsafe-inline' 'unsafe-eval'`,
   `img-src 'self' data: https://${SUPABASE_HOST} https://api.dicebear.com https://www.google-analytics.com https://*.google-analytics.com`,
   `font-src 'self' data:`,

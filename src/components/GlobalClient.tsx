@@ -41,9 +41,9 @@ export default function GlobalClient({ children }: { children: React.ReactNode }
               gtag('config', 'G-EVR583NXGN');
             `}
           </Script>
+          <Analytics />
         </>
       )}
-      <Analytics />
     </>
   );
 }

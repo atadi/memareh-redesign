@@ -119,7 +119,8 @@ export function Menu() {
           width={112}
           height={32}
           unoptimized
-          className="w-28 h-auto dark:hidden"
+          className="w-28 dark:hidden"
+          style={{ height: "auto" }}
         />
         <Image
           src="/assets/logo/logo-dark.svg"
@@ -127,7 +128,8 @@ export function Menu() {
           width={112}
           height={32}
           unoptimized
-          className="w-28 h-auto hidden dark:block"
+          className="w-28 hidden dark:block"
+          style={{ height: "auto" }}
         />
       </a>
 
