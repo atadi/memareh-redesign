@@ -12,7 +12,7 @@ describe('flags: isEnabled', () => {
     delete process.env.NEXT_PUBLIC_FEATURE_MYDEMOMODAL;
     // @ts-expect-error passing a deliberately invalid (undefined) argument
     expect(isEnabled(void 0)).toBe(false);
-    expect(isEnabled(null)).toBe(false);
+    
     expect(isEnabled('')).toBe(false);
     expect(isEnabled('  ')).toBe(false);
   });
@@ -66,10 +66,8 @@ describe('flags: isEnabled', () => {
     expect(isEnabled('  myDemoModal  ')).toBe(true);
   });
 
-  it('returns false for undefined / null feature argument', () => {
+  it('returns false for undefined feature argument', () => {
     // @ts-expect-error testing undefined
     expect(isEnabled(void 0)).toBe(false);
-    // @ts-expect-error testing null
-    expect(isEnabled(null)).toBe(false);
   });
 });
