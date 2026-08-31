@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import { isAdminUser } from '@/lib/auth-role'
 import Button from '@/components/ui/Button'
-import Image from 'next/image'
 
 /**
  * Pure derivation of the menu's auth display state from the resolved Supabase
@@ -113,23 +112,15 @@ export function Menu() {
   return (
     <div className="flex items-center justify-between w-full">
       <a href="/" className="flex items-center gap-3">
-        <Image
+        <img
           src="/assets/logo/logo.svg"
           alt="معماره"
-          width={112}
-          height={32}
-          unoptimized
-          className="w-28 dark:hidden"
-          style={{ height: "auto" }}
+          className="w-28 h-auto dark:hidden"
         />
-        <Image
+        <img
           src="/assets/logo/logo-dark.svg"
           alt="معماره"
-          width={112}
-          height={32}
-          unoptimized
-          className="w-28 hidden dark:block"
-          style={{ height: "auto" }}
+          className="w-28 h-auto hidden dark:block"
         />
       </a>
 
