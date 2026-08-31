@@ -196,6 +196,36 @@ nothing is broken."
 
 Be explicit about what's in scope and what's NOT in scope for each increment.
 
+## User-Driven Slice Cadence (this project)
+
+When the user hands you a multi-slice plan and says "implement one by one,
+report, ask for a smoke test, then commit, push at the end", follow this
+exact cadence — it is the user's stated preference, not a default:
+
+1. **Cleanliness first.** Before the first slice, check `git status`.
+   If dirty, commit the in-progress baseline (descriptive message) so each
+   planned slice lands as its own commit. Don't mix baseline work into
+   slice 1.
+2. **Per slice:** implement → run the relevant verification (build,
+   `tsc --noEmit`, `pnpm test:unit`, `node scripts/check-no-jsdom.cjs` as
+   the change warrants) → **report what you did in a short table** (file /
+   change / why) → **ask whether a smoke test is needed** (e.g. `pnpm dev`
+   at the URL) → **commit that slice with a descriptive message** → then
+   **stop and wait for the user's command to proceed**. Do not auto-advance
+   to the next slice.
+3. **Push only at the end.** `git push` happens once, after the user has
+   approved all slices — never per slice, never mid-plan.
+4. **Warnings are in scope.** "Resolve all issues, even warnings" means:
+   fix TS/lint warnings (unused vars, deprecated options, missing module
+   declarations), not just errors. But keep each fix scoped to what was
+   reported — pre-existing, codebase-wide warnings (e.g. intentional
+   `react-hooks/exhaustive-deps`, unrelated unused imports) are out of
+   scope unless the user points at them; note them and offer a separate
+   cleanup pass rather than silently broadening the commit.
+
+This cadence overrides the skill's default "move to the next slice"
+autonomy: here the user drives progression. Report + wait each time.
+
 ## Increment Checklist
 
 After each increment, verify:

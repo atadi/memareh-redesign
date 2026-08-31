@@ -154,6 +154,50 @@ manual rather than from memory.
 - `get_errors` and `get_page_metadata` need at least one navigation
   to populate.
 
+## Windows / pnpm Turbopack dev panic (os error 1314)
+
+On **Windows with pnpm**, `next dev --turbopack` can crash on the
+*first compile of any route* with a hard Turbopack panic:
+
+```
+create symlink to ../../../node_modules/.pnpm/postcss@.../node_modules/postcss
+Caused by: A required privilege is not held by the client. (os error 1314)
+```
+
+Error 1314 = `ERROR_PRIVILEGE_NOT_HELD`. Turbopack's dev server tries
+to create a symlink into the pnpm store, and a normal Windows account
+lacks the **Create symbolic links** privilege (`SeCreateSymbolicLinkPrivilege`).
+This is environmental, **not a code defect** — it fires regardless of
+which route you load, and is unrelated to your edits or to `next build`
+(which does not hit this symlink step). Symptom often shows as a 500 on
+every route after the panic.
+
+**Workaround (dev only):** Next 16 still ships the webpack dev server.
+Run `next dev --webpack` (or set the `package.json` `dev` script to
+`next dev --webpack`). Production `build`/`start` stay on Turbopack and
+are unaffected. If you want Turbopack dev back later: enable **Developer
+Mode** (Settings → System → For developers) or launch the terminal/IDE
+as Administrator, then flip the script back.
+
+**Stale lock after a crash:** a killed Turbopack run leaves
+`.next/dev/lock`, so the next `next dev` (webpack or not) fails with
+`Unable to acquire lock ... is another instance of next dev running?`.
+Clear it: `rm -rf .next/dev` (and `taskkill /PID <pid> /F` any zombie
+`node.exe` holding the port — MSYS needs forward slashes: `taskkill /PID 47548 /F`).
+Then restart.
+
+**Using `curl` for a server-side panic is allowed here.** The "don't
+fall back to curl" rule (above) is specifically about *blank browser
+sessions* during the edit/verify loop. When the user reports a *server*
+500 / Turbopack panic, `curl -s -o <outfile> -w "%{http_code}" <url>`
+is the correct probe to prove the route renders (200 + real body, 0
+error markers) under `next dev --webpack`. Write the body to a Windows
+path (`C:/Users/<you>/AppData/Local/Temp/...`), not `/tmp` — MSYS maps
+`/tmp` to `C:\tmp`, which often doesn't exist.
+
+See `references/turbopack-windows-symlink-panic.md` for the full recipe
+and the article-route verification that confirmed the route was healthy.
+
 ## reference
 
 All tools below are present once preflight passes. If `tools/list`

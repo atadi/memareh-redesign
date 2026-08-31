@@ -63,3 +63,6 @@ supabase/.temp/
 
 # graphify knowledge-graph output (generated tooling artifact — ARCH-02)
 graphify-out/
+
+# Windows redirect artifact (stray > nul)
+nul
