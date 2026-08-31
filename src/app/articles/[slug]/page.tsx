@@ -169,6 +169,8 @@ export default async function ArticlePage({
               width={1200}
               height={675}
               sizes="(max-width: 896px) 100vw, 896px"
+              loading="eager"
+              priority
               className="w-full h-auto rounded-xl mb-8"
             />
           )}
