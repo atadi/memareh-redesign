@@ -21,7 +21,7 @@ export default defineConfig({
     },
   },
   test: {
-    include: ['tests/*.test.ts', 'tests/accessibility/**/*.test.tsx', 'tests/ui/**/*.test.tsx'],
+    include: ['tests/*.test.ts', 'tests/accessibility/**/*.test.tsx', 'tests/ui/**/*.test.tsx', 'tests/flags.test.ts'],
     exclude: ['tests/rls/**', 'tests/api/**'],
     environment: 'node',
     setupFiles: ['tests/setup/dom-parser.ts'],
