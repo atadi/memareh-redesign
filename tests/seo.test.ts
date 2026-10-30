@@ -224,9 +224,15 @@ describe('seo: structured data', () => {
   it('canonical_url with custom value flows into both Article and Breadcrumb', () => {
     const custom = 'https://www.memareh.com/articles/custom'
     const a = baseArticle({ canonical_url: custom })
+
     expect((buildArticleJsonLd(a, SITE) as any).url).toBe(custom)
+
     expect(
       (buildBreadcrumbJsonLd(a, SITE) as any).itemListElement[1].item,
+    ).toBe(`${SITE}/articles`)
+
+    expect(
+      (buildBreadcrumbJsonLd(a, SITE) as any).itemListElement[2].item,
     ).toBe(custom)
   })
 })
