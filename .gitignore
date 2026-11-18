@@ -64,5 +64,8 @@ supabase/.temp/
 # graphify knowledge-graph output (generated tooling artifact — ARCH-02)
 graphify-out/
 
+# Claude Code local workspace metadata
+.claude/
+
 # Windows redirect artifact (stray > nul)
 nul
