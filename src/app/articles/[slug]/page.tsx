@@ -189,7 +189,6 @@ export default async function ArticlePage({
         <section className="max-w-4xl mx-auto px-6 py-10">
           <RelatedArticles
             currentArticleId={article.id}
-            category={article.category}
           />
         </section>
 

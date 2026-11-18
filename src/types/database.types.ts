@@ -16,6 +16,13 @@ export interface ArticleTag {
   created_at: string | null
 }
 
+export interface ArticleRelatedArticle {
+  article_id: string
+  related_article_id: string
+  position: number
+  created_at: string
+}
+
 export interface ArticleRow {
   id: string
   title: string
@@ -139,6 +146,21 @@ export interface Database {
           article_id?: string
           tag_id?: string
           created_at?: string | null
+        }
+      }
+      article_related_articles: {
+        Row: ArticleRelatedArticle
+        Insert: {
+          article_id: string
+          related_article_id: string
+          position: number
+          created_at?: string
+        }
+        Update: {
+          article_id?: string
+          related_article_id?: string
+          position?: number
+          created_at?: string
         }
       }
       services: {

@@ -21,6 +21,7 @@ import {
   FileText,
   User,
   ChevronDown,
+  ChevronUp,
   Video,
   Star,
   Loader2,
@@ -40,6 +41,14 @@ import toast from 'react-hot-toast'
 import { RichTextEditor } from './RichTextEditor'
 import { ArticleContent } from '@/components/articles/ArticleContent'
 import type { ArticleTag } from '@/types/database.types'
+import {
+  addEditorialRelatedArticle,
+  filterEditorialRelatedCandidates,
+  moveEditorialRelatedArticle,
+  removeEditorialRelatedArticle,
+  MAX_EDITORIAL_RELATED_ARTICLES,
+  type EditorialRelatedArticle,
+} from '@/lib/editorial-related-articles'
 
 const CATEGORIES = [
   { value: 'safety_tips', label: 'نکات ایمنی' },
@@ -77,6 +86,8 @@ interface ArticleEditorProps {
   onSave: () => void
   onCancel: () => void
 }
+
+type RelatedArticleSelection = EditorialRelatedArticle
 
 export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps) {
   const supabase = createClient()
@@ -124,6 +135,10 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
   const [selectedTags, setSelectedTags] = useState<ArticleTag[]>([])
   const [tagSearch, setTagSearch] = useState('')
   const [showTagDropdown, setShowTagDropdown] = useState(false)
+  const [selectedRelatedArticles, setSelectedRelatedArticles] = useState<RelatedArticleSelection[]>([])
+  const [relatedArticleSearch, setRelatedArticleSearch] = useState('')
+  const [relatedArticleCandidates, setRelatedArticleCandidates] = useState<RelatedArticleSelection[]>([])
+  const [loadingRelatedArticles, setLoadingRelatedArticles] = useState(false)
   const [slugExists, setSlugExists] = useState(false)
   const [checkingSlug, setCheckingSlug] = useState(false)
 
@@ -154,8 +169,10 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     loadTags()
     if (article?.id) {
       loadArticleTags(article.id)
+      loadRelatedArticles(article.id)
     } else {
       setSelectedTags([])
+      setSelectedRelatedArticles([])
     }
   }, [article?.id])
 
@@ -178,6 +195,71 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     setSelectedTags(loadedTags)
     resetForm(article)
   }
+
+  const loadRelatedArticles = async (articleId: string) => {
+    const { data, error } = await supabase
+      .from('article_related_articles')
+      .select(`
+        position,
+        related_article:articles!article_related_articles_related_article_id_fkey(
+          id,
+          title,
+          slug,
+          category
+        )
+      `)
+      .eq('article_id', articleId)
+      .order('position', { ascending: true })
+
+    if (error) {
+      toast.error('بارگذاری مقالات مرتبط ناموفق بود')
+      console.error('[related-articles] failed to load selections:', error)
+      return
+    }
+
+    setSelectedRelatedArticles(
+      (data ?? [])
+        .map((relation) => {
+          const related = Array.isArray(relation.related_article)
+            ? relation.related_article[0]
+            : relation.related_article
+          return related as RelatedArticleSelection | null
+        })
+        .filter((related): related is RelatedArticleSelection => Boolean(related)),
+    )
+  }
+
+  const searchRelatedArticles = async (query: string) => {
+    setLoadingRelatedArticles(true)
+    let request = supabase
+      .from('articles')
+      .select('id, title, slug, category')
+      .eq('status', 'published')
+      .order('title')
+      .limit(20)
+
+    if (article?.id) request = request.neq('id', article.id)
+    const { data, error } = await request
+    if (error) {
+      console.error('[related-articles] failed to search:', error)
+      setRelatedArticleCandidates([])
+    } else {
+      setRelatedArticleCandidates(
+        filterEditorialRelatedCandidates(
+          data ?? [],
+          article?.id,
+          selectedRelatedArticles,
+          query,
+        ),
+      )
+    }
+    setLoadingRelatedArticles(false)
+  }
+
+  useEffect(() => {
+    if (activeTab !== 'advanced') return
+    void searchRelatedArticles(relatedArticleSearch)
+  }, [activeTab, relatedArticleSearch, article?.id, selectedRelatedArticles])
 
   const loadAuthors = async () => {
     const { data } = await supabase
@@ -408,6 +490,25 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     setSelectedTags(selectedTags.filter(t => t.id !== tagId))
   }
 
+  const handleRelatedArticleSelect = (related: RelatedArticleSelection) => {
+    if (selectedRelatedArticles.length >= MAX_EDITORIAL_RELATED_ARTICLES) {
+      toast.error('حداکثر ۳ مقاله مرتبط می‌توانید انتخاب کنید')
+      return
+    }
+    setSelectedRelatedArticles(addEditorialRelatedArticle(selectedRelatedArticles, related))
+    setRelatedArticleSearch('')
+  }
+
+  const handleRelatedArticleRemove = (relatedId: string) => {
+    setSelectedRelatedArticles(removeEditorialRelatedArticle(selectedRelatedArticles, relatedId))
+  }
+
+  const moveRelatedArticle = (index: number, direction: -1 | 1) => {
+    setSelectedRelatedArticles(
+      moveEditorialRelatedArticle(selectedRelatedArticles, index, direction),
+    )
+  }
+
   const filteredTags = tagSearch.trim()
     ? tags.filter(
         t =>
@@ -594,6 +695,37 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
             .limit(1)
           if (!remaining || remaining.length === 0) {
             await supabase.from('article_tags').delete().eq('id', removedId)
+          }
+        }
+      }
+
+      if (articleId) {
+        const { error: removeRelatedError } = await supabase
+          .from('article_related_articles')
+          .delete()
+          .eq('article_id', articleId)
+
+        if (removeRelatedError) {
+          toast.error('مقاله ذخیره شد، اما مقالات مرتبط بروزرسانی نشدند')
+          console.error('[related-articles] failed to clear relations:', removeRelatedError)
+          return
+        }
+
+        if (selectedRelatedArticles.length > 0) {
+          const { error: insertRelatedError } = await supabase
+            .from('article_related_articles')
+            .insert(
+              selectedRelatedArticles.map((related, index) => ({
+                article_id: articleId,
+                related_article_id: related.id,
+                position: index + 1,
+              })),
+            )
+
+          if (insertRelatedError) {
+            toast.error('مقاله ذخیره شد، اما مقالات مرتبط بروزرسانی نشدند')
+            console.error('[related-articles] failed to insert relations:', insertRelatedError)
+            return
           }
         }
       }
@@ -1367,6 +1499,104 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
       {activeTab === 'advanced' && (
         <div className="max-w-2xl space-y-6">
           <h3 className="font-bold">تنظیمات پیشرفته</h3>
+
+          <div className="border rounded-lg p-4 space-y-4">
+            <div>
+              <h4 className="font-bold">مقالات مرتبط</h4>
+              <p className="text-xs text-gray-500 mt-1">
+                حداکثر ۳ مقاله را برای نمایش در انتهای این مقاله انتخاب کنید.
+              </p>
+            </div>
+
+            {selectedRelatedArticles.length > 0 && (
+              <ol className="space-y-2">
+                {selectedRelatedArticles.map((related, index) => (
+                  <li
+                    key={related.id}
+                    className="flex items-center gap-2 rounded-lg border bg-gray-50 p-2"
+                  >
+                    <span className="w-6 text-center font-bold text-gray-500">{index + 1}</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium truncate">{related.title}</p>
+                      {related.slug && (
+                        <p dir="ltr" className="text-xs text-gray-500 truncate text-right">
+                          {related.slug}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => moveRelatedArticle(index, -1)}
+                      disabled={index === 0}
+                      aria-label="انتقال به بالا"
+                      className="rounded p-1 text-gray-600 hover:bg-white disabled:opacity-30"
+                    >
+                      <ChevronUp className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveRelatedArticle(index, 1)}
+                      disabled={index === selectedRelatedArticles.length - 1}
+                      aria-label="انتقال به پایین"
+                      className="rounded p-1 text-gray-600 hover:bg-white disabled:opacity-30"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRelatedArticleRemove(related.id)}
+                      aria-label={`حذف ${related.title}`}
+                      className="rounded p-1 text-red-600 hover:bg-red-50"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            )}
+
+            <div className="relative">
+              <Search className="absolute right-3 top-3 w-4 h-4 text-gray-400" />
+              <input
+                type="search"
+                value={relatedArticleSearch}
+                onChange={(event) => setRelatedArticleSearch(event.target.value)}
+                placeholder="جستجوی مقاله منتشرشده..."
+                className={`${inputClasses} pr-10`}
+                disabled={selectedRelatedArticles.length >= 3}
+              />
+            </div>
+
+            {selectedRelatedArticles.length >= 3 && (
+              <p className="text-xs text-amber-700">
+                سقف ۳ مقاله انتخاب شده است. برای انتخاب مقاله دیگر، ابتدا یکی را حذف کنید.
+              </p>
+            )}
+
+            {selectedRelatedArticles.length < 3 && (relatedArticleSearch.trim() || relatedArticleCandidates.length > 0) && (
+              <div className="max-h-52 overflow-y-auto rounded-lg border divide-y">
+                {loadingRelatedArticles ? (
+                  <p className="p-3 text-sm text-gray-500">در حال جستجو...</p>
+                ) : relatedArticleCandidates.length > 0 ? (
+                  relatedArticleCandidates.map((candidate) => (
+                    <button
+                      key={candidate.id}
+                      type="button"
+                      onClick={() => handleRelatedArticleSelect(candidate)}
+                      className="w-full px-3 py-2 text-right hover:bg-gray-50"
+                    >
+                      <span className="block font-medium truncate">{candidate.title}</span>
+                      <span className="block text-xs text-gray-500 truncate">
+                        {candidate.slug || candidate.category || ''}
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <p className="p-3 text-sm text-gray-500">مقاله‌ای پیدا نشد</p>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* --- Local (per-article) CSS ------------------------------------ */}
           <div className="border rounded-lg p-4 space-y-3">
