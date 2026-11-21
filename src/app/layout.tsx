@@ -26,9 +26,7 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>
       <head>
-        <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32x32.png" />
-        <link rel="icon" type="image/svg+xml" sizes="any" href="/assets/logo/favicon.svg" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/assets/logo/apple-touch-icon.png" />
+        {/* Favicons are emitted by Next.js metadata; see buildRootMetadata in src/lib/seo.ts. */}
 
         {/* Analytics and Google Tag Manager are now handled in GlobalClient */}
 

@@ -278,11 +278,9 @@ export function buildRootMetadata(siteUrl: string): Metadata {
     publisher: SITE_NAME,
     icons: {
       icon: [
-        { url: '/assets/logo/favicon.svg', type: 'image/svg+xml', sizes: 'any' },
         { url: '/assets/logo/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
       ],
       apple: [{ url: '/assets/logo/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
-      shortcut: '/assets/logo/favicon.svg',
     },
     alternates: { canonical: siteUrl },
     openGraph: {

@@ -263,6 +263,22 @@ describe('seo: site graph + listing + private + sitemap', () => {
     expect(m.title).toBe(m.twitter?.title)
   })
 
+  it('root metadata uses only the lightweight PNG favicon and Apple touch icon', () => {
+    const m = buildRootMetadata(SITE)
+    const icons = m.icons
+    if (!icons || typeof icons === 'string' || Array.isArray(icons) || icons instanceof URL) {
+      throw new Error('root metadata must define icon descriptors')
+    }
+    expect(Array.isArray(icons.icon) ? icons.icon : [icons.icon]).toEqual([
+      { url: '/assets/logo/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ])
+    expect(Array.isArray(icons.apple) ? icons.apple : [icons.apple]).toEqual([
+      { url: '/assets/logo/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ])
+    expect(icons.shortcut).toBeUndefined()
+    expect(JSON.stringify(icons)).not.toContain('favicon.svg')
+  })
+
   it('private pages are noindex', () => {
     const m = buildPrivateMetadata('ورود')
     expect(m.robots).toEqual({ index: false, follow: false })
