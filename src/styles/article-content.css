@@ -52,6 +52,10 @@
   --article-gap: 1rem;
   --article-block-space: 2rem;
 
+  /* Local article z-index values stay inside this stacking context and cannot
+     compete with global navigation, banners, or modal layers. */
+  isolation: isolate;
+
   direction: rtl;
   text-align: start;
   color: var(--article-text);

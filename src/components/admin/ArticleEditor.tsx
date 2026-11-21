@@ -28,7 +28,11 @@ import {
   FileImage,
 } from 'lucide-react'
 import { sanitizeHtml } from '@/lib/html-sanitizer'
-import { sanitizeArticleCss } from '@/lib/article-css'
+import {
+  sanitizeArticleCss,
+  groupArticleCssIssues,
+  formatArticleCssIssueLines,
+} from '@/lib/article-css'
 import {
   analyzeArticleHtml,
   optimizeArticleHtml,
@@ -754,6 +758,13 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     if (!customCss.trim()) return []
     return sanitizeArticleCss(customCss, article?.id || 'preview').issues
   }, [customCss, article?.id])
+
+  // Group repeated problem types so a long stylesheet produces a short summary
+  // instead of a wall of near-identical red lines. Line numbers are preserved.
+  const groupedCssIssues = useMemo(
+    () => groupArticleCssIssues(customCssIssues),
+    [customCssIssues],
+  )
 
   // ---- Optimizer (بهینه‌سازی سئو) ----
   // Stage 1: Analyze — purely read-only over current content + SEO metadata.
@@ -1616,15 +1627,17 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
             </div>
 
             <p className="text-xs text-gray-500 leading-6">
-              این استایل فقط روی همین مقاله اعمال می‌شود. از کلاس‌های طراحی مقاله
-              (مانند <code className="font-mono">.article-callout</code> یا{' '}
-              <code className="font-mono">.article-step</code>) استفاده کنید.
-              دستورهایی مثل <code className="font-mono">@import</code>،{' '}
-              <code className="font-mono">url()</code>،{' '}
-              <code className="font-mono">position: fixed</code> و انتخابگرهای
-              سراسری (<code className="font-mono">body</code>،{' '}
-              <code className="font-mono">html</code>،{' '}
-              <code className="font-mono">:root</code>) مجاز نیستند.
+              این استایل فقط روی همین مقاله اعمال می‌شود. انتخابگرهای معمولی،{' '}
+              <code className="font-mono">@media</code>،{' '}
+              <code className="font-mono">@supports</code>،{' '}
+              <code className="font-mono">@container</code>،{' '}
+              <code className="font-mono">@layer</code>،{' '}
+              <code className="font-mono">position: sticky</code>، انیمیشن‌های
+              محلی و مقادیر مجاز <code className="font-mono">z-index</code> پشتیبانی
+              می‌شوند. <code className="font-mono">position: fixed</code>،{' '}
+              <code className="font-mono">@import</code>،{' '}
+              <code className="font-mono">url()</code>، انتخابگرهای سراسری و تلاش
+              برای خروج از استایل مجاز نیستند.
             </p>
 
             <textarea
@@ -1637,19 +1650,28 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
               placeholder={'.article-callout {\n  border-inline-start-color: #059669;\n}'}
             />
 
-            {customCssIssues.length > 0 ? (
+            {groupedCssIssues.length > 0 ? (
               <div
                 role="alert"
                 className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700"
               >
-                <p className="font-bold mb-1">این CSS شامل دستورات غیرمجاز است.</p>
+                <p className="font-bold mb-1">
+                  این CSS شامل {groupedCssIssues.length} نوع دستور پشتیبانی نشده است.
+                </p>
                 <ul className="list-disc pr-5 space-y-1">
-                  {customCssIssues.slice(0, 6).map((issue, i) => (
+                  {groupedCssIssues.slice(0, 6).map((group, i) => (
                     <li key={i}>
-                      خط {issue.line}: {issue.message}
+                      <span className="font-mono">{group.message}</span>
+                      {' — '}
+                      {formatArticleCssIssueLines(group.lines)}
                     </li>
                   ))}
                 </ul>
+                {groupedCssIssues.length > 6 && (
+                  <p className="mt-1 text-xs">
+                    و {groupedCssIssues.length - 6} نوع دیگر در اینجا نمایش داده نشد.
+                  </p>
+                )}
               </div>
             ) : (
               customCss.trim() !== '' && (

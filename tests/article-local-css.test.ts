@@ -69,6 +69,12 @@ describe('sanitizeArticleCss: allowed CSS', () => {
   it('allows a moderate z-index', () => {
     expect(sanitizeArticleCss('.x { z-index: 3; }', ID_A).ok).toBe(true)
   })
+
+  it('allows position: sticky', () => {
+    const r = sanitizeArticleCss('.x { position: sticky; top: 0; }', ID_A)
+    expect(r.ok).toBe(true)
+    expect(r.css).toContain('position: sticky')
+  })
 })
 
 describe('sanitizeArticleCss: prohibited constructs are rejected', () => {
@@ -88,7 +94,6 @@ describe('sanitizeArticleCss: prohibited constructs are rejected', () => {
     ['-moz-binding', '.x { -moz-binding: url(evil.xml); }'],
     ['behavior', '.x { behavior: url(evil.htc); }'],
     ['position fixed', '.x { position: fixed; inset: 0; }'],
-    ['position sticky', '.x { position: sticky; }'],
     ['extreme z-index', '.x { z-index: 999999; }'],
     ['style tag breakout', '.x { color: red; } </style><script>alert(1)</script>'],
     ['@font-face', '@font-face { font-family: x; }'],
