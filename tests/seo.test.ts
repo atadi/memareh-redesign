@@ -11,6 +11,7 @@ import {
   buildContactMetadata,
   buildRobots,
   buildPublicSitemap,
+  buildPublicRedirects,
   generatedArticleCanonical,
   resolveCanonicalUrl,
   absoluteImageUrl,
@@ -301,28 +302,60 @@ describe('seo: site graph + listing + private + sitemap', () => {
     expect(m.robots).toEqual({ index: true, follow: true })
   })
 
-  it('robots disallow auth surfaces and point at the sitemap', () => {
+  it('robots disallows only admin/api and points at the sitemap', () => {
     const r = buildRobots(SITE)
     expect(r.sitemap).toBe(`${SITE}/sitemap.xml`)
-    expect(r.rules).toEqual(
-      expect.objectContaining({
-        disallow: expect.arrayContaining(['/admin', '/login', '/register', '/profile']),
-      }),
+    const rules = Array.isArray(r.rules) ? r.rules : [r.rules]
+    expect(rules).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          userAgent: '*',
+          disallow: expect.arrayContaining(['/admin', '/api']),
+        }),
+      ]),
+    )
+    const disallow = rules.flatMap((rule) =>
+      Array.isArray(rule.disallow) ? rule.disallow : rule.disallow ? [rule.disallow] : [],
+    )
+    expect(disallow).not.toContain('/login')
+    expect(disallow).not.toContain('/register')
+    expect(disallow).not.toContain('/profile')
+  })
+
+  it('sitemap omits the non-existent /contact-us route and invalid slugs', () => {
+    const entries = buildPublicSitemap(SITE, [
+      { slug: 'a', updated_at: '2026-01-15T00:00:00Z' },
+      { slug: 'brghkar-fori-tehran       ', updated_at: '2026-01-16T00:00:00Z' },
+      { slug: '', updated_at: null },
+    ])
+    const urls = entries.map((e) => e.url)
+    expect(urls).toEqual([SITE, `${SITE}/articles`, `${SITE}/articles/a`])
+    expect(entries[0].lastModified).toEqual(new Date('2026-01-15T00:00:00Z'))
+  })
+
+  it('permanently redirects legacy /index.html to the canonical homepage', () => {
+    expect(buildPublicRedirects()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          source: '/index.html',
+          destination: '/',
+          permanent: true,
+        }),
+      ]),
     )
   })
 
-  it('sitemap includes home, /articles, /contact-us, and article URLs with stable home lastmod', () => {
-    const entries = buildPublicSitemap(SITE, [
-      { slug: 'a', updated_at: '2026-01-15T00:00:00Z' },
-    ])
-    const urls = entries.map((e) => e.url)
-    expect(urls).toEqual([
-      SITE,
-      `${SITE}/articles`,
-      `${SITE}/contact-us`,
-      `${SITE}/articles/a`,
-    ])
-    expect(entries[0].lastModified).toEqual(new Date('2026-01-15T00:00:00Z'))
+  it('permanently redirects the replaced Moshirieh article slug to its live replacement', () => {
+    expect(buildPublicRedirects()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          source:
+            '/articles/brghkarbrghkar-mshirih-aazam-fvri-brghkar-rfa-atsali-brgh-khrabi-tlfn-nsbiat-brghkari',
+          destination: '/articles/barghkar-moshiriyeh-tehran-ezaam-fori-raf-etesali',
+          permanent: true,
+        }),
+      ]),
+    )
   })
 
   it('featured image alt prefers featured_image_alt over title', () => {

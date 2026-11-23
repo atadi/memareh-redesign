@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { securityHeaders, devSecurityHeaders } from "@/lib/security-headers";
+import { buildPublicRedirects } from "@/lib/public-redirects";
 
 const SUPABASE_HOST = "uakvurskrcyvksxfvhho.supabase.co";
 
@@ -17,6 +18,9 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
     ],
+  },
+  async redirects() {
+    return buildPublicRedirects();
   },
   async headers() {
     // The enforced (strict, no unsafe-eval) CSP is for production only. In dev,

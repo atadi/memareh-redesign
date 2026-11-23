@@ -5,6 +5,7 @@
 
 import type { Metadata } from 'next'
 import type { MetadataRoute } from 'next'
+export { buildPublicRedirects } from './public-redirects'
 import {
   DEFAULT_OG_IMAGE,
   SITE_AREA_SERVED,
@@ -374,7 +375,10 @@ export function buildRobots(siteUrl: string): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/admin', '/api', '/login', '/register', '/profile'],
+      // Private user-facing routes stay crawlable so Google can observe their
+      // noindex metadata (see buildPrivateMetadata). /admin and /api remain
+      // blocked; robots.txt is never used as an access-control mechanism.
+      disallow: ['/admin', '/api'],
     },
     sitemap: `${siteUrl}/sitemap.xml`,
   }
@@ -394,7 +398,16 @@ export function buildPublicSitemap(
   siteUrl: string,
   articles: SitemapArticleInput[],
 ): MetadataRoute.Sitemap {
-  const latest = latestArticleDate(articles)
+  // Only publish slugs that produce a real public URL. A stored slug with
+  // surrounding whitespace would generate an unreachable sitemap entry.
+  const validArticles = articles.filter(
+    (article) =>
+      typeof article.slug === 'string' &&
+      article.slug.length > 0 &&
+      article.slug === article.slug.trim() &&
+      !article.slug.includes('/'),
+  )
+  const latest = latestArticleDate(validArticles)
   return [
     {
       url: siteUrl,
@@ -404,10 +417,7 @@ export function buildPublicSitemap(
       url: `${siteUrl}/articles`,
       ...(latest ? { lastModified: latest } : {}),
     },
-    {
-      url: `${siteUrl}/contact-us`,
-    },
-    ...articles.map((article) => ({
+    ...validArticles.map((article) => ({
       url: `${siteUrl}/articles/${article.slug}`,
       lastModified: article.updated_at ? new Date(article.updated_at) : new Date(),
     })),
