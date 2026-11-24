@@ -44,7 +44,6 @@ export interface OptimizationFinding {
     | 'metadata-missing'
     | 'metadata-meta_title'
     | 'metadata-meta_description'
-    | 'metadata-canonical_url'
     | 'metadata-og_image'
     | 'metadata-featured_image_alt'
   severity: 'high' | 'medium' | 'low'
@@ -60,7 +59,6 @@ export interface ArticleSeoMeta {
   meta_title?: string | null
   meta_description?: string | null
   meta_keywords?: string | null
-  canonical_url?: string | null
   og_image?: string | null
   featured_image_alt?: string | null
 }
@@ -294,9 +292,6 @@ export function analyzeArticleHtml(
       metaFindings.push(makeMeta('metadata-meta_description', 'توضیحات متا خالی یا خیلی کوتاه است (کمتر از ۵۰ کاراکتر).', 'medium'))
     } else if (meta.meta_description.trim().length > 160) {
       metaFindings.push(makeMeta('metadata-meta_description', 'توضیحات متا بیش از ۱۶۰ کاراکتر است.', 'low'))
-    }
-    if (!meta.canonical_url || !/^https?:\/\/www\.memareh\.com/.test(meta.canonical_url)) {
-      metaFindings.push(makeMeta('metadata-canonical_url', 'آدرس canonical خالی است یا با دامنه www یکسان نیست.', 'medium'))
     }
     if (!meta.og_image) {
       metaFindings.push(makeMeta('metadata-og_image', 'تصویر OG (اشتراک‌گذاری اجتماعی) تنظیم نشده است.', 'low'))

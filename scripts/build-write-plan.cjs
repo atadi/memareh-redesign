@@ -95,7 +95,7 @@ function contentSha(str) {
 // ---- fetch all published via publishable key (read-only) ----
 function getArticles() {
   return new Promise((resolve, reject) => {
-    const cols = 'id,slug,title,content,custom_css,meta_title,meta_description,meta_keywords,canonical_url,og_image,featured_image_alt,status,updated_at'
+    const cols = 'id,slug,title,content,custom_css,meta_title,meta_description,meta_keywords,og_image,featured_image_alt,status,updated_at'
     const p = `/rest/v1/articles?select=${encodeURIComponent(cols)}&status=eq.published&order=slug.asc`
     const req = https.get(`https://${BASE}${p}`, {
       headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, 'Accept-Profile': 'memareh' },
@@ -191,7 +191,7 @@ function main() {
       // ---- backup (always, for any article we might touch) ----
       const meta = {
         meta_title: a.meta_title || '', meta_description: a.meta_description || '',
-        meta_keywords: a.meta_keywords || '', canonical_url: a.canonical_url || '',
+        meta_keywords: a.meta_keywords || '',
         og_image: a.og_image || '', featured_image_alt: a.featured_image_alt || '',
       }
       const backupObj = {

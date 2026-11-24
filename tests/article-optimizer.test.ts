@@ -57,12 +57,11 @@ describe('analyzeArticleHtml', () => {
     const { metaFindings } = analyzeArticleHtml('<p>بدنه</p>', {
       meta_title: '',
       meta_description: '',
-      canonical_url: 'https://memareh.com/x',
       og_image: '',
       featured_image_alt: '',
     })
     expect(metaFindings.some((f) => f.type === 'metadata-meta_title')).toBe(true)
-    expect(metaFindings.some((f) => f.type === 'metadata-canonical_url')).toBe(true)
+    expect(metaFindings.map((f) => f.type)).not.toContain('metadata-canonical_url')
   })
 })
 

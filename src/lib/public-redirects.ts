@@ -12,7 +12,7 @@ export function buildPublicRedirects(): PublicRedirect[] {
     // Legacy static alias of the homepage. Never render a duplicate home page.
     { source: '/index.html', destination: '/', permanent: true },
     // Old article slug replaced by the live Moshirieh article. The replacement
-    // record previously declared this slug as its canonical_url, so the
+    // record previously declared this exact slug as its canonical URL, so the
     // semantic mapping is unambiguous.
     {
       source:

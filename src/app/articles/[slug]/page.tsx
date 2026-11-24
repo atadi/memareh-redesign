@@ -63,7 +63,7 @@ export async function generateMetadata({
   const { data: article } = await supabase
     .from("articles")
     .select(
-      "slug, title, excerpt, featured_image, featured_image_alt, published_at, updated_at, meta_title, meta_description, meta_keywords, canonical_url, og_image",
+      "slug, title, excerpt, featured_image, featured_image_alt, published_at, updated_at, meta_title, meta_description, meta_keywords, og_image",
     )
     .eq("slug", slug)
     .eq("status", "published")

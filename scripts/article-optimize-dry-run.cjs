@@ -79,7 +79,7 @@ async function analyzeArticle(a) {
   const raw = a.content || ''
   const meta = {
     meta_title: a.meta_title || '', meta_description: a.meta_description || '',
-    meta_keywords: a.meta_keywords || '', canonical_url: a.canonical_url || '',
+    meta_keywords: a.meta_keywords || '',
     og_image: a.og_image || '', featured_image_alt: a.featured_image_alt || '',
   }
   const originalHash = hashContentSync(raw)
@@ -155,7 +155,7 @@ async function analyzeArticle(a) {
 
 async function main() {
   console.log('BULK SEO OPTIMIZATION DRY-RUN (read-only)')
-  const cols = 'id, slug, title, content, custom_css, meta_title, meta_description, meta_keywords, canonical_url, og_image, featured_image_alt, status, updated_at'
+  const cols = 'id, slug, title, content, custom_css, meta_title, meta_description, meta_keywords, og_image, featured_image_alt, status, updated_at'
   const rows = await mgmtQuery(`SELECT ${cols} FROM memareh.articles WHERE status = 'published' ORDER BY slug`)
   console.log(`Fetched ${rows.length} published articles (SELECT only)`)
 

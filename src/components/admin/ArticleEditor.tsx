@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { createClient } from '@/lib/supabase/client'
+import { getSiteUrl } from '@/lib/config'
+import { articlePublicUrl, isValidArticleSlug } from '@/lib/article-urls'
 import { invalidateArticlePaths } from '@/actions/revalidate'
 import { uploadFeaturedImage, deleteStorageFile, uploadContentImage, uploadVideoFile } from '@/lib/uploadImage'
 import {
@@ -95,6 +97,8 @@ type RelatedArticleSelection = EditorialRelatedArticle
 
 export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps) {
   const supabase = createClient()
+  // Canonical production origin from app config — never the browser origin.
+  const siteUrl = getSiteUrl()
   const { register, handleSubmit, setValue, watch, trigger } = useForm({
     defaultValues: {
       title: '',
@@ -106,7 +110,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
       meta_title: '',
       meta_description: '',
       meta_keywords: '',
-      canonical_url: '',
       featured_image_alt: '',
       is_featured: false,
       video_url: '',
@@ -356,7 +359,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     setValue('meta_title', article.meta_title || '')
     setValue('meta_description', article.meta_description || '')
     setMetaKeywords(article.meta_keywords || [])
-    setValue('canonical_url', article.canonical_url || '')
     setValue('featured_image_alt', article.featured_image_alt || '')
     setValue('is_featured', article.is_featured || false)
     setValue('video_url', article.video_url || '')
@@ -450,10 +452,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     }
     if (metaKeywords.length === 0 && selectedTags.length > 0) {
       setMetaKeywords(selectedTags.map(t => t.name))
-    }
-    const canonicalVal = watch('canonical_url')
-    if (!canonicalVal && slugValue) {
-      setValue('canonical_url', `${window.location.origin}/articles/${slugValue}`)
     }
     toast.success('فیلدهای متا تکمیل شدند')
   }
@@ -600,8 +598,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
         }
       }
 
-      const canonicalUrl = data.canonical_url || `${window.location.origin}/articles/${data.slug}`
-
       // Sync tags: ensure all selected tags exist, then link them
       const tagIds: string[] = []
       for (const tag of selectedTags) {
@@ -637,7 +633,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
         featured_image: featuredImageUrl,
         featured_image_alt: data.featured_image_alt,
         og_image: ogImageUrl,
-        canonical_url: canonicalUrl,
         video_url: videoUrl,
         meta_title: data.meta_title,
         meta_description: data.meta_description,
@@ -778,7 +773,6 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
           meta_title: watch('meta_title'),
           meta_description: watch('meta_description'),
           meta_keywords: watch('meta_keywords'),
-          canonical_url: watch('canonical_url'),
           og_image: article?.og_image ?? null,
           featured_image_alt: watch('featured_image_alt'),
         })
@@ -816,7 +810,8 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
     }
   }, [optimizerPreHtml])
 
-  const seoPreviewUrl = `/articles/${slugValue || 'your-slug'}`
+  const previewSlug = isValidArticleSlug(slugValue) ? slugValue : 'your-slug'
+  const articlePreviewUrl = articlePublicUrl(siteUrl, previewSlug)
   const seoPreviewTitle = metaTitleValue || titleValue || 'عنوان مقاله'
   const seoPreviewDesc = metaDescValue || excerptValue || ''
 
@@ -1021,8 +1016,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
               <label className={labelClasses}>Slug (آدرس اینترنتی)</label>
               <div className="relative">
                 <input type="text" {...register('slug', { required: true })}
-                  disabled={article?.status === 'published'}
-                  className={`${inputClasses} font-mono text-sm ${article?.status === 'published' ? 'bg-gray-100' : ''} ${slugExists ? 'border-red-500' : ''}`}
+                  className={`${inputClasses} font-mono text-sm ${slugExists ? 'border-red-500' : ''}`}
                   placeholder="article-url-slug" />
                 <div className="absolute left-3 top-1/2 -translate-y-1/2">
                   {checkingSlug ? (
@@ -1035,8 +1029,13 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
                 </div>
               </div>
               {slugExists && <p className={errorClasses}>این slug قبلاً استفاده شده است</p>}
-              <p className="text-xs text-gray-500 mt-1">
-                {window.location.origin}/articles/<strong>{slugValue || 'your-slug'}</strong>
+              {article?.status === 'published' && (
+                <p className="text-xs text-amber-700 mt-1">
+                  تغییر نامک، آدرس عمومی مقاله را تغییر میدهد و ممکن است روی لینکهای قبلی و سئو اثر بگذارد.
+                </p>
+              )}
+              <p className="text-xs text-gray-500 mt-1" dir="ltr">
+                {articlePreviewUrl}
               </p>
             </div>
 
@@ -1411,10 +1410,13 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
             </div>
 
             <div>
-              <label className="text-sm font-medium">آدرس کنونیکال</label>
-              <input type="url" {...register('canonical_url')}
-                className={inputClasses} placeholder="آدرس اصلی این مقاله..." />
-              <p className="text-xs text-gray-500 mt-1">اگر خالی بماند، آدرس پیش‌فرض استفاده می‌شود</p>
+              <label className="text-sm font-medium">آدرس اصلی مقاله</label>
+              <div className="mt-1 px-3 py-2 border rounded-lg bg-gray-50 text-sm text-gray-700 truncate" dir="ltr">
+                {articlePreviewUrl}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                این آدرس بهصورت خودکار از نامک مقاله ساخته میشود.
+              </p>
             </div>
 
             <div className="border rounded-lg p-4 bg-gray-50">
@@ -1486,7 +1488,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
             <h3 className="font-bold mb-4">پیش‌نمایش در گوگل</h3>
             <div className="border rounded-lg p-4 bg-white">
               <div className="max-w-[600px]">
-                <div className="text-sm text-green-700 truncate">{window.location.origin}{seoPreviewUrl}</div>
+                <div className="text-sm text-green-700 truncate" dir="ltr">{articlePreviewUrl}</div>
                 <div className="text-xl text-blue-600 font-medium truncate hover:underline cursor-pointer">
                   {seoPreviewTitle}
                 </div>

@@ -36,7 +36,7 @@ rows.forEach((r,i)=>{
 fs.writeFileSync(path.join(SUP,'PUBLIC_ARTICLES_ROWS.md'), rowsMd);
 
 // ---- 2) schema / column mapping ----
-const memCols = ['id','title','slug','excerpt','content','featured_image','featured_image_alt','category','author_id','author_name','allow_comments','status','meta_title','meta_description','meta_keywords','canonical_url','og_image','reading_time','view_count','is_featured','video_url','scheduled_at','published_at','created_at','updated_at','search_vector'];
+const memCols = ['id','title','slug','excerpt','content','featured_image','featured_image_alt','category','author_id','author_name','allow_comments','status','meta_title','meta_description','meta_keywords','og_image','reading_time','view_count','is_featured','video_url','scheduled_at','published_at','created_at','updated_at','search_vector'];
 const pubCols = out.columns;
 const pub = new Set(pubCols), mem = new Set(memCols);
 const onlyPub = [...pub].filter(c=>!mem.has(c));
@@ -55,7 +55,7 @@ schemaMd += '- `status` CHECK: public allows `(draft,published,archived)` — **
 schemaMd += '- `author_id`: public has NO FK to `profiles`; memareh has `FK → memareh.profiles(id) ON DELETE SET NULL`.\n';
 schemaMd += '- `tags`: public stores as `text[]` (native array) + GIN `idx_articles_tags`; memareh uses normalized `article_tags`/`article_tag_relations` + `article_tags_view` (JSONB).\n';
 schemaMd += '- `featured_image_url` (public) vs `featured_image` (memareh): separate image columns (public has BOTH).\n';
-schemaMd += '- public is missing SEO/engagement columns memareh carries: `featured_image_alt`, `canonical_url`, `og_image`, `view_count`, `is_featured`, `video_url`, `scheduled_at`.\n\n';
+schemaMd += '- public is missing SEO/engagement columns memareh carries: `featured_image_alt`, `og_image`, `view_count`, `is_featured`, `video_url`, `scheduled_at`.\n\n';
 schemaMd += '## Consolidation impact\n';
 schemaMd += '- A merge of `public.articles` INTO `memareh.articles` would require back-filling `tags`→relations (via existing `memareh.migrate_tags_to_relations()` pattern) and mapping `featured_image_url`→`featured_image`.\n';
 schemaMd += '- Reverse (memareh→public) would lose `scheduled` status support, `author_id` FK integrity, and 7 SEO/engagement columns — NOT recommended.\n';

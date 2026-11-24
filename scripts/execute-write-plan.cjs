@@ -74,7 +74,7 @@ function mutateCtaAnchor(html, ctaText, targetHref) {
 }
 
 async function selectArticle(slug) {
-  const r = await sql(`SELECT id, slug, status, content, updated_at, custom_css, meta_title, meta_description, meta_keywords, canonical_url, og_image, featured_image_alt FROM memareh.articles WHERE slug = ${dq(slug)} LIMIT 1;`)
+  const r = await sql(`SELECT id, slug, status, content, updated_at, custom_css, meta_title, meta_description, meta_keywords, og_image, featured_image_alt FROM memareh.articles WHERE slug = ${dq(slug)} LIMIT 1;`)
   if (r.status !== 201 || !r.body || !r.body.length) throw new Error(`SELECT failed for ${slug}: ${r.status} ${r.raw}`)
   return r.body[0]
 }
@@ -131,7 +131,7 @@ function main() {
       if (stopped) { results.push({ slug, result: 'SKIPPED_BATCH_STOPPED' }); continue }
       const p = planBySlug.get(slug)
       const a = await selectArticle(slug)
-      const meta = { meta_title: a.meta_title || '', meta_description: a.meta_description || '', meta_keywords: a.meta_keywords || '', canonical_url: a.canonical_url || '', og_image: a.og_image || '', featured_image_alt: a.featured_image_alt || '' }
+      const meta = { meta_title: a.meta_title || '', meta_description: a.meta_description || '', meta_keywords: a.meta_keywords || '', og_image: a.og_image || '', featured_image_alt: a.featured_image_alt || '' }
 
       // re-read current content; verify CAS precondition
       const curHash = sha256(a.content)

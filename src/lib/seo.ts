@@ -6,6 +6,7 @@
 import type { Metadata } from 'next'
 import type { MetadataRoute } from 'next'
 export { buildPublicRedirects } from './public-redirects'
+import { articlePublicUrl, isValidArticleSlug } from '@/lib/article-urls'
 import {
   DEFAULT_OG_IMAGE,
   SITE_AREA_SERVED,
@@ -26,7 +27,6 @@ export interface ArticleSeoInput {
   meta_title: string | null
   meta_description: string | null
   meta_keywords: string[] | null
-  canonical_url: string | null
   og_image: string | null
 }
 
@@ -58,33 +58,6 @@ export function absoluteImageUrl(
   }
 }
 
-/** Always `<siteUrl>/articles/<slug>` — never the browser origin. */
-export function generatedArticleCanonical(
-  siteUrl: string,
-  slug: string | null | undefined,
-): string {
-  const safeSlug = isNonEmpty(slug) ? slug.trim() : ''
-  return `${siteUrl}/articles/${safeSlug}`
-}
-
-export function resolveCanonicalUrl(
-  canonicalUrl: string | null | undefined,
-  siteUrl: string,
-  slug: string | null | undefined,
-): string {
-  if (isNonEmpty(canonicalUrl)) {
-    try {
-      const u = new URL(canonicalUrl)
-      if (u.protocol === 'http:' || u.protocol === 'https:') {
-        return u.toString()
-      }
-    } catch {
-      /* fall through */
-    }
-  }
-  return generatedArticleCanonical(siteUrl, slug)
-}
-
 function pickTitle(article: ArticleSeoInput): string {
   if (isNonEmpty(article.meta_title)) return article.meta_title
   if (isNonEmpty(article.title)) return article.title
@@ -110,7 +83,7 @@ export function buildArticleMetadata(
   article: ArticleSeoInput,
   siteUrl: string,
 ): Metadata {
-  const articleUrl = resolveCanonicalUrl(article.canonical_url, siteUrl, article.slug)
+  const articleUrl = articlePublicUrl(siteUrl, article.slug)
   const title = pickTitle(article)
   const description = pickDescription(article)
   const image = absoluteImageUrl(
@@ -161,7 +134,7 @@ export function buildArticleJsonLd(
   article: ArticleSeoInput,
   siteUrl: string,
 ): Record<string, unknown> {
-  const articleUrl = resolveCanonicalUrl(article.canonical_url, siteUrl, article.slug)
+  const articleUrl = articlePublicUrl(siteUrl, article.slug)
   const title = pickTitle(article)
   const image = absoluteImageUrl(
     isNonEmpty(article.og_image) ? article.og_image : article.featured_image,
@@ -201,7 +174,7 @@ export function buildBreadcrumbJsonLd(
   article: ArticleSeoInput,
   siteUrl: string,
 ): Record<string, unknown> {
-  const articleUrl = resolveCanonicalUrl(article.canonical_url, siteUrl, article.slug)
+  const articleUrl = articlePublicUrl(siteUrl, article.slug)
   const name = isNonEmpty(article.title) ? article.title : 'مقاله'
   return {
     '@context': 'https://schema.org',
@@ -400,12 +373,8 @@ export function buildPublicSitemap(
 ): MetadataRoute.Sitemap {
   // Only publish slugs that produce a real public URL. A stored slug with
   // surrounding whitespace would generate an unreachable sitemap entry.
-  const validArticles = articles.filter(
-    (article) =>
-      typeof article.slug === 'string' &&
-      article.slug.length > 0 &&
-      article.slug === article.slug.trim() &&
-      !article.slug.includes('/'),
+  const validArticles = articles.filter((article) =>
+    isValidArticleSlug(article.slug),
   )
   const latest = latestArticleDate(validArticles)
   return [
@@ -418,7 +387,7 @@ export function buildPublicSitemap(
       ...(latest ? { lastModified: latest } : {}),
     },
     ...validArticles.map((article) => ({
-      url: `${siteUrl}/articles/${article.slug}`,
+      url: articlePublicUrl(siteUrl, article.slug),
       lastModified: article.updated_at ? new Date(article.updated_at) : new Date(),
     })),
   ]

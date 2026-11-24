@@ -22,7 +22,6 @@ export interface Article {
   meta_title: string | null
   meta_description: string | null
   meta_keywords: string[] | null
-  canonical_url: string | null
   og_image: string | null
   /**
    * Optional per-article CSS (Feature B). Stored raw; always passed through

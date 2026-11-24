@@ -12,14 +12,13 @@ import {
   buildRobots,
   buildPublicSitemap,
   buildPublicRedirects,
-  generatedArticleCanonical,
-  resolveCanonicalUrl,
   absoluteImageUrl,
   organizationId,
   organizationLogoUrl,
   pickFeaturedImageAlt,
 } from '../src/lib/seo'
 import { SITE_PHONE_E164 } from '../src/lib/site'
+import { articlePublicUrl } from '../src/lib/article-urls'
 
 const SITE = 'https://www.memareh.com'
 
@@ -40,7 +39,6 @@ function baseArticle(overrides: Partial<ArticleRow> = {}): ArticleRow {
     meta_title: null,
     meta_description: null,
     meta_keywords: null,
-    canonical_url: null,
     og_image: null,
     custom_css: null,
     reading_time: null,
@@ -111,32 +109,11 @@ describe('seo: meta keywords', () => {
   })
 })
 
-describe('seo: canonical url', () => {
-  it('uses explicit valid www canonical_url', () => {
-    const m = buildArticleMetadata(
-      baseArticle({ canonical_url: 'https://www.memareh.com/articles/foo' }),
-      SITE,
-    )
-    expect(m.alternates?.canonical).toBe('https://www.memareh.com/articles/foo')
-  })
-
-  it('generates canonical when canonical_url missing', () => {
+describe('seo: canonical url is derived from slug only', () => {
+  it('generates a self-referencing canonical from siteUrl + slug', () => {
     const m = buildArticleMetadata(baseArticle({ slug: 'bar' }), SITE)
     expect(m.alternates?.canonical).toBe('https://www.memareh.com/articles/bar')
-  })
-
-  it('ignores invalid canonical_url and generates instead', () => {
-    const m = buildArticleMetadata(
-      baseArticle({ slug: 'baz', canonical_url: 'not a url' }),
-      SITE,
-    )
-    expect(m.alternates?.canonical).toBe('https://www.memareh.com/articles/baz')
-  })
-
-  it('resolveCanonicalUrl rejects relative custom values', () => {
-    expect(resolveCanonicalUrl('/articles/x', SITE, 'x')).toBe(
-      'https://www.memareh.com/articles/x',
-    )
+    expect(m.openGraph?.url).toBe('https://www.memareh.com/articles/bar')
   })
 })
 
@@ -222,27 +199,23 @@ describe('seo: structured data', () => {
     expect(bc.itemListElement[2].name).toBe('مقاله')
   })
 
-  it('canonical_url with custom value flows into both Article and Breadcrumb', () => {
-    const custom = 'https://www.memareh.com/articles/custom'
-    const a = baseArticle({ canonical_url: custom })
+  it('all article URL consumers share one derived URL', () => {
+    const a = baseArticle({ slug: 'consistent-slug' })
+    const expected = articlePublicUrl(SITE, a.slug)
+    const metadata = buildArticleMetadata(a, SITE)
+    const jsonLd = buildArticleJsonLd(a, SITE) as any
+    const breadcrumb = buildBreadcrumbJsonLd(a, SITE) as any
+    const sitemap = buildPublicSitemap(SITE, [
+      { slug: 'consistent-slug', updated_at: a.updated_at },
+    ])
 
-    expect((buildArticleJsonLd(a, SITE) as any).url).toBe(custom)
-
-    expect(
-      (buildBreadcrumbJsonLd(a, SITE) as any).itemListElement[1].item,
-    ).toBe(`${SITE}/articles`)
-
-    expect(
-      (buildBreadcrumbJsonLd(a, SITE) as any).itemListElement[2].item,
-    ).toBe(custom)
-  })
-})
-
-describe('seo: generated canonical never uses a browser origin', () => {
-  it('builds www article URL from siteUrl + slug', () => {
-    expect(generatedArticleCanonical(SITE, 'foo')).toBe(
-      'https://www.memareh.com/articles/foo',
-    )
+    expect(expected).toBe('https://www.memareh.com/articles/consistent-slug')
+    expect(metadata.alternates?.canonical).toBe(expected)
+    expect(metadata.openGraph?.url).toBe(expected)
+    expect(jsonLd.url).toBe(expected)
+    expect(jsonLd.mainEntityOfPage['@id']).toBe(expected)
+    expect(breadcrumb.itemListElement[2].item).toBe(expected)
+    expect(sitemap[2].url).toBe(expected)
   })
 })
 
@@ -368,18 +341,20 @@ describe('seo: site graph + listing + private + sitemap', () => {
   })
 })
 
-describe('seo: degradation on missing data', () => {
-  it('handles null slug / missing dates without throwing', () => {
+describe('seo: invalid slug fails fast', () => {
+  it('rejects whitespace-only slugs instead of publishing a malformed canonical', () => {
+    expect(() =>
+      buildArticleMetadata(baseArticle({ slug: '   ' }), SITE),
+    ).toThrow(/invalid article slug/)
+  })
+
+  it('handles missing dates without throwing', () => {
     const m = buildArticleMetadata(
-      baseArticle({ slug: null, published_at: null, updated_at: null }),
+      baseArticle({ published_at: null, updated_at: null }),
       SITE,
     )
-    expect(m.alternates?.canonical).toBe('https://www.memareh.com/articles/')
-    expect(() =>
-      buildArticleJsonLd(
-        baseArticle({ slug: null, published_at: null }),
-        SITE,
-      ),
-    ).not.toThrow()
+    expect(m.alternates?.canonical).toBe(
+      'https://www.memareh.com/articles/sample-slug',
+    )
   })
 })

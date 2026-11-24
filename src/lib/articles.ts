@@ -14,6 +14,7 @@
 
 import { createPublicClient } from '@/lib/supabase/server-public'
 import { getSupabaseUrl } from '@/lib/config'
+import { isValidArticleSlug } from '@/lib/article-urls'
 
 export interface ArticleSlug {
   slug: string
@@ -44,7 +45,7 @@ export async function getPublishedArticleSlugs(): Promise<ArticleSlug[]> {
       return []
     }
     return (data ?? []).filter(
-      (a): a is ArticleSlug => typeof a.slug === 'string' && a.slug.length > 0,
+      (a): a is ArticleSlug => isValidArticleSlug(a.slug),
     )
   } catch (err) {
     console.error(
@@ -75,7 +76,7 @@ export async function getPublishedArticlesForSitemap(): Promise<SitemapArticle[]
       return []
     }
     return (data ?? []).filter(
-      (a): a is SitemapArticle => typeof a.slug === 'string' && a.slug.length > 0,
+      (a): a is SitemapArticle => isValidArticleSlug(a.slug),
     )
   } catch (err) {
     console.error(
